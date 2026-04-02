@@ -36,7 +36,7 @@
                 </div>
                 <h1 class="font-headline font-bold text-2xl tracking-tight text-zinc-900">@ViewData["PageHeader"]</h1>
             </div>
-            <button class="bg-primary text-white px-4 py-2 rounded-full font-medium flex items-center gap-2">
+            <button class="bg-primary text-white px-4 py-2 rounded-full font-medium flex items-center gap-2 hover:opacity-80 transition-opacity active:scale-95 duration-200">
                 <span class="material-symbols-outlined text-[20px]">add</span>
                 <span class="text-sm font-headline">Thêm mới</span>
             </button>
@@ -46,9 +46,12 @@
             @RenderBody()
         </main>
 
-        <button class="fixed right-6 bottom-32 w-16 h-16 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl z-[60] active:scale-90 transition-transform hover:shadow-primary/20 hover:shadow-xl">
-            <span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
-        </button>
+        @if (ViewData["HideFloatingAI"] == null)
+        {
+            <button class="fixed right-6 bottom-32 w-16 h-16 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl z-[60] active:scale-90 transition-transform hover:shadow-primary/20 hover:shadow-xl">
+                <span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+            </button>
+        }
 
         <nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8 shadow-2xl">
             <a asp-controller="Home" asp-action="Index" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
