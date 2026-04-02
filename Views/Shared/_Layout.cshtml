@@ -1,50 +1,78 @@
 ﻿<!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Web_quan_ly_nhan_su</title>
-    <script type="importmap"></script>
-    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+    <title>@ViewData["Title"] - Atelier HR</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
-    <link rel="stylesheet" href="~/Web_quan_ly_nhan_su.styles.css" asp-append-version="true" />
+    <script>
+        tailwind.config = {
+        theme: {
+        extend: {
+        colors: {
+        "primary": "#0058bc",
+        "primary-container": "#0070eb",
+        "surface": "#f9f9fb",
+        "on-surface": "#1a1c1d",
+        "outline": "#717786",
+        "tertiary": "#006b27"
+        },
+        fontFamily: {
+        "headline": ["Be Vietnam Pro"],
+        "body": ["Inter"]
+        }
+        }
+        }
+        }
+    </script>
 </head>
-<body>
-    <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">Web_quan_ly_nhan_su</a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
-                        aria-expanded="false" aria-label="Toggle navigation">
-                    <span class="navbar-toggler-icon"></span>
-                </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-                        </li>
-                    </ul>
+<body class="bg-surface font-body text-on-surface antialiased pb-32">
+    
+    <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container">
+                <img src="~/images/avatar_default.jpg" class="w-full h-full object-cover" alt="User">
                 </div>
+                <h1 class="font-headline font-bold text-2xl tracking-tight text-zinc-900">@ViewData["PageHeader"]</h1>
             </div>
-        </nav>
-    </header>
-    <div class="container">
-        <main role="main" class="pb-3">
+            <button class="bg-primary text-white px-4 py-2 rounded-full font-medium flex items-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">add</span>
+                <span class="text-sm font-headline">Thêm mới</span>
+            </button>
+        </header>
+
+        <main class="pt-24 px-6 max-w-5xl mx-auto">
             @RenderBody()
         </main>
-    </div>
 
-    <footer class="border-top footer text-muted">
-        <div class="container">
-            &copy; 2026 - Web_quan_ly_nhan_su - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
-        </div>
-    </footer>
-    <script src="~/lib/jquery/dist/jquery.min.js"></script>
-    <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="~/js/site.js" asp-append-version="true"></script>
-    @await RenderSectionAsync("Scripts", required: false)
-</body>
+        <button class="fixed right-6 bottom-32 w-16 h-16 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl z-[60] active:scale-90 transition-transform hover:shadow-primary/20 hover:shadow-xl">
+            <span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+        </button>
+
+        <nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8 shadow-2xl">
+            <a asp-controller="Home" asp-action="Index" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+                <span class="material-symbols-outlined">dashboard</span>
+                <span class="text-[11px] font-medium mt-1">Tổng quan</span>
+            </a>
+            <a asp-controller="Home" asp-action="NhanVien" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "NhanVien" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+                <span class="material-symbols-outlined">group</span>
+                <span class="text-[11px] font-medium mt-1">Nhân viên</span>
+            </a>
+            <a asp-controller="Home" asp-action="ChamCong" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "ChamCong" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+                <span class="material-symbols-outlined">fact_check</span>
+                <span class="text-[11px] font-medium mt-1">Chấm công</span>
+            </a>
+            <a asp-controller="Home" asp-action="Chat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Chat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+                <span class="material-symbols-outlined">forum</span>
+                <span class="text-[11px] font-medium mt-1">Chat</span>
+            </a>
+            <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+                <span class="material-symbols-outlined">settings</span>
+                <span class="text-[11px] font-medium mt-1">Cài đặt</span>
+            </a>
+        </nav>
+
+        @await RenderSectionAsync("Scripts", required: false)
+    </body>
 </html>

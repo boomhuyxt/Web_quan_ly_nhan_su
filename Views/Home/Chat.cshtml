@@ -1,0 +1,284 @@
+﻿<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Atelier HR - Chat nội bộ</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "outline": "#717786",
+                        "primary": "#0058bc",
+                        "surface-tint": "#005bc1",
+                        "surface-container": "#eeeef0",
+                        "on-error-container": "#93000a",
+                        "surface-dim": "#d9dadc",
+                        "secondary-fixed-dim": "#c7c6cb",
+                        "primary-container": "#0070eb",
+                        "secondary-fixed": "#e3e2e7",
+                        "on-secondary": "#ffffff",
+                        "on-primary-fixed": "#001a41",
+                        "on-primary": "#ffffff",
+                        "surface-container-lowest": "#ffffff",
+                        "error": "#ba1a1a",
+                        "on-tertiary": "#ffffff",
+                        "on-primary-container": "#fefcff",
+                        "on-surface": "#1a1c1d",
+                        "on-tertiary-fixed-variant": "#00531c",
+                        "surface-container-highest": "#e2e2e4",
+                        "secondary": "#5e5e63",
+                        "surface-bright": "#f9f9fb",
+                        "surface-variant": "#e2e2e4",
+                        "on-secondary-fixed": "#1a1b1f",
+                        "tertiary-fixed": "#72fe88",
+                        "error-container": "#ffdad6",
+                        "outline-variant": "#c1c6d7",
+                        "inverse-on-surface": "#f0f0f2",
+                        "surface-container-high": "#e8e8ea",
+                        "tertiary-container": "#008733",
+                        "inverse-surface": "#2f3132",
+                        "on-secondary-container": "#626267",
+                        "surface-container-low": "#f3f3f5",
+                        "on-primary-fixed-variant": "#004493",
+                        "on-error": "#ffffff",
+                        "on-surface-variant": "#414755",
+                        "tertiary-fixed-dim": "#53e16f",
+                        "surface": "#f9f9fb",
+                        "inverse-primary": "#adc6ff",
+                        "background": "#f9f9fb",
+                        "secondary-container": "#e0dfe4",
+                        "on-secondary-fixed-variant": "#46464b",
+                        "on-tertiary-fixed": "#002107",
+                        "primary-fixed": "#d8e2ff",
+                        "tertiary": "#006b27",
+                        "on-tertiary-container": "#f7fff2",
+                        "primary-fixed-dim": "#adc6ff",
+                        "on-background": "#1a1c1d"
+                    },
+                    fontFamily: {
+                        "headline": ["Be Vietnam Pro"],
+                        "body": ["Inter"],
+                        "label": ["Inter"]
+                    },
+                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .tonal-transition { transition: background-color 0.3s ease; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface antialiased">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.04)]">
+<div class="flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-4">
+<img alt="Ảnh đại diện người dùng" class="w-10 h-10 rounded-full object-cover" data-alt="close-up portrait of a professional woman with a friendly smile in a bright modern office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA77q7oVEOTp5PdWMxTDUSC3GDYElqQBVHdGstMDRC4T8vDOfZSiePvfhBwOwZJpfZfkjOD2mHoXUmNhyMdQjfAITO9BfR46pKBR-QuXUjGbsIDOMaX-Xx_seEPcmkKscyggWZrTT1QnPDI6p_II1i47nZbyoJBFYOWJ2ZWFFhvFCPaGUpTkDwGS0xTFKhxj5DpQyl_UCQfPpRb27GrsoKVcxS2QWBVg0gpqJUrZtJxU3U4IPJynGt6jfUXUwMHkvMDfLvcOGSG_gMA"/>
+<h1 class="font-['Be_Vietnam_Pro'] font-bold text-2xl tracking-tight text-zinc-900 dark:text-zinc-50">Chat</h1>
+</div>
+<button class="text-blue-600 dark:text-blue-400 font-['Be_Vietnam_Pro'] font-bold text-sm hover:opacity-80 transition-opacity active:scale-95 duration-200">
+                + Thêm mới
+            </button>
+</div>
+</header>
+<main class="pt-20 pb-32 min-h-screen flex flex-col md:flex-row max-w-7xl mx-auto px-4 md:px-6 gap-6">
+<!-- Conversation List Section -->
+<aside class="w-full md:w-[380px] flex flex-col gap-4">
+<div class="bg-surface-container-low rounded-[32px] p-2 flex items-center gap-3 px-4 h-14">
+<span class="material-symbols-outlined text-outline">search</span>
+<input class="bg-transparent border-none focus:ring-0 w-full text-sm font-medium placeholder:text-outline-variant" placeholder="Tìm kiếm hội thoại..." type="text"/>
+</div>
+<div class="space-y-1 overflow-y-auto no-scrollbar">
+<!-- Chat Item Active -->
+<div class="flex items-center gap-4 p-4 rounded-3xl bg-surface-container-lowest shadow-sm cursor-pointer border border-primary/10">
+<div class="relative">
+<img alt="Minh Trần" class="w-14 h-14 rounded-2xl object-cover" data-alt="portrait of a young man with glasses and creative appearance looking at the camera" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDIzIVjUGkjx98FiaS5YeWitiNh78zFOL69iqAvn--k0WjI5B5AfUj3EwfolDlz96dU6ym18fEnjuHCWa9ZvxwWr1Be1BUoDMLgPFLFxguIAam0TCDs93-gV7K2ppmHEt8aqiAkmbQm7vJRGvVradGWLfBwn6RjuaDFLC3anz6C85BzGl5aQxb_DA4gftAi5dbnuF3NJ_eQmrZz9S-Zy68tvpqEwPWV3GoSxsZIRCHU0-p7HYkKaE12xWITvJKaY1S5EqCQ25VPxqvn"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 bg-tertiary border-2 border-white rounded-full"></div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<span class="font-bold text-on-surface truncate">Minh Trần</span>
+<span class="text-[10px] text-outline font-medium">10:45 AM</span>
+</div>
+<p class="text-sm text-primary font-semibold truncate">Bạn: Đã gửi tài liệu on-boarding...</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="w-5 h-5 bg-primary text-white text-[10px] flex items-center justify-center rounded-full font-bold">3</span>
+</div>
+</div>
+<!-- Chat Item 2 -->
+<div class="flex items-center gap-4 p-4 rounded-3xl hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="relative">
+<img alt="Linh Nguyễn" class="w-14 h-14 rounded-2xl object-cover" data-alt="smiling woman with long dark hair wearing professional attire in soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC7Ed60pLs2rUsLn56mRbACgUlo34ctQWjdv_OACcPI0f7Bw7UyJJbL5npeDXl41eyZP74qf9aMBow907IVuERoSR3LquxU1vwpKY72AZtzaEWBc4yXZg44s_MNOvpQ7aqA5SD76Oz2mDk5EE-9WIYOB_9U4poCsUbtRXtYx3k4VD64EEkjfEF0g1G_-qRoprw-AuvBrFHqIgp5FyxltEUlwFEg-_RqDuLEEywGrRKAG9NdcnpCOyhN7-d7Z5VsvZ0z0LQpdamYmLb3"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<span class="font-bold text-on-surface truncate">Linh Nguyễn</span>
+<span class="text-[10px] text-outline font-medium">09:12 AM</span>
+</div>
+<p class="text-sm text-outline truncate">Chị check giúp em bảng lương tháng này với ạ.</p>
+</div>
+</div>
+<!-- Chat Item 3 -->
+<div class="flex items-center gap-4 p-4 rounded-3xl hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="relative">
+<div class="w-14 h-14 rounded-2xl bg-secondary-container flex items-center justify-center text-secondary font-bold text-lg">
+                            HR
+                        </div>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<span class="font-bold text-on-surface truncate">Nhóm Tuyển dụng Q4</span>
+<span class="text-[10px] text-outline font-medium">Hôm qua</span>
+</div>
+<p class="text-sm text-outline truncate">Hoàng: CV ứng viên mới rất tiềm năng.</p>
+</div>
+</div>
+<!-- Chat Item 4 -->
+<div class="flex items-center gap-4 p-4 rounded-3xl hover:bg-surface-container-low transition-colors cursor-pointer">
+<div class="relative">
+<img alt="Quốc Anh" class="w-14 h-14 rounded-2xl object-cover" data-alt="portrait of a confident businessman in a tailored suit against a neutral studio background" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIiMaOBAAy_drG0Mt0QtbdhTu0eUpHbjfaqaI9NEE6j6cPcffPGiG4wZ-HbwvAJyf2orpyDeibPqL1p-HNeOXJku0wSNhrrqwt72fS1fmpVyu-A-p9hT7LLtr3UX3BCWFZPIW2-Yu1oCVgUtsptG3fuVVTmJSi5_7I5pPPTx2YExiRhC-LSJv7WVvsP0jqrcF0TUDjcMEDXkS_Li9BjV1dygcEr31mbRMqzn3kfT1t3IImD3DkB8GLFv0nw_GbEOo19NaAiMY5lEqh"/>
+</div>
+<div class="flex-1 min-w-0">
+<div class="flex justify-between items-center mb-0.5">
+<span class="font-bold text-on-surface truncate">Quốc Anh</span>
+<span class="text-[10px] text-outline font-medium">Hôm qua</span>
+</div>
+<p class="text-sm text-outline truncate">Cảm ơn chị nhiều nhé!</p>
+</div>
+</div>
+</div>
+</aside>
+<!-- Chat Interface Section -->
+<section class="flex-1 flex flex-col bg-surface-container-lowest rounded-[40px] shadow-[0_20px_40px_rgba(0,0,0,0.04)] overflow-hidden border border-surface-container h-[calc(100vh-180px)] md:h-auto">
+<!-- Header Chat -->
+<div class="px-6 py-4 flex justify-between items-center border-b border-surface-container">
+<div class="flex items-center gap-3">
+<img alt="Active Chat" class="w-10 h-10 rounded-full object-cover" data-alt="close-up profile portrait of a smiling man with sharp features and a clean-cut look" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCLNx1h7Vm9g2lsGSI8cA43btkrddaLedQztsYtHOpe2sGXW-QBrafqnZRmNfgrNAZtFzBb1eDqk7qpB8jCSGPMMTvV_VLckyEur2GfQK2FXm4ObtCuoS0UMjjdugzZp7o_b007iI5ekF_ZETIhcS1mKeQIvGnPLs9fbXTZ0HnteIzUBd-2PXEPfl4NTr6oEY_Tko4BfyeyM6IggKg6yMk-sXRbMBFvB4oVsGSHBr0yF5wOoqwlSO9M0BdUc3LNVIjolOXz74HS3GWn"/>
+<div>
+<h3 class="font-bold text-on-surface leading-tight">Minh Trần</h3>
+<span class="text-[11px] text-tertiary flex items-center gap-1 font-medium">
+<span class="w-1.5 h-1.5 bg-tertiary rounded-full animate-pulse"></span> Đang hoạt động
+                        </span>
+</div>
+</div>
+<div class="flex items-center gap-2">
+<button class="p-2.5 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">videocam</span>
+</button>
+<button class="p-2.5 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">call</span>
+</button>
+<button class="p-2.5 rounded-full hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-on-surface-variant">info</span>
+</button>
+</div>
+</div>
+<!-- Messages Canvas -->
+<div class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-zinc-50/50">
+<div class="text-center">
+<span class="px-3 py-1 bg-surface-container-high rounded-full text-[10px] font-bold text-outline tracking-wider">HÔM NAY</span>
+</div>
+<!-- Message Incoming -->
+<div class="flex items-end gap-3 max-w-[80%]">
+<img alt="Avatar" class="w-8 h-8 rounded-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCqXKBiPdg9v52MfaafvPGZX5uHSTq7Qgb4P3clxxt1iX1uqbV3iE7Gvh-l76LBUTEBdmMrXhe_cSjinokzhsEh5hMMktI8ghwgV7GPYbv1NLtbUTaos1pNpJtg_h-Xo1q3-bdspZPN_zYLA6z1aap988Boop2UV0VxJOo5WqH9AZAZdOr4U8-NcX2tq-0WithZbu5XflmQ3KY8M7xY7toZgYgOTZ2oKbTWLXO6bBU_cT90LBdOniyISwmahxswUQ2H11P0v8y4HKr-"/>
+<div class="bg-surface-container-high text-on-surface p-4 rounded-2xl rounded-bl-none shadow-sm">
+<p class="text-sm leading-relaxed">Chào chị, em đã hoàn thành xong phần đánh giá KPI cho team Tech tháng này rồi ạ.</p>
+<span class="text-[9px] text-outline block mt-2 text-right">10:42 AM</span>
+</div>
+</div>
+<!-- Message Outgoing -->
+<div class="flex flex-col items-end gap-1 self-end max-w-[80%]">
+<div class="bg-primary text-white p-4 rounded-2xl rounded-br-none shadow-md bg-gradient-to-br from-primary to-primary-container">
+<p class="text-sm leading-relaxed">Tuyệt vời quá Minh! Chị đã nhận được thông báo trên hệ thống rồi.</p>
+<span class="text-[9px] text-primary-fixed block mt-2 text-right">10:44 AM</span>
+</div>
+</div>
+<!-- Message Outgoing 2 -->
+<div class="flex flex-col items-end gap-1 self-end max-w-[80%]">
+<div class="bg-primary text-white p-4 rounded-2xl rounded-br-none shadow-md bg-gradient-to-br from-primary to-primary-container">
+<p class="text-sm leading-relaxed">Chị đang gửi tài liệu on-boarding cho nhân sự mới, Minh check giúp chị xem còn thiếu gì không nhé.</p>
+<span class="text-[9px] text-primary-fixed block mt-2 text-right">10:45 AM</span>
+</div>
+<span class="text-[10px] text-primary flex items-center gap-1 mt-1 font-medium">
+<span class="material-symbols-outlined text-[14px]" style="font-variation-settings: 'FILL' 1;">done_all</span> Đã xem
+                    </span>
+</div>
+<!-- Attachment Outgoing -->
+<div class="self-end flex flex-col items-end gap-2">
+<div class="flex items-center gap-3 bg-surface-container-lowest border border-outline-variant/30 p-3 rounded-2xl shadow-sm">
+<div class="w-10 h-10 bg-error/10 text-error rounded-xl flex items-center justify-center">
+<span class="material-symbols-outlined">description</span>
+</div>
+<div class="flex flex-col">
+<span class="text-xs font-bold text-on-surface">Onboarding_Checklist.pdf</span>
+<span class="text-[10px] text-outline">1.2 MB • PDF</span>
+</div>
+<button class="p-2 text-primary hover:bg-primary/5 rounded-full transition-colors">
+<span class="material-symbols-outlined">download</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Input Bar -->
+<div class="p-6 bg-white border-t border-surface-container">
+<div class="flex items-center gap-3 bg-surface-container-low rounded-3xl p-2 pl-4">
+<button class="text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">add_circle</span>
+</button>
+<input class="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium" placeholder="Nhập tin nhắn..." type="text"/>
+<div class="flex items-center gap-1">
+<button class="p-2 text-outline hover:text-primary transition-colors">
+<span class="material-symbols-outlined">mood</span>
+</button>
+<button class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+</button>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 rounded-t-[32px] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl shadow-2xl">
+<div class="flex justify-around items-center px-4 py-3 pb-8 w-full">
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Tổng quan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Nhân viên</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chấm công</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20 rounded-2xl p-2 active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">forum</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Cài đặt</span>
+</a>
+</div>
+</nav>
+</body></html>

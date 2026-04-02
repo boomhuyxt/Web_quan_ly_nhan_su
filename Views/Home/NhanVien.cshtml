@@ -1,0 +1,259 @@
+﻿<!DOCTYPE html>
+
+<html class="light" lang="vi"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "outline": "#717786",
+              "primary": "#0058bc",
+              "surface-tint": "#005bc1",
+              "surface-container": "#eeeef0",
+              "on-error-container": "#93000a",
+              "surface-dim": "#d9dadc",
+              "secondary-fixed-dim": "#c7c6cb",
+              "primary-container": "#0070eb",
+              "secondary-fixed": "#e3e2e7",
+              "on-secondary": "#ffffff",
+              "on-primary-fixed": "#001a41",
+              "on-primary": "#ffffff",
+              "surface-container-lowest": "#ffffff",
+              "error": "#ba1a1a",
+              "on-tertiary": "#ffffff",
+              "on-primary-container": "#fefcff",
+              "on-surface": "#1a1c1d",
+              "on-tertiary-fixed-variant": "#00531c",
+              "surface-container-highest": "#e2e2e4",
+              "secondary": "#5e5e63",
+              "surface-bright": "#f9f9fb",
+              "surface-variant": "#e2e2e4",
+              "on-secondary-fixed": "#1a1b1f",
+              "tertiary-fixed": "#72fe88",
+              "error-container": "#ffdad6",
+              "outline-variant": "#c1c6d7",
+              "inverse-on-surface": "#f0f0f2",
+              "surface-container-high": "#e8e8ea",
+              "tertiary-container": "#008733",
+              "inverse-surface": "#2f3132",
+              "on-secondary-container": "#626267",
+              "surface-container-low": "#f3f3f5",
+              "on-primary-fixed-variant": "#004493",
+              "on-error": "#ffffff",
+              "on-surface-variant": "#414755",
+              "tertiary-fixed-dim": "#53e16f",
+              "surface": "#f9f9fb",
+              "inverse-primary": "#adc6ff",
+              "background": "#f9f9fb",
+              "secondary-container": "#e0dfe4",
+              "on-secondary-fixed-variant": "#46464b",
+              "on-tertiary-fixed": "#002107",
+              "primary-fixed": "#d8e2ff",
+              "tertiary": "#006b27",
+              "on-tertiary-container": "#f7fff2",
+              "primary-fixed-dim": "#adc6ff",
+              "on-background": "#1a1c1d"
+            },
+            fontFamily: {
+              "headline": ["Be Vietnam Pro"],
+              "body": ["Inter"],
+              "label": ["Inter"]
+            },
+            borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<style>
+      .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      }
+      .tonal-transition { transition: background-color 0.3s ease; }
+      .no-scrollbar::-webkit-scrollbar { display: none; }
+      .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body text-on-surface selection:bg-primary/10">
+<!-- TopAppBar -->
+<header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] flex justify-between items-center px-6 py-4 w-full">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-surface-container">
+<img alt="User Avatar" data-alt="professional corporate headshot of a smiling Vietnamese HR manager in a clean modern office setting with soft natural lighting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBLAMn4-MvBZ5szR87CcUFap12-YpX9fYvDgojBYm3Lxhiod5Zc4g-ERv3dMQX6aSqww0WcY1hMRSq2YjpuT92nepXReAoF071ipJ4pr8FBUwMAv8OizTFGaGVOqme7_cxeP-_ilA9FJUkCpg3aUrlWVXGH6LqLZpcNInGnNZb9owSiKSgxVMGntNFJdi2nUrGobshdoBGOZ3JHwZ7J4p6MMg514qMCKWopNPnaIyKfzVmqb5y3ApgJWP5HpTYuRY1jOWu9y4O3RGcS"/>
+</div>
+<h1 class="font-headline font-bold text-2xl tracking-tight text-zinc-900">Nhân viên</h1>
+</div>
+<button class="bg-primary text-white px-5 py-2.5 rounded-full font-medium text-sm flex items-center gap-2 hover:opacity-80 transition-opacity active:scale-95 duration-200">
+<span class="material-symbols-outlined text-[20px]">add</span>
+            Thêm mới
+        </button>
+</header>
+<main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
+<!-- Search & Filters -->
+<section class="space-y-6 mb-8">
+<!-- iOS Style Search Bar -->
+<div class="relative">
+<div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+<span class="material-symbols-outlined text-outline">search</span>
+</div>
+<input class="w-full bg-surface-container-low border-none rounded-2xl py-3.5 pl-12 pr-4 text-sm focus:ring-2 focus:ring-primary/10 transition-all placeholder:text-outline" placeholder="Tìm kiếm nhân viên..." type="text"/>
+</div>
+<!-- Filter Chips -->
+<div class="flex gap-2 overflow-x-auto no-scrollbar pb-2">
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-primary text-white text-sm font-medium shadow-sm transition-all">Tất cả</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant border border-outline-variant/10 text-sm font-medium hover:bg-surface-container-low transition-all">Thiết kế</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant border border-outline-variant/10 text-sm font-medium hover:bg-surface-container-low transition-all">Kỹ thuật</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant border border-outline-variant/10 text-sm font-medium hover:bg-surface-container-low transition-all">Đang làm việc</button>
+<button class="whitespace-nowrap px-4 py-2 rounded-full bg-surface-container-lowest text-on-surface-variant border border-outline-variant/10 text-sm font-medium hover:bg-surface-container-low transition-all">
+<span class="material-symbols-outlined text-[18px] align-middle">tune</span>
+</button>
+</div>
+</section>
+<!-- Employee List -->
+<section class="space-y-4">
+<!-- Employee Card 1 -->
+<div class="relative overflow-hidden rounded-[24px] bg-surface-container-low group">
+<!-- Swipe Actions Layer (Mocking the visual state) -->
+<div class="absolute inset-0 flex justify-end opacity-0 group-hover:opacity-100 transition-opacity">
+<button class="bg-blue-100 text-blue-600 w-20 flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined">edit</span>
+<span class="text-[10px] font-bold">SỬA</span>
+</button>
+<button class="bg-red-50 text-error w-20 flex flex-col items-center justify-center gap-1">
+<span class="material-symbols-outlined">delete</span>
+<span class="text-[10px] font-bold">XOÁ</span>
+</button>
+</div>
+<!-- Foreground Content -->
+<div class="relative bg-surface-container-lowest p-4 transition-transform group-hover:-translate-x-40 duration-300 ease-out">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Employee" class="w-14 h-14 rounded-2xl object-cover bg-surface-container" data-alt="portrait of a young Asian male professional wearing glasses and a smart casual shirt in a bright modern studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSkamnNWeDnCsB-C349-i7eP_oGOyB8yXm26p1DdGYdkxsBRaH6E3_tzsco8IA2KOFbspNzsXafk1dtxQ3dV_2MrYTrwB0cCC9G1_7USSsvzVsBEF2FV5rIAvW_1xSSVnrSOMxcuOMZ0D2fkdF0DKy4U7IQ-CUoIvOUkDMDrk0Vx6jwpJKFuxE1Cv5m_c7qqF8fqgFsp2y60cEZcHHH6Oxwtqu1WIj-gYPtWWHJyraFZZLnRH_e-UuLe3a08ca9OicJxTGnV0V_MAx"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white bg-tertiary"></div>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-semibold text-on-surface">Lê Hoàng Nam</h3>
+<p class="text-xs text-on-surface-variant mt-0.5">Senior Product Designer</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-2.5 py-1 rounded-lg bg-tertiary/10 text-tertiary text-[10px] font-bold uppercase tracking-wider">Chính thức</span>
+<span class="text-[10px] text-outline">ID: #AT-9921</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Employee Card 2 -->
+<div class="relative overflow-hidden rounded-[24px] bg-surface-container-low group">
+<div class="relative bg-surface-container-lowest p-4">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Employee" class="w-14 h-14 rounded-2xl object-cover bg-surface-container" data-alt="close-up portrait of a confident Asian female manager in professional attire with soft bokeh background office" src="https://lh3.googleusercontent.com/aida-public/AB6AXuASbAudh2lmze19us6yXoW0vT0X7Cg3QWRG5PfCNSUwLRFSILedlcAIwTG1MZ2L1YOHAc5ddomge60HVZFhU3OWRlUqOxY0iz3MPMJ1j-ZgpsT_sw6_58eXbqJd4vXe-AZWQMgkqb-MoUZlXa2caYhl9wvfGkL21_0eVMQHxM7iWNgMSjpp7DX0H9RrQEPQlCFYkOkp9nJMFY8Fst-NY7m0U4XDttdC0BfmuJt_VsQx5L77TQwE158ImL9Gt0M6jiv4BptrJM3bH922"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white bg-tertiary"></div>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-semibold text-on-surface">Nguyễn Thu Thảo</h3>
+<p class="text-xs text-on-surface-variant mt-0.5">HR Business Partner</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-2.5 py-1 rounded-lg bg-tertiary/10 text-tertiary text-[10px] font-bold uppercase tracking-wider">Chính thức</span>
+<span class="text-[10px] text-outline">ID: #AT-8812</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Employee Card 3 -->
+<div class="relative overflow-hidden rounded-[24px] bg-surface-container-low group">
+<div class="relative bg-surface-container-lowest p-4">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Employee" class="w-14 h-14 rounded-2xl object-cover bg-surface-container" data-alt="creative professional with stylish hair and modern clothing looking thoughtfully away from camera in a minimalist studio" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCDmzUHEbrnn7Dp-FodOexrUhNkUAv11VDH0kwWYqFBmZzLrUCvPBwaw2TZfKwe5Xbq56xcl_dTahHrauMgqH-ooavar5sHFY4xig80I_tX60fU120aJ-K_-Xp_tfbB4HCfu4g8dGpSFHkrGRJ6bzV4CPrSIKlJWaL10QCOiMnY5KpKTK3UBtTMoofKinn7KOeovYQ-zVAYxqrCeBPxEChj8g8t1aprTAPqjJMBWe8c4Q59q9XTsOCDnbl6ONIMvbNqSxj423Vph-rl"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white bg-outline"></div>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-semibold text-on-surface">Trần Anh Đức</h3>
+<p class="text-xs text-on-surface-variant mt-0.5">Junior UI Designer</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-2.5 py-1 rounded-lg bg-surface-container-highest text-secondary text-[10px] font-bold uppercase tracking-wider">Thử việc</span>
+<span class="text-[10px] text-outline">ID: #AT-1022</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Employee Card 4 -->
+<div class="relative overflow-hidden rounded-[24px] bg-surface-container-low group">
+<div class="relative bg-surface-container-lowest p-4">
+<div class="flex items-center gap-4">
+<div class="relative">
+<img alt="Employee" class="w-14 h-14 rounded-2xl object-cover bg-surface-container" data-alt="smiling young female software engineer sitting with a laptop in a cozy plant-filled collaborative workspace" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBJcnVHyh7hhrsC5cQ8hFr-NoIQ0ZkaLN6Xwi__ho60KJv2Sqx0PyAFwk0nnXwfDocoDrytF4kmJkYjq3DNxfw0CtcuxKI4b7Vt3oqJqf_nWkfD0yXAgUI0o4_UNlmKNljaB0vzZZLsHg-dWUuA86Hapj_Y9CaVUsbDQ4WHZ5-Z4xskvvKTpg0UjjHPz_KAQo9lGcN1RoUkGnrrN0wPDZxnoqpDlwPnacEBucXKgopbepj2XrcGdfyNsywIWgYZICzDcLgeblF0-s4o"/>
+<div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white bg-tertiary"></div>
+</div>
+<div class="flex-1">
+<h3 class="font-headline font-semibold text-on-surface">Phạm Mỹ Linh</h3>
+<p class="text-xs text-on-surface-variant mt-0.5">Frontend Developer</p>
+</div>
+<div class="flex flex-col items-end gap-1">
+<span class="px-2.5 py-1 rounded-lg bg-tertiary/10 text-tertiary text-[10px] font-bold uppercase tracking-wider">Chính thức</span>
+<span class="text-[10px] text-outline">ID: #AT-9003</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Stats Bento Section -->
+<section class="mt-12 grid grid-cols-2 gap-4">
+<div class="col-span-2 bg-primary/5 p-6 rounded-[32px] flex items-center justify-between border border-primary/10">
+<div>
+<h4 class="text-primary font-semibold">Tăng trưởng đội ngũ</h4>
+<p class="text-sm text-on-surface-variant">+12% so với tháng trước</p>
+</div>
+<div class="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center text-white">
+<span class="material-symbols-outlined">trending_up</span>
+</div>
+</div>
+<div class="bg-surface-container-low p-5 rounded-[32px] flex flex-col gap-2">
+<span class="text-2xl font-bold text-on-surface">124</span>
+<span class="text-xs text-on-surface-variant font-medium">Tổng nhân sự</span>
+</div>
+<div class="bg-surface-container-low p-5 rounded-[32px] flex flex-col gap-2">
+<span class="text-2xl font-bold text-on-surface">98%</span>
+<span class="text-xs text-on-surface-variant font-medium">Tỷ lệ hài lòng</span>
+</div>
+</section>
+</main>
+
+<!-- BottomNavBar -->
+<nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl shadow-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8 w-full">
+<a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Tổng quan</span>
+</a>
+<a class="flex flex-col items-center justify-center text-blue-600 bg-blue-50/50 rounded-2xl p-2 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">group</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Nhân viên</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chấm công</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined">forum</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chat</span>
+</a>
+<a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Cài đặt</span>
+</a>
+</nav>
+</body></html>
