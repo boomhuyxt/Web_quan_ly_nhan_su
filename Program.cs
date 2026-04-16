@@ -1,3 +1,6 @@
+using Microsoft.EntityFrameworkCore;
+using Web_quan_ly_nhan_su.Context;
+
 namespace Web_quan_ly_nhan_su
 {
     public class Program
@@ -5,6 +8,13 @@ namespace Web_quan_ly_nhan_su
         public static void Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
+
+            // 1. Lấy chuỗi kết nối từ appsettings.json
+            var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            // 2. Đăng ký AppDbContext sử dụng PostgreSQL (Npgsql)
+            builder.Services.AddDbContext<AppDbContext>(options =>
+                options.UseNpgsql(connectionString));
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -15,20 +25,22 @@ namespace Web_quan_ly_nhan_su
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
-                // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
 
             app.UseHttpsRedirection();
+
+            // Cấu hình để sử dụng các file tĩnh trong wwwroot (CSS, JS, Images)
+            app.UseStaticFiles();
+
             app.UseRouting();
 
             app.UseAuthorization();
 
-            app.MapStaticAssets();
+            // Cấu hình Route mặc định trỏ về trang Login của AccountController
             app.MapControllerRoute(
-             name: "default",
-             pattern: "{controller=Account}/{action=Login}/{id?}")
-                .WithStaticAssets();
+                name: "default",
+                pattern: "{controller=Account}/{action=Login}/{id?}");
 
             app.Run();
         }
