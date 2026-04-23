@@ -12,8 +12,8 @@ using Web_quan_ly_nhan_su.Context;
 namespace Web_quan_ly_nhan_su.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20260416025614_InitialCreateSupabase")]
-    partial class InitialCreateSupabase
+    [Migration("20260423172647_RebuildSchema")]
+    partial class RebuildSchema
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -49,7 +49,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
                     b.HasIndex("MaNhanVien");
 
-                    b.ToTable("ChamCong");
+                    b.ToTable("ChamCong", (string)null);
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.Luong", b =>
@@ -85,7 +85,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
                     b.HasIndex("MaNhanVien");
 
-                    b.ToTable("Luongs");
+                    b.ToTable("Luong", (string)null);
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.LuuTruFile", b =>
@@ -120,7 +120,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
                     b.HasIndex("MaNhanVien");
 
-                    b.ToTable("LuuTruFiles");
+                    b.ToTable("LuuTruFile", (string)null);
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.NghiPhep", b =>
@@ -155,7 +155,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
                     b.HasIndex("NhanVienId");
 
-                    b.ToTable("NghiPhep");
+                    b.ToTable("NghiPhep", (string)null);
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.NhanVien", b =>
@@ -227,7 +227,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
                     b.HasIndex("MaVaiTro");
 
-                    b.ToTable("NhanVienVaiTros");
+                    b.ToTable("NhanVienVaiTro", (string)null);
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.PhongBan", b =>
@@ -323,13 +323,13 @@ namespace Web_quan_ly_nhan_su.Migrations
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.NhanVienVaiTro", b =>
                 {
                     b.HasOne("Web_quan_ly_nhan_su.Models.NhanVien", "NhanVien")
-                        .WithMany("NhanVienVaiTros")
+                        .WithMany("NhanVienVaiTro")
                         .HasForeignKey("MaNhanVien")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Web_quan_ly_nhan_su.Models.VaiTro", "VaiTro")
-                        .WithMany("NhanVienVaiTros")
+                        .WithMany("NhanVienVaiTro")
                         .HasForeignKey("MaVaiTro")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -341,7 +341,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.NhanVien", b =>
                 {
-                    b.Navigation("NhanVienVaiTros");
+                    b.Navigation("NhanVienVaiTro");
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.PhongBan", b =>
@@ -351,7 +351,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.VaiTro", b =>
                 {
-                    b.Navigation("NhanVienVaiTros");
+                    b.Navigation("NhanVienVaiTro");
                 });
 #pragma warning restore 612, 618
         }

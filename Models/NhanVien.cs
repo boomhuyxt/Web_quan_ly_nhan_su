@@ -32,7 +32,7 @@ namespace Web_quan_ly_nhan_su.Models
             [ForeignKey("MaPhongBan")]
             public virtual PhongBan? PhongBan { get; set; }
 
-            public virtual ICollection<NhanVienVaiTro> NhanVienVaiTros { get; set; }
+            public virtual ICollection<NhanVienVaiTro> NhanVienVaiTro { get; set; }
         }
     
 }

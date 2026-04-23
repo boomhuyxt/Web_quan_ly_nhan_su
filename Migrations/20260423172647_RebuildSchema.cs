@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace Web_quan_ly_nhan_su.Migrations
 {
     /// <inheritdoc />
-    public partial class InitialCreateSupabase : Migration
+    public partial class RebuildSchema : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -92,7 +92,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Luongs",
+                name: "Luong",
                 columns: table => new
                 {
                     MaLuong = table.Column<int>(type: "integer", nullable: false)
@@ -107,9 +107,9 @@ namespace Web_quan_ly_nhan_su.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Luongs", x => x.MaLuong);
+                    table.PrimaryKey("PK_Luong", x => x.MaLuong);
                     table.ForeignKey(
-                        name: "FK_Luongs_NhanVien_MaNhanVien",
+                        name: "FK_Luong_NhanVien_MaNhanVien",
                         column: x => x.MaNhanVien,
                         principalTable: "NhanVien",
                         principalColumn: "MaNhanVien",
@@ -117,7 +117,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "LuuTruFiles",
+                name: "LuuTruFile",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -131,9 +131,9 @@ namespace Web_quan_ly_nhan_su.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_LuuTruFiles", x => x.Id);
+                    table.PrimaryKey("PK_LuuTruFile", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_LuuTruFiles_NhanVien_MaNhanVien",
+                        name: "FK_LuuTruFile_NhanVien_MaNhanVien",
                         column: x => x.MaNhanVien,
                         principalTable: "NhanVien",
                         principalColumn: "MaNhanVien");
@@ -164,7 +164,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "NhanVienVaiTros",
+                name: "NhanVienVaiTro",
                 columns: table => new
                 {
                     MaNhanVien = table.Column<int>(type: "integer", nullable: false),
@@ -172,15 +172,15 @@ namespace Web_quan_ly_nhan_su.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_NhanVienVaiTros", x => new { x.MaNhanVien, x.MaVaiTro });
+                    table.PrimaryKey("PK_NhanVienVaiTro", x => new { x.MaNhanVien, x.MaVaiTro });
                     table.ForeignKey(
-                        name: "FK_NhanVienVaiTros_NhanVien_MaNhanVien",
+                        name: "FK_NhanVienVaiTro_NhanVien_MaNhanVien",
                         column: x => x.MaNhanVien,
                         principalTable: "NhanVien",
                         principalColumn: "MaNhanVien",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_NhanVienVaiTros_VaiTro_MaVaiTro",
+                        name: "FK_NhanVienVaiTro_VaiTro_MaVaiTro",
                         column: x => x.MaVaiTro,
                         principalTable: "VaiTro",
                         principalColumn: "MaVaiTro",
@@ -193,13 +193,13 @@ namespace Web_quan_ly_nhan_su.Migrations
                 column: "MaNhanVien");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Luongs_MaNhanVien",
-                table: "Luongs",
+                name: "IX_Luong_MaNhanVien",
+                table: "Luong",
                 column: "MaNhanVien");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LuuTruFiles_MaNhanVien",
-                table: "LuuTruFiles",
+                name: "IX_LuuTruFile_MaNhanVien",
+                table: "LuuTruFile",
                 column: "MaNhanVien");
 
             migrationBuilder.CreateIndex(
@@ -213,8 +213,8 @@ namespace Web_quan_ly_nhan_su.Migrations
                 column: "MaPhongBan");
 
             migrationBuilder.CreateIndex(
-                name: "IX_NhanVienVaiTros_MaVaiTro",
-                table: "NhanVienVaiTros",
+                name: "IX_NhanVienVaiTro_MaVaiTro",
+                table: "NhanVienVaiTro",
                 column: "MaVaiTro");
         }
 
@@ -225,16 +225,16 @@ namespace Web_quan_ly_nhan_su.Migrations
                 name: "ChamCong");
 
             migrationBuilder.DropTable(
-                name: "Luongs");
+                name: "Luong");
 
             migrationBuilder.DropTable(
-                name: "LuuTruFiles");
+                name: "LuuTruFile");
 
             migrationBuilder.DropTable(
                 name: "NghiPhep");
 
             migrationBuilder.DropTable(
-                name: "NhanVienVaiTros");
+                name: "NhanVienVaiTro");
 
             migrationBuilder.DropTable(
                 name: "NhanVien");

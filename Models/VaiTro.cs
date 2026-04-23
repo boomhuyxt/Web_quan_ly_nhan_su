@@ -17,7 +17,7 @@ namespace Web_quan_ly_nhan_su.Models
             public string? TenVaiTro { get; set; }
 
             // Quan hệ n-n với NhanVien thông qua bảng trung gian NhanVienVaiTro
-            public virtual ICollection<NhanVienVaiTro>? NhanVienVaiTros { get; set; }
+            public virtual ICollection<NhanVienVaiTro>? NhanVienVaiTro { get; set; }
         }
     
 }
