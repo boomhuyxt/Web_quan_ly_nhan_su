@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using Web_quan_ly_nhan_su.Context;
 using Microsoft.AspNetCore.Authentication.Cookies;
-using System; // Thêm thư viện này
+using System;
 
 namespace Web_quan_ly_nhan_su
 {
@@ -37,6 +37,18 @@ namespace Web_quan_ly_nhan_su
                     options.ExpireTimeSpan = TimeSpan.FromDays(7);
                 });
 
+            // ==========================================
+            // 4. THÊM CẤU HÌNH DỊCH VỤ SESSION TẠI ĐÂY
+            // ==========================================
+            builder.Services.AddDistributedMemoryCache(); // Lưu session vào RAM
+            builder.Services.AddSession(options =>
+            {
+                options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian sống của Session
+                options.Cookie.HttpOnly = true; // Bảo mật Cookie Session
+                options.Cookie.IsEssential = true;
+            });
+            // ==========================================
+
             // Add services to the container.
             builder.Services.AddControllersWithViews();
 
@@ -53,6 +65,13 @@ namespace Web_quan_ly_nhan_su
             app.UseStaticFiles();
 
             app.UseRouting();
+
+            // ==========================================
+            // 5. KÍCH HOẠT MIDDLEWARE SESSION TẠI ĐÂY
+            // Phải nằm sau UseRouting() và trước UseAuthentication()
+            // ==========================================
+            app.UseSession();
+            // ==========================================
 
             // Kích hoạt Middleware Xác thực (Phải đặt trước UseAuthorization)
             app.UseAuthentication();
