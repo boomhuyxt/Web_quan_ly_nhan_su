@@ -1,12 +1,11 @@
 ﻿<!DOCTYPE html>
-
-<html class="light" lang="vi"><head>
+<html class="light" lang="vi">
+<head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&amp;family=Inter:wght@400;500;600&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
 <script id="tailwind-config">
       tailwind.config = {
         darkMode: "class",
@@ -83,9 +82,8 @@
       min-height: max(884px, 100dvh);
     }
   </style>
-  </head>
+</head>
 <body class="bg-surface font-body text-on-surface selection:bg-primary/10">
-<!-- TopAppBar -->
 <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl tonal-transition shadow-[0_20px_40px_rgba(0,0,0,0.04)]">
 <div class="flex justify-between items-center px-6 py-4 w-full">
 <div class="flex items-center gap-3">
@@ -101,26 +99,45 @@
 </div>
 </header>
 <main class="pt-24 pb-32 px-6 max-w-2xl mx-auto space-y-8">
-<!-- Current Status & FaceID Action -->
-<section class="relative overflow-hidden bg-surface-container-lowest rounded-[40px] p-8 shadow-[0_20px_40px_rgba(0,0,0,0.04)]">
+<section class="relative overflow-hidden bg-surface-container-lowest rounded-[40px] p-6 shadow-[0_20px_40px_rgba(0,0,0,0.04)]">
 <div class="flex flex-col items-center text-center space-y-6">
 <div class="space-y-1">
 <p class="text-secondary font-medium label-sm tracking-wider uppercase">Trạng thái hiện tại</p>
 <div class="flex items-center justify-center gap-2">
-<span class="w-2.5 h-2.5 rounded-full bg-error animate-pulse"></span>
-<h2 class="text-2xl font-headline font-bold text-on-surface">Chưa chấm công</h2>
+<span id="statusDot" class="w-2.5 h-2.5 rounded-full bg-error animate-pulse"></span>
+<h2 id="statusText" class="text-2xl font-headline font-bold text-on-surface">Chưa chấm công</h2>
 </div>
 </div>
-<!-- Apple FaceID Style Button -->
-<button class="group relative w-48 h-48 flex flex-col items-center justify-center gap-4 rounded-[48px] bg-gradient-to-br from-primary to-primary-container text-white shadow-2xl active:scale-95 transition-all duration-300">
-<div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-[48px]"></div>
-<span class="material-symbols-outlined text-[72px] font-light" data-icon="faceid" style="font-variation-settings: 'wght' 200;">face</span>
-<span class="font-headline font-semibold text-sm px-4">Chấm công khuôn mặt</span>
-</button>
-<p class="text-on-surface-variant text-sm max-w-[240px]">Vui lòng đảm bảo khuôn mặt nằm trong khung hình và đủ ánh sáng</p>
+
+<div class="flex flex-row items-center justify-center gap-4 w-full px-2">
+    
+    <button id="btnDangKy" class="group relative w-1/2 aspect-square max-w-[160px] flex flex-col items-center justify-center gap-3 rounded-[32px] bg-gradient-to-br from-slate-600 to-slate-800 text-white shadow-xl active:scale-95 transition-all duration-300 overflow-hidden">
+        <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-[32px] z-20"></div>
+        <video id="cameraStreamDangKy" autoplay playsinline class="hidden absolute inset-0 w-full h-full object-cover z-0"></video>
+        
+        <div id="uiKhuonMatDangKy" class="z-10 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-300 drop-shadow-lg">
+            <span class="material-symbols-outlined text-[56px] font-light" data-icon="person_add" style="font-variation-settings: 'wght' 200;">person_add</span>
+            <span class="font-headline font-semibold text-sm px-2 mt-2 leading-tight">Đăng ký<br/>FaceID</span>
+        </div>
+    </button>
+
+    <button id="btnChamCong" class="group relative w-1/2 aspect-square max-w-[160px] flex flex-col items-center justify-center gap-3 rounded-[32px] bg-gradient-to-br from-primary to-primary-container text-white shadow-xl active:scale-95 transition-all duration-300 overflow-hidden">
+        <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-[32px] z-20"></div>
+        <video id="cameraStreamChamCong" autoplay playsinline class="hidden absolute inset-0 w-full h-full object-cover z-0"></video>
+        
+        <div id="uiKhuonMatChamCong" class="z-10 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-300 drop-shadow-lg">
+            <span class="material-symbols-outlined text-[56px] font-light" data-icon="faceid" style="font-variation-settings: 'wght' 200;">face</span>
+            <span class="font-headline font-semibold text-sm px-2 mt-2 leading-tight">Chấm công<br/>Khuôn mặt</span>
+        </div>
+    </button>
+
+</div>
+
+<canvas id="captureCanvas" class="hidden"></canvas>
+<p id="instructionText" class="text-on-surface-variant text-sm max-w-[280px]">Vui lòng chọn Đăng ký nếu là lần đầu, hoặc Chấm công để ghi nhận giờ làm</p>
 </div>
 </section>
-<!-- Location Verification (Mini Map) -->
+
 <section class="space-y-4">
 <div class="flex justify-between items-end px-2">
 <h3 class="font-headline font-bold text-xl text-on-surface">Vị trí hiện tại</h3>
@@ -140,7 +157,6 @@
 </div>
 </div>
 </section>
-<!-- Weekly History Log -->
 <section class="space-y-4">
 <div class="flex justify-between items-end px-2">
 <h3 class="font-headline font-bold text-xl text-on-surface">Lịch sử tuần này</h3>
@@ -149,7 +165,6 @@
 </button>
 </div>
 <div class="bg-surface-container-low rounded-[32px] p-2 space-y-1">
-<!-- Log Item: Monday -->
 <div class="flex items-center justify-between p-5 bg-white rounded-[24px] shadow-sm">
 <div class="flex items-center gap-4">
 <div class="w-12 h-12 rounded-2xl bg-zinc-50 flex flex-col items-center justify-center leading-none">
@@ -166,7 +181,6 @@
 <p class="text-[11px] text-secondary">8h 33m làm việc</p>
 </div>
 </div>
-<!-- Log Item: Tuesday -->
 <div class="flex items-center justify-between p-5 hover:bg-white/50 transition-colors rounded-[24px]">
 <div class="flex items-center gap-4">
 <div class="w-12 h-12 rounded-2xl bg-zinc-100/50 flex flex-col items-center justify-center leading-none">
@@ -183,7 +197,6 @@
 <p class="text-[11px] text-secondary">9h 12m làm việc</p>
 </div>
 </div>
-<!-- Log Item: Wednesday (Today) -->
 <div class="flex items-center justify-between p-5 hover:bg-white/50 transition-colors rounded-[24px]">
 <div class="flex items-center gap-4">
 <div class="w-12 h-12 rounded-2xl bg-zinc-100/50 flex flex-col items-center justify-center leading-none">
@@ -204,7 +217,6 @@
 </section>
 </main>
 
-<!-- BottomNavBar -->
 <nav class="fixed bottom-0 w-full z-50 rounded-t-[32px] bg-white/80 backdrop-blur-2xl shadow-2xl no-border">
 <div class="flex justify-around items-center px-4 py-3 pb-8 w-full">
 <a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
@@ -229,4 +241,107 @@
 </a>
 </div>
 </nav>
-</body></html>
+
+<script>
+    // Elements cho Đăng ký
+    const btnDangKy = document.getElementById('btnDangKy');
+    const cameraStreamDangKy = document.getElementById('cameraStreamDangKy');
+    const uiKhuonMatDangKy = document.getElementById('uiKhuonMatDangKy');
+
+    // Elements cho Chấm công
+    const btnChamCong = document.getElementById('btnChamCong');
+    const cameraStreamChamCong = document.getElementById('cameraStreamChamCong');
+    const uiKhuonMatChamCong = document.getElementById('uiKhuonMatChamCong');
+
+    // Shared Elements
+    const canvas = document.getElementById('captureCanvas');
+    const statusText = document.getElementById('statusText');
+    const statusDot = document.getElementById('statusDot');
+    const instructionText = document.getElementById('instructionText');
+    
+    let currentStream = null;
+    let activeAction = null; // Sẽ là 'DANG_KY' hoặc 'CHAM_CONG'
+
+    async function handleCameraAction(actionType) {
+        const isDangKy = actionType === 'DANG_KY';
+        const activeBtn = isDangKy ? btnDangKy : btnChamCong;
+        const activeVideo = isDangKy ? cameraStreamDangKy : cameraStreamChamCong;
+        const activeUI = isDangKy ? uiKhuonMatDangKy : uiKhuonMatChamCong;
+        
+        // Cấu hình URL gọi API Backend
+        const apiUrl = isDangKy ? '/ChamCong/DangKyKhuonMat' : '/ChamCong/NhanDienVaChamCong';
+
+        // Xử lý xung đột nếu bấm nhầm nút kia khi camera đang bật
+        if (activeAction && activeAction !== actionType) {
+            alert("Vui lòng hoàn thành thao tác hiện tại hoặc làm mới trang.");
+            return;
+        }
+
+        if (!activeAction) {
+            // --- BƯỚC 1: XIN QUYỀN VÀ MỞ CAMERA ---
+            try {
+                currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
+                activeVideo.srcObject = currentStream;
+                activeVideo.classList.remove('hidden');
+                
+                // Làm mờ UI của nút để nhường chỗ cho video
+                activeUI.classList.add('opacity-0'); 
+                
+                // Cập nhật Text chỉ dẫn
+                statusText.textContent = isDangKy ? "Sẵn sàng Đăng ký" : "Sẵn sàng Chấm công";
+                statusDot.classList.replace('bg-error', 'bg-yellow-400');
+                instructionText.textContent = `Bấm lại vào khung camera để hoàn tất quá trình ${isDangKy ? 'đăng ký' : 'chấm công'}`;
+                instructionText.classList.add('text-primary', 'font-bold');
+
+                activeAction = actionType;
+            } catch (err) {
+                alert("Không thể truy cập camera: " + err.message);
+            }
+        } else {
+            // --- BƯỚC 2: CHỤP ẢNH VÀ GỬI LÊN SERVER ---
+            canvas.width = activeVideo.videoWidth;
+            canvas.height = activeVideo.videoHeight;
+            canvas.getContext('2d').drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
+            
+            const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
+            
+            // Thông báo UI đang xử lý
+            statusText.textContent = "Đang xử lý...";
+            statusDot.classList.replace('bg-yellow-400', 'bg-blue-500');
+
+            // Gọi AJAX về Controller C#
+            fetch(apiUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ imageBase64: base64Image })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if(data.success) {
+                    alert(`${isDangKy ? 'Đăng ký' : 'Chấm công'} thành công!`);
+                    location.reload(); 
+                } else {
+                    alert("Lỗi: " + data.message);
+                    resetUIError();
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert("Đã xảy ra lỗi kết nối với máy chủ!");
+                resetUIError();
+            });
+        }
+    }
+
+    function resetUIError() {
+        statusText.textContent = "Thử lại";
+        statusDot.classList.replace('bg-blue-500', 'bg-error');
+        statusDot.classList.replace('bg-yellow-400', 'bg-error');
+    }
+
+    // Gán sự kiện Click
+    btnDangKy.addEventListener('click', () => handleCameraAction('DANG_KY'));
+    btnChamCong.addEventListener('click', () => handleCameraAction('CHAM_CONG'));
+</script>
+</body>
+</html>

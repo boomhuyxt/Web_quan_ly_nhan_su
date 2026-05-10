@@ -9,15 +9,13 @@ namespace Web_quan_ly_nhan_su
     {
         public static void Main(string[] args)
         {
-            // BƯỚC QUAN TRỌNG NHẤT: Tắt IPv6, ép ứng dụng chỉ dùng IPv4 để kết nối đến Supabase
+            // BƯỚC QUAN TRỌNG: Tắt IPv6 để tránh lỗi kết nối đến Supabase (ép dùng IPv4)
             AppContext.SetSwitch("System.Net.DisableIPv6", true);
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // 1. Lấy chuỗi kết nối từ appsettings.json
+            // 1. Cấu hình Database (PostgreSQL)
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
-            // 2. Đăng ký AppDbContext sử dụng PostgreSQL (Npgsql) VÀ Bật tính năng tự động thử lại (RetryOnFailure)
             builder.Services.AddDbContext<AppDbContext>(options =>
                 options.UseNpgsql(connectionString, sqlOptions =>
                 {
@@ -27,34 +25,32 @@ namespace Web_quan_ly_nhan_su
                         errorCodesToAdd: null);
                 }));
 
-            // 3. CẤU HÌNH BẮT BUỘC CHO ĐĂNG NHẬP (Cookie Authentication)
+            // 2. Cấu hình Xác thực bằng Cookie (Cookie Authentication)
+            // Cho phép NhanVienController sử dụng Claims để lấy ID người dùng
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
                     options.LoginPath = "/Account/Login";
                     options.LogoutPath = "/Account/Logout";
                     options.AccessDeniedPath = "/Account/AccessDenied";
-                    options.ExpireTimeSpan = TimeSpan.FromDays(7);
+                    options.ExpireTimeSpan = TimeSpan.FromDays(7); // Duy trì đăng nhập 7 ngày
                 });
 
-            // ==========================================
-            // 4. THÊM CẤU HÌNH DỊCH VỤ SESSION TẠI ĐÂY
-            // ==========================================
-            builder.Services.AddDistributedMemoryCache(); // Lưu session vào RAM
+            // 3. Cấu hình Session (Nếu bạn vẫn muốn dùng Session song song với Cookie)
+            builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
-                options.IdleTimeout = TimeSpan.FromMinutes(30); // Thời gian sống của Session
-                options.Cookie.HttpOnly = true; // Bảo mật Cookie Session
+                options.IdleTimeout = TimeSpan.FromMinutes(30);
+                options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
-            // ==========================================
 
-            // Add services to the container.
+            // 4. Đăng ký dịch vụ MVC
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
 
-            // Configure the HTTP request pipeline.
+            // Cấu hình Pipeline (Middleware)
             if (!app.Environment.IsDevelopment())
             {
                 app.UseExceptionHandler("/Home/Error");
@@ -66,18 +62,14 @@ namespace Web_quan_ly_nhan_su
 
             app.UseRouting();
 
-            // ==========================================
-            // 5. KÍCH HOẠT MIDDLEWARE SESSION TẠI ĐÂY
-            // Phải nằm sau UseRouting() và trước UseAuthentication()
-            // ==========================================
+            // 5. Kích hoạt Session (Phải nằm sau UseRouting và trước UseAuthentication)
             app.UseSession();
-            // ==========================================
 
-            // Kích hoạt Middleware Xác thực (Phải đặt trước UseAuthorization)
+            // 6. Kích hoạt Xác thực và Phân quyền
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // Cấu hình Route mặc định trỏ về trang Login của AccountController
+            // 7. Cấu hình Route (Trỏ mặc định về Login)
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");

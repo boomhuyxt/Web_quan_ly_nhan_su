@@ -4,6 +4,9 @@ using Web_quan_ly_nhan_su.Context;
 using Web_quan_ly_nhan_su.Models;
 using System.Security.Cryptography;
 using System.Text;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Web_quan_ly_nhan_su.Controllers
 {
@@ -32,66 +35,73 @@ namespace Web_quan_ly_nhan_su.Controllers
         }
 
         [HttpGet]
-        public IActionResult Login()
-        {
-            return View();
-        }
+        public IActionResult Login() => View();
 
-        // Nhận trực tiếp 2 tham số từ Form HTML gửi lên
         [HttpPost]
-        public IActionResult Login(string email, string password)
+        public async Task<IActionResult> Login(string email, string password)
         {
-            // Kiểm tra người dùng đã nhập đủ 2 trường chưa
             if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
             {
-                // 1. Tìm nhân viên trong CSDL theo Email 
+                // 1. Tìm nhân viên theo Email 
                 var nhanVien = _context.NhanVien.FirstOrDefault(nv => nv.Email == email);
 
                 if (nhanVien != null)
                 {
-                    // 2. Băm mật khẩu người dùng vừa nhập bằng chuẩn SHA-256
+                    // 2. Kiểm tra mật khẩu 
                     string hashedInputPassword = ComputeSha256Hash(password);
 
-                    // 3. So sánh với MatKhauHash đã lưu trong CSDL 
                     if (nhanVien.MatKhauHash == hashedInputPassword)
                     {
-                        // Đăng nhập thành công -> Lưu Session
-                        HttpContext.Session.SetString("UserEmail", nhanVien.Email);
+                        // 3. TẠO DANH SÁCH CLAIMS 
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, nhanVien.HoTen),
+                            // QUAN TRỌNG: Lưu Email để NhanVienController lấy thông tin cập nhật
+                            new Claim(ClaimTypes.Email, nhanVien.Email), 
+                            // Lưu ID để hỗ trợ các chức năng khác nếu cần
+                            new Claim(ClaimTypes.NameIdentifier, nhanVien.MaNhanVien.ToString())
+                        };
 
+                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var authProperties = new AuthenticationProperties
+                        {
+                            IsPersistent = true, // Ghi nhớ đăng nhập
+                            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
+                        };
 
-                        // Chuyển hướng đến trang Tổng Quát
+                        // 4. Đăng nhập bằng Cookie 
+                        await HttpContext.SignInAsync(
+                            CookieAuthenticationDefaults.AuthenticationScheme,
+                            new ClaimsPrincipal(claimsIdentity),
+                            authProperties);
+
                         return RedirectToAction("TongQuat", "Account");
                     }
                 }
-
                 ViewBag.ErrorMessage = "Email hoặc mật khẩu không chính xác.";
             }
             else
             {
                 ViewBag.ErrorMessage = "Vui lòng nhập đầy đủ email và mật khẩu.";
             }
-
-            // Trả về lại trang đăng nhập (không cần truyền model về)
             return View();
         }
 
         [HttpGet]
         public IActionResult TongQuat()
         {
-            var userEmail = HttpContext.Session.GetString("UserEmail");
-            if (string.IsNullOrEmpty(userEmail))
-            {
-                return RedirectToAction("Login", "Account");
-            }
+            // Kiểm tra quyền truy cập thông qua Identity 
+            if (!User.Identity.IsAuthenticated) return RedirectToAction("Login", "Account");
 
-            // CHỈ ĐỊNH RÕ ĐƯỜNG DẪN TỚI THƯ MỤC HOME
+           // Chỉ định đường dẫn tới thư mục Home 
             return View("~/Views/Home/TongQuat.cshtml");
         }
 
         [HttpGet]
-        public IActionResult Logout()
+        public async Task<IActionResult> Logout()
         {
-            HttpContext.Session.Clear();
+           // Đăng xuất và xóa Cookie 
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }
     }

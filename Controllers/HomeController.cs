@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace Web_quan_ly_nhan_su.Controllers
 {
@@ -33,5 +34,15 @@ namespace Web_quan_ly_nhan_su.Controllers
         {
             return View("CaiDat");
         }
+
+        // Trong Controllers/HomeController.cs
+        public IActionResult ThongTinUser()
+        {
+            ViewData["PageHeader"] = "Thông tin cá nhân";
+            // Giả sử file của bạn nằm tại Views/Home/thongtinUser.cshtml
+            return View();
+        }
+
+        
     }
 }

@@ -1,0 +1,110 @@
+﻿@model Web_quan_ly_nhan_su.Models.NhanVien
+@{
+    ViewData["Title"] = "Cập nhật nhân viên";
+}
+
+@if (Model == null)
+{
+    <div class="pt-32 text-center">
+        <span class="material-symbols-outlined text-error text-6xl">account_circle_off</span>
+        <p class="text-on-surface font-headline font-bold text-xl mt-4">Không tìm thấy dữ liệu</p>
+        <p class="text-outline text-sm">Vui lòng đăng nhập lại để hệ thống nhận diện tài khoản.</p>
+    </div>
+}
+else
+{
+    <main class="max-w-3xl mx-auto pb-20">
+        <form asp-controller="NhanVien" asp-action="CapNhat" method="post" enctype="multipart/form-data" class="space-y-8">
+            <input type="hidden" asp-for="MaNhanVien" />
+            
+            <!-- Avatar Section -->
+            <div class="flex flex-col items-center gap-4 mb-6">
+                <div class="relative">
+                    <div class="w-32 h-32 rounded-full overflow-hidden ring-4 ring-white shadow-xl bg-surface-container-highest flex items-center justify-center">
+                        @if (!string.IsNullOrEmpty(Model.AnhDaiDien)) 
+{
+<img src="@Model.AnhDaiDien" id="previewImg" class="w-full h-full object-cover" alt="Avatar" />
+}
+else
+{
+<img id="previewImg" class="w-full h-full object-cover hidden" />
+<span id="placeholderIcon" class="material-symbols-outlined text-outline text-5xl">person</span>
+}
+</div>
+                    <label for="fileInput" class="absolute bottom-1 right-1 w-9 h-9 bg-primary text-white rounded-full flex items-center justify-center cursor-pointer shadow-lg">
+                        <span class="material-symbols-outlined text-[20px]">photo_camera</span>
+                        <input type="file" id="fileInput" name="uploadAnh" class="hidden" accept="image/*" onchange="previewImage(this)" />
+                    </label>
+                </div>
+            </div>
+
+            <!-- Form Fields -->
+            <div class="bg-white p-8 rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.03)] border border-zinc-100 space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div class="flex flex-col gap-1.5">
+                        <label asp-for="HoTen" class="text-[13px] font-bold text-on-surface-variant uppercase tracking-wider">Họ và Tên</label>[cite: 2]
+                        <input asp-for="HoTen" class="w-full px-5 py-3.5 rounded-2xl border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium" />[cite: 2]
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label asp-for="Email" class="text-[13px] font-bold text-on-surface-variant uppercase tracking-wider">Email</label>[cite: 2]
+                        <input asp-for="Email" type="email" class="w-full px-5 py-3.5 rounded-2xl border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium" />[cite: 2]
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label asp-for="SoDienThoai" class="text-[13px] font-bold text-on-surface-variant uppercase tracking-wider">Số điện thoại</label>[cite: 2]
+                        <input asp-for="SoDienThoai" class="w-full px-5 py-3.5 rounded-2xl border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium" />[cite: 2]
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label asp-for="GioiTinh" class="text-[13px] font-bold text-on-surface-variant uppercase tracking-wider">Giới tính</label>[cite: 2]
+                        <select asp-for="GioiTinh" class="w-full px-5 py-3.5 rounded-2xl border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium">
+                            <option value="">-- Để trống --</option>
+                            <option value="Nam">Nam</option>
+                            <option value="Nữ">Nữ</option>
+                        </select>[cite: 2]
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label asp-for="NgaySinh" class="text-[13px] font-bold text-on-surface-variant uppercase tracking-wider">Ngày sinh</label>[cite: 2]
+                        <input asp-for="NgaySinh" type="date" value="@(Model.NgaySinh?.ToString("yyyy-MM-dd"))" class="w-full px-5 py-3.5 rounded-2xl border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium" />[cite: 2]
+                    </div>
+
+                    <div class="flex flex-col gap-1.5">
+                        <label asp-for="NgayVaoLam" class="text-[13px] font-bold text-on-surface-variant uppercase tracking-wider">Ngày vào làm</label>[cite: 2]
+                        <input asp-for="NgayVaoLam" type="date" value="@(Model.NgayVaoLam?.ToString("yyyy-MM-dd"))" class="w-full px-5 py-3.5 rounded-2xl border-zinc-200 bg-zinc-50 text-outline outline-none text-sm font-medium" readonly />[cite: 2]
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                    <label asp-for="DiaChi" class="text-[13px] font-bold text-on-surface-variant uppercase tracking-wider">Địa chỉ</label>[cite: 2]
+                    <textarea asp-for="DiaChi" rows="3" class="w-full px-5 py-3.5 rounded-2xl border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium resize-none"></textarea>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-4">
+                <button type="submit" class="flex-1 bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2">
+                    <span class="material-symbols-outlined">save</span> Lưu thông tin
+                </button>
+            </div>
+        </form>
+    </main>
+}
+
+@section Scripts {
+    <script>
+        function previewImage(input) {
+            if (input.files && input.files[0]) {
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    const img = document.getElementById('previewImg');
+                    const icon = document.getElementById('placeholderIcon');
+                    img.src = e.target.result;
+                    img.classList.remove('hidden');
+                    if(icon) icon.classList.add('hidden');
+                }
+                reader.readAsDataURL(input.files[0]);
+            }
+        }
+    </script>
+}
