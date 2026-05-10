@@ -4,7 +4,6 @@ using Web_quan_ly_nhan_su.Context;
 using Web_quan_ly_nhan_su.Models;
 using Supabase;
 using System.Security.Claims;
-using Microsoft.Extensions.Options; // Nếu bạn đã dùng Models cấu hình Supabase
 
 namespace Web_quan_ly_nhan_su.Controllers
 {
@@ -19,11 +18,9 @@ namespace Web_quan_ly_nhan_su.Controllers
             _context = context;
         }
 
-        // GET: Lấy thông tin dựa trên Gmail của người đang đăng nhập
         [HttpGet]
-        public async Task<IActionResult> CapNhat()
+        public async Task<IActionResult> ThongTinUser()
         {
-            // Lấy Email từ Claims của người dùng đã đăng nhập
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
 
             if (string.IsNullOrEmpty(userEmail))
@@ -31,38 +28,36 @@ namespace Web_quan_ly_nhan_su.Controllers
                 return RedirectToAction("Login", "Account");
             }
 
-            // Tìm nhân viên trong DB dựa trên Gmail (Email)
             var nhanVien = await _context.NhanVien
                 .FirstOrDefaultAsync(nv => nv.Email == userEmail);
 
             if (nhanVien == null)
             {
-                return NotFound("Không tìm thấy thông tin nhân viên với Gmail này.");
+                return NotFound("Không tìm thấy thông tin nhân viên với Email này.");
             }
 
-            return View(nhanVien);
+            return View("~/Views/Home/thongtinUser.cshtml", nhanVien);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> CapNhat(NhanVien nvUpdate, IFormFile uploadAnh)
+        public async Task<IActionResult> ThongTinUser(NhanVien nvUpdate, IFormFile uploadAnh)
         {
-            // Lấy Email từ hệ thống để xác thực
             var userEmail = User.FindFirstValue(ClaimTypes.Email);
             if (string.IsNullOrEmpty(userEmail)) return Challenge();
 
             try
             {
-                // Tìm dữ liệu gốc dựa trên Email để bảo vệ các trường hệ thống
-                var currentNV = await _context.NhanVien.AsNoTracking()
+                var currentNV = await _context.NhanVien
                     .FirstOrDefaultAsync(m => m.Email == userEmail);
 
-                if (currentNV == null) return NotFound();
+                if (currentNV == null)
+                {
+                    TempData["ErrorMessage"] = "Không tìm thấy dữ liệu nhân viên để cập nhật!";
+                    return RedirectToAction("ThongTinUser");
+                }
 
-                // Đảm bảo không ai có thể đổi Email của người khác thông qua Form
-                if (currentNV.Email != userEmail) return BadRequest("Hành động không hợp lệ.");
-
-                // --- XỬ LÝ UPLOAD LÊN SUPABASE ---
+                // 1. XỬ LÝ UPLOAD ẢNH LÊN SUPABASE
                 if (uploadAnh != null && uploadAnh.Length > 0)
                 {
                     var options = new SupabaseOptions { AutoConnectRealtime = true };
@@ -76,31 +71,38 @@ namespace Web_quan_ly_nhan_su.Controllers
                     string fileName = $"{Guid.NewGuid()}{Path.GetExtension(uploadAnh.FileName)}";
                     await supabase.Storage.From("avatars").Upload(fileBytes, fileName);
 
-                    nvUpdate.AnhDaiDien = supabase.Storage.From("avatars").GetPublicUrl(fileName);
+                    currentNV.AnhDaiDien = supabase.Storage.From("avatars").GetPublicUrl(fileName);
+                }
+
+                // 2. CẬP NHẬT TRỰC TIẾP VÀO currentNV
+                currentNV.HoTen = nvUpdate.HoTen;
+                currentNV.SoDienThoai = nvUpdate.SoDienThoai;
+                currentNV.GioiTinh = nvUpdate.GioiTinh;
+                currentNV.DiaChi = nvUpdate.DiaChi;
+
+                // FIX LỖI POSTGRESQL: Ép kiểu Ngày sinh về UTC để tránh Crash Database
+                if (nvUpdate.NgaySinh.HasValue)
+                {
+                    currentNV.NgaySinh = DateTime.SpecifyKind(nvUpdate.NgaySinh.Value, DateTimeKind.Utc);
                 }
                 else
                 {
-                    nvUpdate.AnhDaiDien = currentNV.AnhDaiDien;
+                    currentNV.NgaySinh = null;
                 }
 
-                // Gán lại các giá trị nhạy cảm (không cho phép sửa qua form)
-                nvUpdate.MaNhanVien = currentNV.MaNhanVien; // Giữ nguyên ID gốc
-                nvUpdate.Email = currentNV.Email; // Giữ nguyên Email gốc
-                nvUpdate.MatKhauHash = currentNV.MatKhauHash;
-                nvUpdate.TrangThai = currentNV.TrangThai;
-                nvUpdate.MaPhongBan = currentNV.MaPhongBan;
-                nvUpdate.FaceVector = currentNV.FaceVector;
-                nvUpdate.NgayTao = currentNV.NgayTao;
-
-                _context.Update(nvUpdate);
+                // 3. LƯU VÀO DATABASE
                 await _context.SaveChangesAsync();
 
-                return RedirectToAction("TongQuat", "Account");
+                // 4. THÔNG BÁO THÀNH CÔNG
+                TempData["SuccessMessage"] = "Cập nhật thông tin cá nhân thành công!";
+                return RedirectToAction("ThongTinUser");
             }
             catch (Exception ex)
             {
-                ModelState.AddModelError("", "Lỗi cập nhật: " + ex.Message);
-                return View(nvUpdate);
+                // BẮT LỖI VÀ LẤY LỖI CHI TIẾT (INNER EXCEPTION) IN RA MÀN HÌNH
+                string detailError = ex.InnerException != null ? ex.InnerException.Message : ex.Message;
+                TempData["ErrorMessage"] = "Cập nhật thất bại: " + detailError;
+                return RedirectToAction("ThongTinUser");
             }
         }
     }

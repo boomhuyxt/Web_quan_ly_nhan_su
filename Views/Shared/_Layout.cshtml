@@ -1,4 +1,26 @@
-﻿<!DOCTYPE html>
+﻿@using Web_quan_ly_nhan_su.Context
+@using System.Security.Claims
+@inject AppDbContext _context
+
+@{
+    // Tự động tìm ảnh đại diện của người dùng đang đăng nhập
+    string avatarUrl = "/images/avatar_default.jpg"; // Ảnh mặc định
+    
+    if (User.Identity != null && User.Identity.IsAuthenticated)
+    {
+        var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
+        if (!string.IsNullOrEmpty(userEmail))
+        {
+            var nv = _context.NhanVien.FirstOrDefault(x => x.Email == userEmail);
+            if (nv != null && !string.IsNullOrEmpty(nv.AnhDaiDien))
+            {
+                avatarUrl = nv.AnhDaiDien; // Lấy ảnh từ Supabase
+            }
+        }
+    }
+}
+
+<!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
@@ -6,6 +28,8 @@
     <title>@ViewData["Title"] - Atelier HR</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    
     <script>
         tailwind.config = {
         theme: {
@@ -16,7 +40,11 @@
         "surface": "#f9f9fb",
         "on-surface": "#1a1c1d",
         "outline": "#717786",
-        "tertiary": "#006b27"
+        "tertiary": "#006b27",
+        "surface-container": "#eeeef0",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f3f3f5",
+        "error": "#ba1a1a",
         },
         fontFamily: {
         "headline": ["Be Vietnam Pro"],
@@ -30,56 +58,127 @@
 <body class="bg-surface font-body text-on-surface antialiased pb-32">
     
     <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] px-6 py-4 flex justify-between items-center">
-        <!-- Tìm đoạn này trong header của bạn -->
         <div class="flex items-center gap-4">
-            <div class="w-10 h-10 rounded-full overflow-hidden bg-surface-container hover:ring-2 hover:ring-primary transition-all cursor-pointer">
-                <!-- Bọc thẻ img bằng thẻ a -->
-                <a asp-controller="Home" asp-action="ThongTinUser">
-                    <img src="~/images/avatar_default.jpg" class="w-full h-full object-cover" alt="User">
-                </a>
+            
+            <div class="relative">
+                <button id="userMenuBtn" class="w-10 h-10 rounded-full overflow-hidden bg-surface-container hover:ring-2 hover:ring-primary transition-all cursor-pointer block focus:outline-none">
+                    <img src="@avatarUrl" class="w-full h-full object-cover" alt="User">
+                </button>
+                
+                <div id="userDropdown" class="hidden absolute left-0 mt-3 w-60 bg-white rounded-2xl shadow-xl border border-surface-container overflow-hidden z-[60] transition-all transform origin-top-left">
+                    <div class="px-4 py-3 bg-surface-container-lowest border-b border-surface-container">
+                        <p class="text-xs text-outline mb-0.5">Đang đăng nhập dưới tên</p>
+                        <p class="text-sm text-on-surface font-bold truncate">@(User.Identity?.Name ?? "Nhân viên")</p>
+                    </div>
+                    
+                    <div class="py-2">
+                        <a asp-controller="NhanVien" asp-action="ThongTinUser" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
+                            Cập nhật thông tin
+                        </a>
+                        <a asp-controller="Account" asp-action="Logout" class="flex items-center gap-3 px-4 py-2.5 text-sm text-error hover:bg-error/10 transition-colors">
+                            <span class="material-symbols-outlined text-[20px]">logout</span>
+                            Đăng xuất
+                        </a>
+                    </div>
+                </div>
             </div>
+
             <h1 class="font-headline font-bold text-2xl tracking-tight text-zinc-900">@ViewData["PageHeader"]</h1>
         </div>
-            <button class="bg-primary text-white px-4 py-2 rounded-full font-medium flex items-center gap-2 hover:opacity-80 transition-opacity active:scale-95 duration-200">
-                <span class="material-symbols-outlined text-[20px]">add</span>
-                <span class="text-sm font-headline">Thêm mới</span>
-            </button>
-        </header>
+    
+        <button class="bg-primary text-white px-4 py-2 rounded-full font-medium flex items-center gap-2 hover:opacity-80 transition-opacity active:scale-95 duration-200">
+            <span class="material-symbols-outlined text-[20px]">add</span>
+            <span class="text-sm font-headline">Thêm mới</span>
+        </button>
+    </header>
 
-        <main class="pt-24 px-6 max-w-5xl mx-auto">
-            @RenderBody()
-        </main>
+    <main class="pt-24 px-6 max-w-5xl mx-auto">
+        @RenderBody()
+    </main>
 
-        @if (ViewData["HideFloatingAI"] == null)
-        {
-            <button class="fixed right-6 bottom-32 w-16 h-16 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl z-[60] active:scale-90 transition-transform hover:shadow-primary/20 hover:shadow-xl">
-                <span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
-            </button>
+    @if (ViewData["HideFloatingAI"] == null)
+    {
+        <button class="fixed right-6 bottom-32 w-16 h-16 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl z-[60] active:scale-90 transition-transform hover:shadow-primary/20 hover:shadow-xl">
+            <span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+        </button>
+    }
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div id="toast-success" class="fixed top-24 right-6 flex items-center w-full max-w-xs p-4 space-x-3 text-white bg-tertiary rounded-2xl shadow-2xl z-[100] transform transition-all duration-500 translate-x-0" role="alert">
+            <span class="material-symbols-outlined text-[24px]">check_circle</span>
+            <div class="text-sm font-medium ml-3">@TempData["SuccessMessage"]</div>
+        </div>
+        <script>
+            setTimeout(function() {
+            const toast = document.getElementById('toast-success');
+            if (toast) {
+            toast.classList.add('opacity-0', 'translate-x-full');
+            setTimeout(() => toast.style.display = 'none', 500);
+            }
+            }, 3000);
+        </script>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div id="toast-error" class="fixed top-24 right-6 flex items-center w-full max-w-xs p-4 space-x-3 text-white bg-error rounded-2xl shadow-2xl z-[100] transform transition-all duration-500 translate-x-0" role="alert">
+            <span class="material-symbols-outlined text-[24px]">error</span>
+            <div class="text-sm font-medium ml-3">@TempData["ErrorMessage"]</div>
+        </div>
+        <script>
+            setTimeout(function() {
+            const toast = document.getElementById('toast-error');
+            if (toast) {
+            toast.classList.add('opacity-0', 'translate-x-full');
+            setTimeout(() => toast.style.display = 'none', 500);
+            }
+            }, 4000);
+        </script>
+    }
+    <nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8 shadow-2xl">
+        <a asp-controller="Home" asp-action="Index" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+            <span class="material-symbols-outlined">dashboard</span>
+            <span class="text-[11px] font-medium mt-1">Tổng quan</span>
+        </a>
+        <a asp-controller="Home" asp-action="NhanVien" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "NhanVien" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+            <span class="material-symbols-outlined">group</span>
+            <span class="text-[11px] font-medium mt-1">Nhân viên</span>
+        </a>
+        <a asp-controller="Home" asp-action="ChamCong" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "ChamCong" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+            <span class="material-symbols-outlined">fact_check</span>
+            <span class="text-[11px] font-medium mt-1">Chấm công</span>
+        </a>
+        <a asp-controller="Home" asp-action="Chat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Chat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+            <span class="material-symbols-outlined">forum</span>
+            <span class="text-[11px] font-medium mt-1">Chat</span>
+        </a>
+        <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
+            <span class="material-symbols-outlined">settings</span>
+            <span class="text-[11px] font-medium mt-1">Cài đặt</span>
+        </a>
+    </nav>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+        const userMenuBtn = document.getElementById('userMenuBtn');
+        const userDropdown = document.getElementById('userDropdown');
+
+        if (userMenuBtn && userDropdown) {
+        userMenuBtn.addEventListener('click', function (e) {
+        e.stopPropagation();
+        userDropdown.classList.toggle('hidden');
+        });
+        document.addEventListener('click', function (e) {
+        if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
+        userDropdown.classList.add('hidden');
         }
+        });
+        }
+        });
+    </script>
 
-        <nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8 shadow-2xl">
-            <a asp-controller="Home" asp-action="Index" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Index" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-                <span class="material-symbols-outlined">dashboard</span>
-                <span class="text-[11px] font-medium mt-1">Tổng quan</span>
-            </a>
-            <a asp-controller="Home" asp-action="NhanVien" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "NhanVien" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-                <span class="material-symbols-outlined">group</span>
-                <span class="text-[11px] font-medium mt-1">Nhân viên</span>
-            </a>
-            <a asp-controller="Home" asp-action="ChamCong" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "ChamCong" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-                <span class="material-symbols-outlined">fact_check</span>
-                <span class="text-[11px] font-medium mt-1">Chấm công</span>
-            </a>
-            <a asp-controller="Home" asp-action="Chat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Chat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-                <span class="material-symbols-outlined">forum</span>
-                <span class="text-[11px] font-medium mt-1">Chat</span>
-            </a>
-            <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-                <span class="material-symbols-outlined">settings</span>
-                <span class="text-[11px] font-medium mt-1">Cài đặt</span>
-            </a>
-        </nav>
-
-        @await RenderSectionAsync("Scripts", required: false)
-    </body>
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
 </html>

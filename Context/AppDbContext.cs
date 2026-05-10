@@ -11,13 +11,16 @@ namespace Web_quan_ly_nhan_su.Context
         }
 
         public DbSet<NhanVien> NhanVien { get; set; }
-        public DbSet<PhongBan> PhongBan { get; set; } // Đã bỏ 's' để đồng bộ
-        public DbSet<ChamCong> ChamCong { get; set; }  // Đã bỏ 's'
-        public DbSet<NghiPhep> NghiPhep { get; set; }  // Đã bỏ 's'
-        public DbSet<VaiTro> VaiTro { get; set; }      // Đã bỏ 's'
+        public DbSet<PhongBan> PhongBan { get; set; }
+        public DbSet<ChamCong> ChamCong { get; set; }
+        public DbSet<NghiPhep> NghiPhep { get; set; }
+        public DbSet<VaiTro> VaiTro { get; set; }
         public DbSet<NhanVienVaiTro> NhanVienVaiTro { get; set; }
-        public DbSet<Luong> Luong { get; set; }        // Đã bỏ 's'
-        public DbSet<LuuTruFile> LuuTruFile { get; set; } // Đã bỏ 's'
+        public DbSet<Luong> Luong { get; set; }
+        public DbSet<LuuTruFile> LuuTruFile { get; set; }
+
+        // Thêm DbSet cho bảng TinNhan
+        public DbSet<TinNhan> TinNhan { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -33,18 +36,21 @@ namespace Web_quan_ly_nhan_su.Context
             modelBuilder.Entity<LuuTruFile>().ToTable("LuuTruFile");
             modelBuilder.Entity<NhanVienVaiTro>().ToTable("NhanVienVaiTro");
 
+            // Cấu hình bảng TinNhan
+            modelBuilder.Entity<TinNhan>().ToTable("TinNhan");
+
             // Cấu hình Quan hệ Many-to-Many trung gian
             modelBuilder.Entity<NhanVienVaiTro>()
                 .HasKey(x => new { x.MaNhanVien, x.MaVaiTro });
 
             modelBuilder.Entity<NhanVienVaiTro>()
                 .HasOne(x => x.NhanVien)
-                .WithMany(x => x.NhanVienVaiTro) // Lỗi CS1061 biến mất nếu NhanVien.cs có prop này
+                .WithMany(x => x.NhanVienVaiTro)
                 .HasForeignKey(x => x.MaNhanVien);
 
             modelBuilder.Entity<NhanVienVaiTro>()
                 .HasOne(x => x.VaiTro)
-                .WithMany(x => x.NhanVienVaiTro) // Lỗi CS1061 biến mất nếu VaiTro.cs có prop này
+                .WithMany(x => x.NhanVienVaiTro)
                 .HasForeignKey(x => x.MaVaiTro);
         }
     }

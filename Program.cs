@@ -2,6 +2,8 @@ using Microsoft.EntityFrameworkCore;
 using Web_quan_ly_nhan_su.Context;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System;
+// THÊM DÒNG NÀY: Khai báo thư mục chứa ChatHub
+using Web_quan_ly_nhan_su.Hubs;
 
 namespace Web_quan_ly_nhan_su
 {
@@ -26,7 +28,6 @@ namespace Web_quan_ly_nhan_su
                 }));
 
             // 2. Cấu hình Xác thực bằng Cookie (Cookie Authentication)
-            // Cho phép NhanVienController sử dụng Claims để lấy ID người dùng
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>
                 {
@@ -36,7 +37,7 @@ namespace Web_quan_ly_nhan_su
                     options.ExpireTimeSpan = TimeSpan.FromDays(7); // Duy trì đăng nhập 7 ngày
                 });
 
-            // 3. Cấu hình Session (Nếu bạn vẫn muốn dùng Session song song với Cookie)
+            // 3. Cấu hình Session 
             builder.Services.AddDistributedMemoryCache();
             builder.Services.AddSession(options =>
             {
@@ -47,6 +48,9 @@ namespace Web_quan_ly_nhan_su
 
             // 4. Đăng ký dịch vụ MVC
             builder.Services.AddControllersWithViews();
+
+            // THÊM DÒNG NÀY: Kích hoạt dịch vụ SignalR trên máy chủ
+            builder.Services.AddSignalR();
 
             var app = builder.Build();
 
@@ -68,6 +72,9 @@ namespace Web_quan_ly_nhan_su
             // 6. Kích hoạt Xác thực và Phân quyền
             app.UseAuthentication();
             app.UseAuthorization();
+
+            // THÊM DÒNG NÀY: Mở đường dẫn kết nối "/chathub" cho Frontend gọi tới
+            app.MapHub<ChatHub>("/chathub");
 
             // 7. Cấu hình Route (Trỏ mặc định về Login)
             app.MapControllerRoute(
