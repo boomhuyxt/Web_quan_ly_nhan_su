@@ -5,7 +5,6 @@
 @{
     // Tự động tìm ảnh đại diện của người dùng đang đăng nhập
     string avatarUrl = "/images/avatar_default.jpg"; // Ảnh mặc định
-    
     if (User.Identity != null && User.Identity.IsAuthenticated)
     {
         var userEmail = User.FindFirst(ClaimTypes.Email)?.Value;
@@ -18,14 +17,16 @@
             }
         }
     }
-}
 
+    // Lấy tên Action hiện tại để làm sáng (Active) nút dưới thanh điều hướng
+    var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - Atelier HR</title>
+    <title>@ViewData["Title"] Atelier HR</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -87,10 +88,6 @@
             <h1 class="font-headline font-bold text-2xl tracking-tight text-zinc-900">@ViewData["PageHeader"]</h1>
         </div>
     
-        <button class="bg-primary text-white px-4 py-2 rounded-full font-medium flex items-center gap-2 hover:opacity-80 transition-opacity active:scale-95 duration-200">
-            <span class="material-symbols-outlined text-[20px]">add</span>
-            <span class="text-sm font-headline">Thêm mới</span>
-        </button>
     </header>
 
     <main class="pt-24 px-6 max-w-5xl mx-auto">
@@ -137,25 +134,31 @@
             }, 4000);
         </script>
     }
+
     <nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8 shadow-2xl">
-        <a asp-controller="Home" asp-action="TongQuat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "TongQuat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-            <span class="material-symbols-outlined">dashboard</span>
+        
+        <a asp-controller="Home" asp-action="TongQuat" class="flex flex-col items-center p-2 @(currentAction == "TongQuat" || currentAction == "Index" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
+            <span class="material-symbols-outlined" style="@(currentAction == "TongQuat" || currentAction == "Index" ? "font-variation-settings: 'FILL' 1;" : "")">dashboard</span>
             <span class="text-[11px] font-medium mt-1">Tổng quan</span>
         </a>
-        <a asp-controller="Home" asp-action="NhanVien" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "NhanVien" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-            <span class="material-symbols-outlined">group</span>
+
+        <a asp-controller="Home" asp-action="NhanVien" class="flex flex-col items-center p-2 @(currentAction == "NhanVien" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
+            <span class="material-symbols-outlined" style="@(currentAction == "NhanVien" ? "font-variation-settings: 'FILL' 1;" : "")">group</span>
             <span class="text-[11px] font-medium mt-1">Nhân viên</span>
         </a>
-        <a asp-controller="Home" asp-action="ChamCong" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "ChamCong" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-            <span class="material-symbols-outlined">fact_check</span>
+
+        <a asp-controller="Home" asp-action="ChamCong" class="flex flex-col items-center p-2 @(currentAction == "ChamCong" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
+            <span class="material-symbols-outlined" style="@(currentAction == "ChamCong" ? "font-variation-settings: 'FILL' 1;" : "")">fact_check</span>
             <span class="text-[11px] font-medium mt-1">Chấm công</span>
         </a>
-        <a asp-controller="Home" asp-action="Chat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "Chat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-            <span class="material-symbols-outlined">forum</span>
+
+        <a asp-controller="Home" asp-action="Chat" class="flex flex-col items-center p-2 @(currentAction == "Chat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
+            <span class="material-symbols-outlined" style="@(currentAction == "Chat" ? "font-variation-settings: 'FILL' 1;" : "")">forum</span>
             <span class="text-[11px] font-medium mt-1">Chat</span>
         </a>
-        <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(ViewContext.RouteData.Values["Action"]?.ToString() == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400")">
-            <span class="material-symbols-outlined">settings</span>
+
+        <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(currentAction == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
+            <span class="material-symbols-outlined" style="@(currentAction == "CaiDat" ? "font-variation-settings: 'FILL' 1;" : "")">settings</span>
             <span class="text-[11px] font-medium mt-1">Cài đặt</span>
         </a>
     </nav>

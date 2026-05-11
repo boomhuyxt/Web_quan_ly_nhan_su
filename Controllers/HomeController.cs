@@ -1,48 +1,55 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace Web_quan_ly_nhan_su.Controllers
 {
     public class HomeController : Controller
     {
-        // Trỏ đến Views/Home/TongQuat.cshtml
+        // 1. KHI VỪA MỞ WEB (Chạy vào Index mặc định), TỰ ĐỘNG CHUYỂN SANG TRANG TỔNG QUAN
+        public IActionResult Index()
+        {
+            return RedirectToAction("Tổng quan");
+        }
+
+        // 2. Trỏ đến Views/Home/TongQuat.cshtml
         public IActionResult TongQuat()
         {
-            return View("TongQuat");
-        }
-
-        // Trỏ đến Views/Home/NhanVien.cshtml
-        public IActionResult NhanVien()
-        {
-            return View("NhanVien");
-        }
-
-        // Trỏ đến Views/Home/ChamCong.cshtml
-        public IActionResult ChamCong()
-        {
-            return View("ChamCong");
-        }
-
-        // Trỏ đến Views/Home/Chat.cshtml
-        public IActionResult Chat()
-        {
-            return View("Chat");
-        }
-
-        // Trỏ đến Views/Home/CaiDat.cshtml
-        public IActionResult CaiDat()
-        {
-            return View("CaiDat");
-        }
-
-        // Trong Controllers/HomeController.cs
-        public IActionResult ThongTinUser()
-        {
-            ViewData["PageHeader"] = "Thông tin cá nhân";
-            // Giả sử file của bạn nằm tại Views/Home/thongtinUser.cshtml
+            ViewData["PageHeader"] = "Tổng quan"; // Đổi tên Tiêu đề Header
             return View();
         }
 
-        
+        // 3. Trỏ đến Views/Home/NhanVien.cshtml
+        public IActionResult NhanVien()
+        {
+            ViewData["PageHeader"] = "Nhân viên";
+            return View();
+        }
+
+        // 4. Trỏ đến Views/Home/ChamCong.cshtml
+        public IActionResult ChamCong()
+        {
+            ViewData["PageHeader"] = "Chấm công";
+            return View();
+        }
+
+        // 5. Trỏ đến Views/Home/Chat.cshtml
+        public IActionResult Chat()
+        {
+            ViewData["PageHeader"] = "Trò chuyện";
+            return View();
+        }
+
+        // 6. Trỏ đến Views/Home/CaiDat.cshtml
+        public IActionResult CaiDat()
+        {
+            ViewData["PageHeader"] = "Cài đặt";
+            return View();
+        }
+
+        // 7. Trỏ đến Views/Home/ThongTinUser.cshtml
+        public IActionResult ThongTinUser()
+        {
+            ViewData["PageHeader"] = "Thông tin cá nhân";
+            return View();
+        }
     }
 }
