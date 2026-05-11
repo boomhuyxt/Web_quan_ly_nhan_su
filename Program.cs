@@ -2,7 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Web_quan_ly_nhan_su.Context;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using System;
-// THÊM DÒNG NÀY: Khai báo thư mục chứa ChatHub
+// Khai báo thư mục chứa ChatHub
 using Web_quan_ly_nhan_su.Hubs;
 
 namespace Web_quan_ly_nhan_su
@@ -49,7 +49,7 @@ namespace Web_quan_ly_nhan_su
             // 4. Đăng ký dịch vụ MVC
             builder.Services.AddControllersWithViews();
 
-            // THÊM DÒNG NÀY: Kích hoạt dịch vụ SignalR trên máy chủ
+            // 5. Kích hoạt dịch vụ SignalR trên máy chủ để chạy Chat Real-time
             builder.Services.AddSignalR();
 
             var app = builder.Build();
@@ -66,17 +66,17 @@ namespace Web_quan_ly_nhan_su
 
             app.UseRouting();
 
-            // 5. Kích hoạt Session (Phải nằm sau UseRouting và trước UseAuthentication)
+            // 6. Kích hoạt Session (Phải nằm sau UseRouting và trước UseAuthentication)
             app.UseSession();
 
-            // 6. Kích hoạt Xác thực và Phân quyền
+            // 7. Kích hoạt Xác thực và Phân quyền
             app.UseAuthentication();
             app.UseAuthorization();
 
-            // THÊM DÒNG NÀY: Mở đường dẫn kết nối "/chathub" cho Frontend gọi tới
+            // 8. Mở đường dẫn kết nối "/chathub" cho Frontend gọi tới
             app.MapHub<ChatHub>("/chathub");
 
-            // 7. Cấu hình Route (Trỏ mặc định về Login)
+            // 9. Cấu hình Route (Trỏ mặc định về Login)
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");

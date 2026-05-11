@@ -6,6 +6,7 @@ using Web_quan_ly_nhan_su.Models;
 
 namespace Web_quan_ly_nhan_su.Hubs
 {
+    // Kế thừa class Hub của SignalR
     public class ChatHub : Hub
     {
         private readonly AppDbContext _context;
@@ -15,29 +16,29 @@ namespace Web_quan_ly_nhan_su.Hubs
             _context = context;
         }
 
-        public async Task SendMessage(int nguoiGuiId, int nguoiNhanId, string noiDung)
+        // Hàm này sẽ được Javascript (Client) gọi mỗi khi bấm nút Gửi
+        public async Task SendMessage(int senderId, int receiverId, string message)
         {
-            // 1. Chuẩn hóa thời gian UTC để không bị lỗi PostgreSQL
-            DateTime thoiGianGuiUtc = DateTime.SpecifyKind(DateTime.UtcNow, DateTimeKind.Utc);
-
-            // Tính giờ VN để trả về luôn cho giao diện hiển thị
-            string thoiGianHienThi = thoiGianGuiUtc.AddHours(7).ToString("hh:mm tt");
-
-            // 2. Lưu tin nhắn vào Database
+            // 1. Lưu tin nhắn vào Database (PostgreSQL)
             var tinNhan = new TinNhan
             {
-                NguoiGuiId = nguoiGuiId,
-                NguoiNhanId = nguoiNhanId,
-                NoiDung = noiDung,
-                ThoiGianGui = thoiGianGuiUtc,
+                NguoiGuiId = senderId,
+                NguoiNhanId = receiverId,
+                NoiDung = message,
+                // Dùng UtcNow để không bị lỗi múi giờ với PostgreSQL
+                ThoiGianGui = DateTime.UtcNow,
                 DaDoc = false
             };
 
             _context.TinNhan.Add(tinNhan);
             await _context.SaveChangesAsync();
 
-            // 3. Gửi tin nhắn đến các Client đang kết nối
-            await Clients.All.SendAsync("ReceiveMessage", nguoiGuiId, nguoiNhanId, noiDung, thoiGianHienThi);
+            // 2. Chuyển đổi giờ thành định dạng hh:mm tt để hiện lên web
+            string timeString = tinNhan.ThoiGianGui.AddHours(7).ToString("hh:mm tt");
+
+            // 3. Phát sóng (Broadcast) tin nhắn này tới TẤT CẢ các thiết bị đang mở web
+            // (Javascript ở Client sẽ bắt sự kiện "ReceiveMessage" và vẽ tin nhắn ra màn hình)
+            await Clients.All.SendAsync("ReceiveMessage", senderId, receiverId, message, timeString);
         }
     }
 }
