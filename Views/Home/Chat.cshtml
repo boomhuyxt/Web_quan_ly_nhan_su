@@ -2,13 +2,13 @@
 <!DOCTYPE html>
 <html class="light" lang="vi">
 <head>
-<meta charset="utf-8"/>
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>Atelier HR - Chat nội bộ</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
-<script id="tailwind-config">
+    <meta charset="utf-8"/>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <title>Atelier HR - Chat nội bộ</title>
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <script id="tailwind-config">
         tailwind.config = {
             darkMode: "class",
             theme: {
@@ -16,395 +16,319 @@
                     colors: {
                         "outline": "#717786",
                         "primary": "#0058bc",
-                        "surface-tint": "#005bc1",
                         "surface-container": "#eeeef0",
-                        "on-error-container": "#93000a",
-                        "surface-dim": "#d9dadc",
-                        "secondary-fixed-dim": "#c7c6cb",
-                        "primary-container": "#0070eb",
-                        "secondary-fixed": "#e3e2e7",
-                        "on-secondary": "#ffffff",
-                        "on-primary-fixed": "#001a41",
-                        "on-primary": "#ffffff",
                         "surface-container-lowest": "#ffffff",
-                        "error": "#ba1a1a",
-                        "on-tertiary": "#ffffff",
-                        "on-primary-container": "#fefcff",
-                        "on-surface": "#1a1c1d",
-                        "on-tertiary-fixed-variant": "#00531c",
-                        "surface-container-highest": "#e2e2e4",
-                        "secondary": "#5e5e63",
-                        "surface-bright": "#f9f9fb",
-                        "surface-variant": "#e2e2e4",
-                        "on-secondary-fixed": "#1a1b1f",
-                        "tertiary-fixed": "#72fe88",
-                        "error-container": "#ffdad6",
-                        "outline-variant": "#c1c6d7",
-                        "inverse-on-surface": "#f0f0f2",
                         "surface-container-high": "#e8e8ea",
-                        "tertiary-container": "#008733",
-                        "inverse-surface": "#2f3132",
-                        "on-secondary-container": "#626267",
-                        "surface-container-low": "#f3f3f5",
-                        "on-primary-fixed-variant": "#004493",
-                        "on-error": "#ffffff",
-                        "on-surface-variant": "#414755",
-                        "tertiary-fixed-dim": "#53e16f",
-                        "surface": "#f9f9fb",
-                        "inverse-primary": "#adc6ff",
-                        "background": "#f9f9fb",
-                        "secondary-container": "#e0dfe4",
-                        "on-secondary-fixed-variant": "#46464b",
-                        "on-tertiary-fixed": "#002107",
-                        "primary-fixed": "#d8e2ff",
+                        "error": "#ba1a1a",
                         "tertiary": "#006b27",
-                        "on-tertiary-container": "#f7fff2",
-                        "primary-fixed-dim": "#adc6ff",
-                        "on-background": "#1a1c1d"
                     },
                     fontFamily: {
                         "headline": ["Be Vietnam Pro"],
-                        "body": ["Inter"],
-                        "label": ["Inter"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
+                        "body": ["Inter"]
+                    }
+                }
+            }
         }
     </script>
-<style>
-        .material-symbols-outlined {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-        }
-        .tonal-transition { transition: background-color 0.3s ease; }
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
+        body { min-height: max(884px, 100dvh); }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
-  </head>
+</head>
 <body class="bg-surface font-body text-on-surface antialiased">
-<header class="fixed top-0 w-full z-50 bg-white/70 dark:bg-zinc-900/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.04)]">
-<div class="flex justify-between items-center px-6 py-4 w-full">
-<div class="flex items-center gap-4">
-<img alt="Ảnh đại diện người dùng" class="w-10 h-10 rounded-full object-cover" data-alt="close-up portrait of a professional woman with a friendly smile in a bright modern office environment" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA77q7oVEOTp5PdWMxTDUSC3GDYElqQBVHdGstMDRC4T8vDOfZSiePvfhBwOwZJpfZfkjOD2mHoXUmNhyMdQjfAITO9BfR46pKBR-QuXUjGbsIDOMaX-Xx_seEPcmkKscyggWZrTT1QnPDI6p_II1i47nZbyoJBFYOWJ2ZWFFhvFCPaGUpTkDwGS0xTFKhxj5DpQyl_UCQfPpRb27GrsoKVcxS2QWBVg0gpqJUrZtJxU3U4IPJynGt6jfUXUwMHkvMDfLvcOGSG_gMA"/>
-<h1 class="font-['Be_Vietnam_Pro'] font-bold text-2xl tracking-tight text-zinc-900 dark:text-zinc-50">Chat</h1>
-</div>
-<button class="text-blue-600 dark:text-blue-400 font-['Be_Vietnam_Pro'] font-bold text-sm hover:opacity-80 transition-opacity active:scale-95 duration-200">
-                + Thêm mới
-            </button>
-</div>
-</header>
-<main class="pt-20 pb-32 min-h-screen flex flex-col md:flex-row max-w-7xl mx-auto px-4 md:px-6 gap-6">
-<aside class="w-full md:w-[380px] flex flex-col gap-4">
-<div class="bg-surface-container-low rounded-[32px] p-2 flex items-center gap-3 px-4 h-14">
-<span class="material-symbols-outlined text-outline">search</span>
-<input id="txtSearchUser" class="bg-transparent border-none focus:ring-0 w-full text-sm font-medium placeholder:text-outline-variant" placeholder="Tìm kiếm hội thoại..." type="text"/>
-</div>
-<div id="userList" class="space-y-1 overflow-y-auto no-scrollbar">
-    <p class="text-center text-sm text-outline mt-8">Đang tải cuộc trò chuyện...</p>
-</div>
-</aside>
-<section class="flex-1 flex flex-col bg-surface-container-lowest rounded-[40px] shadow-[0_20px_40px_rgba(0,0,0,0.04)] overflow-hidden border border-surface-container h-[calc(100vh-180px)] md:h-auto">
-<div class="px-6 py-4 flex justify-between items-center border-b border-surface-container">
-<div class="flex items-center gap-3">
-<img id="chatHeaderAvatar" alt="Active Chat" class="w-10 h-10 rounded-full object-cover" src="~/images/avatar_default.jpg"/>
-<div>
-<h3 id="chatHeaderName" class="font-bold text-on-surface leading-tight">Chọn một cuộc hội thoại</h3>
-<span class="text-[11px] text-tertiary flex items-center gap-1 font-medium">
-<span class="w-1.5 h-1.5 bg-tertiary rounded-full animate-pulse"></span> Sẵn sàng
+    <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] px-6 py-4 flex justify-between items-center">
+        <div class="flex items-center gap-4">
+            <h1 class="font-['Be_Vietnam_Pro'] font-bold text-2xl tracking-tight text-zinc-900">Chat</h1>
+        </div>
+    </header>
+
+    <main class="pt-20 pb-32 min-h-screen flex flex-col md:flex-row max-w-7xl mx-auto px-4 md:px-6 gap-6">
+        <aside class="w-full md:w-[380px] flex flex-col gap-4">
+            <div class="bg-surface-container-low rounded-[32px] p-2 flex items-center gap-3 px-4 h-14 border bg-gray-100">
+                <span class="material-symbols-outlined text-outline">search</span>
+                <input id="txtSearchUser" class="bg-transparent border-none focus:ring-0 w-full text-sm font-medium" placeholder="Tìm kiếm hội thoại..." type="text"/>
+            </div>
+            <div id="userList" class="space-y-1 overflow-y-auto no-scrollbar">
+                <p class="text-center text-sm text-outline mt-8">Đang tải cuộc trò chuyện...</p>
+            </div>
+        </aside>
+
+        <section class="flex-1 flex flex-col bg-white rounded-[40px] shadow-sm overflow-hidden border border-gray-200 h-[calc(100vh-180px)] md:h-auto">
+            <div class="px-6 py-4 flex justify-between items-center border-b border-gray-100">
+                <div class="flex items-center gap-3">
+                    <img id="chatHeaderAvatar" class="w-10 h-10 rounded-full object-cover" src="/images/avatar_default.jpg"/>
+                    <div>
+                        <h3 id="chatHeaderName" class="font-bold leading-tight">Chọn một cuộc hội thoại</h3>
+                        <span class="text-[11px] text-tertiary flex items-center gap-1 font-medium">
+                            <span class="w-1.5 h-1.5 bg-tertiary rounded-full animate-pulse"></span> Sẵn sàng
                         </span>
-</div>
-</div>
-<div class="flex items-center gap-2">
-<button class="p-2.5 rounded-full hover:bg-surface-container transition-colors">
-<span class="material-symbols-outlined text-on-surface-variant">videocam</span>
-</button>
-<button class="p-2.5 rounded-full hover:bg-surface-container transition-colors">
-<span class="material-symbols-outlined text-on-surface-variant">call</span>
-</button>
-<button class="p-2.5 rounded-full hover:bg-surface-container transition-colors">
-<span class="material-symbols-outlined text-on-surface-variant">info</span>
-</button>
-</div>
-</div>
-<div id="chatCanvas" class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-zinc-50/50">
-    <div class="flex h-full items-center justify-center text-outline text-sm">
-        Hãy tìm kiếm và chọn một nhân viên để bắt đầu trò chuyện.
-    </div>
-</div>
-<div class="p-6 bg-white border-t border-surface-container">
-<div class="flex items-center gap-3 bg-surface-container-low rounded-3xl p-2 pl-4">
-<button class="text-outline hover:text-primary transition-colors">
-<span class="material-symbols-outlined">add_circle</span>
-</button>
-<input id="txtMessage" class="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium" placeholder="Nhập tin nhắn..." type="text"/>
-<div class="flex items-center gap-1">
-<button class="p-2 text-outline hover:text-primary transition-colors">
-<span class="material-symbols-outlined">mood</span>
-</button>
-<button id="btnSend" class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
-</button>
-</div>
-</div>
-</div>
-</section>
-</main>
-<nav class="fixed bottom-0 w-full z-50 rounded-t-[32px] bg-white/80 dark:bg-zinc-950/80 backdrop-blur-2xl shadow-2xl">
-<div class="flex justify-around items-center px-4 py-3 pb-8 w-full">
-<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 p-2 hover:text-blue-500 transition-transform active:scale-90" href="/Home/Index">
-<span class="material-symbols-outlined">dashboard</span>
-<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Tổng quan</span>
-</a>
-<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 p-2 hover:text-blue-500 transition-transform active:scale-90" href="/Home/NhanVien">
-<span class="material-symbols-outlined">group</span>
-<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Nhân viên</span>
-</a>
-<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 p-2 hover:text-blue-500 transition-transform active:scale-90" href="/Home/ChamCong">
-<span class="material-symbols-outlined">fact_check</span>
-<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chấm công</span>
-</a>
-<a class="flex flex-col items-center justify-center text-blue-600 dark:text-blue-400 bg-blue-50/50 dark:bg-blue-900/20 rounded-2xl p-2 active:scale-90" href="/Home/Chat">
-<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">forum</span>
-<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chat</span>
-</a>
-<a class="flex flex-col items-center justify-center text-zinc-400 dark:text-zinc-500 p-2 hover:text-blue-500 transition-transform active:scale-90" href="/Home/CaiDat">
-<span class="material-symbols-outlined">settings</span>
-<span class="font-['Inter'] text-[11px] font-medium tracking-wide">Cài đặt</span>
-</a>
-</div>
-</nav>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
-
-<script>
-    // ==============================================================
-    // LẤY ID NGƯỜI DÙNG ĐANG ĐĂNG NHẬP TỪ HỆ THỐNG
-    // ==============================================================
-    const userIdString = '@User.FindFirst(ClaimTypes.NameIdentifier)?.Value';
-    const myId = parseInt(userIdString);
-
-    if (isNaN(myId)) {
-        alert("Phiên đăng nhập đã hết hạn hoặc bạn chưa đăng nhập!");
-        window.location.href = "/Account/Login";
-    }
-
-    let friendId = null; 
-
-    // Các phần tử DOM cần thiết
-    const chatCanvas = document.getElementById('chatCanvas');
-    const txtMessage = document.getElementById('txtMessage');
-    const btnSend = document.getElementById('btnSend');
-    const userList = document.getElementById('userList');
-    const txtSearchUser = document.getElementById('txtSearchUser');
-    const chatHeaderName = document.getElementById('chatHeaderName');
-    const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
-
-    // ==============================================================
-    // 1. TẢI DANH SÁCH CUỘC TRÒ CHUYỆN GẦN ĐÂY (CÓ CHẤM ĐỎ)
-    // ==============================================================
-    async function loadRecentConversations() {
-        if(isNaN(myId)) return;
-        try {
-            const response = await fetch(`/api/chat/conversations/${myId}`);
-            if (response.ok) {
-                const conversations = await response.json();
-                renderConversations(conversations);
-            }
-        } catch (err) {
-            console.error("Lỗi tải danh sách chat: ", err);
-        }
-    }
-
-    function renderConversations(conversations) {
-        userList.innerHTML = '';
-        if (conversations.length === 0) {
-            userList.innerHTML = '<p class="text-center text-sm text-outline mt-8">Chưa có cuộc trò chuyện nào.</p>';
-            return;
-        }
-
-        conversations.forEach(c => {
-            const avatar = c.friendAvatar || "/images/avatar_default.jpg";
-            
-            const redDotHtml = c.hasUnread 
-                ? `<div class="absolute -top-1 -right-1 w-4 h-4 bg-error border-2 border-white rounded-full animate-pulse"></div>` 
-                : '';
-            
-            const textClass = c.hasUnread ? 'text-on-surface font-bold' : 'text-outline font-medium';
-
-            const html = `
-            <div onclick="selectChat(${c.friendId}, '${c.friendName}', '${avatar}')" class="flex items-center gap-4 p-4 rounded-3xl hover:bg-surface-container-low transition-colors cursor-pointer border border-transparent hover:border-primary/10">
-                <div class="relative">
-                    <img alt="${c.friendName}" class="w-14 h-14 rounded-2xl object-cover" src="${avatar}"/>
-                    ${redDotHtml}
-                </div>
-                <div class="flex-1 min-w-0">
-                    <div class="flex justify-between items-center mb-0.5">
-                        <span class="font-bold text-on-surface truncate block">${c.friendName}</span>
-                        <span class="text-[10px] text-outline font-medium">${c.lastMessageTime || ''}</span>
                     </div>
-                    <p class="text-sm ${textClass} truncate">${c.lastMessageContent || 'Nhấn để bắt đầu chat'}</p>
                 </div>
-            </div>`;
-            userList.insertAdjacentHTML('beforeend', html);
-        });
-    }
+            </div>
 
-    // ==============================================================
-    // 2. CHUYỂN PHÒNG CHAT & ĐÁNH DẤU ĐÃ ĐỌC
-    // ==============================================================
-    window.selectChat = async function(id, name, avatar) {
-        friendId = id; 
+            <div id="chatCanvas" class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-gray-50/50">
+                <div class="flex h-full items-center justify-center text-outline text-sm">Hãy chọn nhân viên để trò chuyện.</div>
+            </div>
+
+            <div class="p-6 bg-white border-t border-gray-100 relative">
+                <div id="uploadOverlay" class="hidden absolute inset-0 bg-white/80 z-10 flex items-center justify-center rounded-b-[40px]">
+                    <span class="text-primary font-medium flex items-center gap-2">
+                        <span class="material-symbols-outlined animate-spin">sync</span> Đang tải file lên...
+                    </span>
+                </div>
+
+                <div class="flex items-center gap-3 bg-gray-100 rounded-3xl p-2 pl-4">
+                    <button id="btnAttach" class="text-outline hover:text-primary transition-colors cursor-pointer" title="Đính kèm tài liệu (< 50MB)">
+                        <span class="material-symbols-outlined">attach_file</span>
+                    </button>
+                    <input type="file" id="fileAttach" class="hidden" />
+
+                    <input id="txtMessage" class="flex-1 bg-transparent border-none focus:ring-0 text-sm font-medium" placeholder="Nhập tin nhắn..." type="text"/>
+                    
+                    <button id="btnSend" class="w-10 h-10 bg-primary text-white rounded-full flex items-center justify-center shadow-lg active:scale-90 transition-transform">
+                        <span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">send</span>
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/microsoft-signalr/8.0.0/signalr.min.js"></script>
+
+    <script>
+        const userIdString = '@User.FindFirst(ClaimTypes.NameIdentifier)?.Value';
+        const myId = parseInt(userIdString);
+        if (isNaN(myId)) { window.location.href = "/Account/Login"; }
+
+        let friendId = null; 
+        const chatCanvas = document.getElementById('chatCanvas');
+        const txtMessage = document.getElementById('txtMessage');
+        const btnSend = document.getElementById('btnSend');
+        const userList = document.getElementById('userList');
+        const txtSearchUser = document.getElementById('txtSearchUser');
+        const chatHeaderName = document.getElementById('chatHeaderName');
+        const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
         
-        chatHeaderName.textContent = name;
-        chatHeaderAvatar.src = avatar;
-        txtMessage.value = '';
+        // CÁC PHẦN TỬ LIÊN QUAN ĐẾN UPLOAD FILE
+        const btnAttach = document.getElementById('btnAttach');
+        const fileAttach = document.getElementById('fileAttach');
+        const uploadOverlay = document.getElementById('uploadOverlay');
 
-        try {
-            await fetch(`/api/chat/mark-read/${myId}/${friendId}`, { method: 'POST' });
-        } catch (e) { console.error(e); }
-
-        await loadHistory();
-        loadRecentConversations();
-    };
-
-    // ==============================================================
-    // 3. TẢI LỊCH SỬ TIN NHẮN
-    // ==============================================================
-    function appendMessage(senderId, content, time, avatarUrl) {
-        const isMe = senderId === myId;
-        const defaultAvatar = "/images/avatar_default.jpg"; 
-
-        let html = '';
-        if (isMe) {
-            html = `
-            <div class="flex flex-col items-end gap-1 self-end max-w-[80%] w-full">
-                <div class="bg-primary text-white p-4 rounded-2xl rounded-br-none shadow-md bg-gradient-to-br from-primary to-primary-container">
-                    <p class="text-sm leading-relaxed">${content}</p>
-                    <span class="text-[9px] text-primary-fixed block mt-2 text-right">${time}</span>
-                </div>
-            </div>`;
-        } else {
-            html = `
-            <div class="flex items-end gap-3 max-w-[80%] w-full">
-                <img alt="Avatar" class="w-8 h-8 rounded-full object-cover" src="${avatarUrl || defaultAvatar}"/>
-                <div class="bg-surface-container-high text-on-surface p-4 rounded-2xl rounded-bl-none shadow-sm">
-                    <p class="text-sm leading-relaxed">${content}</p>
-                    <span class="text-[9px] text-outline block mt-2 text-right">${time}</span>
-                </div>
-            </div>`;
-        }
-
-        chatCanvas.insertAdjacentHTML('beforeend', html);
-        chatCanvas.scrollTop = chatCanvas.scrollHeight;
-    }
-
-    async function loadHistory() {
-        if (!friendId) return; 
-
-        try {
-            const response = await fetch(`/api/chat/history/${myId}/${friendId}`);
-            if (response.ok) {
-                const messages = await response.json();
-                chatCanvas.innerHTML = `
-                    <div class="text-center w-full">
-                        <span class="px-3 py-1 bg-surface-container-high rounded-full text-[10px] font-bold text-outline tracking-wider">LỊCH SỬ TRÒ CHUYỆN</span>
-                    </div>`;
-
-                messages.forEach(msg => {
-                    appendMessage(msg.nguoiGuiId, msg.noiDung, msg.thoiGian, msg.anhDaiDien);
-                });
-            }
-        } catch (err) {
-            console.error("Lỗi tải lịch sử: ", err);
-        }
-    }
-
-    // ==============================================================
-    // 4. KẾT NỐI SIGNALR 
-    // ==============================================================
-    const connection = new signalR.HubConnectionBuilder()
-        .withUrl("/chathub")
-        .withAutomaticReconnect()
-        .build();
-
-    connection.on("ReceiveMessage", async (senderId, receiverId, content, time) => {
-        if ((senderId === myId && receiverId === friendId) || 
-            (senderId === friendId && receiverId === myId)) {
-            appendMessage(senderId, content, time, null); 
-            
-            if (senderId === friendId) {
-                await fetch(`/api/chat/mark-read/${myId}/${friendId}`, { method: 'POST' });
-            }
-        }
-        loadRecentConversations();
-    });
-
-    connection.start()
-        .then(() => console.log("Đã kết nối SignalR thành công!"))
-        .catch(err => console.error("Lỗi kết nối SignalR: ", err));
-
-    // ==============================================================
-    // 5. BẮT SỰ KIỆN GỬI TIN NHẮN
-    // ==============================================================
-    btnSend.addEventListener('click', async () => {
-        if (!friendId) return alert("Vui lòng tìm và chọn một nhân viên để chat trước!");
-        if (connection.state !== signalR.HubConnectionState.Connected) return alert("Đang kết nối đến máy chủ Chat, vui lòng đợi...");
-
-        const msg = txtMessage.value.trim();
-        if (msg) {
+        async function loadRecentConversations() {
+            if(isNaN(myId)) return;
             try {
-                await connection.invoke("SendMessage", myId, friendId, msg);
-                txtMessage.value = ''; 
-                txtMessage.focus();
-            } catch (err) { console.error("Lỗi gửi tin nhắn: ", err); }
+                const response = await fetch(`/api/chat/conversations/${myId}`);
+                if (response.ok) {
+                    const conversations = await response.json();
+                    renderConversations(conversations);
+                }
+            } catch (err) { console.error(err); }
         }
-    });
 
-    txtMessage.addEventListener('keydown', (e) => {
-        if (e.key === 'Enter') {
-            e.preventDefault(); 
-            btnSend.click();    
+        function renderConversations(conversations) {
+            userList.innerHTML = '';
+            if (conversations.length === 0) {
+                userList.innerHTML = '<p class="text-center text-sm text-outline mt-8">Chưa có trò chuyện.</p>';
+                return;
+            }
+            conversations.forEach(c => {
+                const avatar = c.friendAvatar || "/images/avatar_default.jpg";
+                const redDotHtml = c.hasUnread ? `<div class="absolute -top-1 -right-1 w-4 h-4 bg-error border-2 border-white rounded-full animate-pulse"></div>` : '';
+                const textClass = c.hasUnread ? 'text-on-surface font-bold' : 'text-outline font-medium';
+
+                const html = `
+                <div onclick="selectChat(${c.friendId}, '${c.friendName}', '${avatar}')" class="flex items-center gap-4 p-4 rounded-3xl hover:bg-gray-100 transition-colors cursor-pointer">
+                    <div class="relative">
+                        <img alt="${c.friendName}" class="w-14 h-14 rounded-2xl object-cover" src="${avatar}"/>
+                        ${redDotHtml}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex justify-between items-center mb-0.5">
+                            <span class="font-bold truncate block">${c.friendName}</span>
+                            <span class="text-[10px] text-outline">${c.lastMessageTime || ''}</span>
+                        </div>
+                        <p class="text-sm ${textClass} truncate">${c.lastMessageContent || 'Nhấn để bắt đầu chat'}</p>
+                    </div>
+                </div>`;
+                userList.insertAdjacentHTML('beforeend', html);
+            });
         }
-    });
 
-    // ==============================================================
-    // 6. TÌM KIẾM NGƯỜI CHAT
-    // ==============================================================
-    let searchTimeout = null;
+        window.selectChat = async function(id, name, avatar) {
+            friendId = id; 
+            chatHeaderName.textContent = name;
+            chatHeaderAvatar.src = avatar;
+            txtMessage.value = '';
+            try { await fetch(`/api/chat/mark-read/${myId}/${friendId}`, { method: 'POST' }); } catch (e) {}
+            await loadHistory();
+            loadRecentConversations();
+        };
 
-    txtSearchUser.addEventListener('input', (e) => {
-        const query = e.target.value.trim();
-        clearTimeout(searchTimeout);
+        // HÀM HIỂN THỊ TIN NHẮN (HỖ TRỢ HIỂN THỊ FILE)
+        function appendMessage(senderId, content, time, avatarUrl) {
+            const isMe = senderId === myId;
+            const defaultAvatar = "/images/avatar_default.jpg"; 
+            
+            // Xử lý nếu nội dung là File đính kèm
+            let displayHtml = `<p class="text-sm leading-relaxed">${content}</p>`;
+            if (content.startsWith("[FILE]")) {
+                const parts = content.substring(6).split('|'); // Tách tên file và URL
+                const fileName = parts[0];
+                const fileUrl = parts[1];
+                
+                // Vẽ khung tải file đẹp mắt
+                displayHtml = `
+                <a href="${fileUrl}" target="_blank" download class="flex items-center gap-3 p-3 rounded-xl border transition-colors hover:opacity-80 decoration-transparent ${isMe ? 'bg-white/20 border-white/30 text-white' : 'bg-white border-gray-200 text-primary'}">
+                    <div class="${isMe ? 'bg-white/20' : 'bg-primary/10'} p-2 rounded-lg flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[24px]">description</span>
+                    </div>
+                    <div class="flex-1 overflow-hidden">
+                        <p class="text-sm font-bold truncate max-w-[150px] leading-tight">${fileName}</p>
+                        <p class="text-[10px] mt-0.5 opacity-80">Nhấn để tải xuống</p>
+                    </div>
+                    <span class="material-symbols-outlined text-[20px] ml-2">download</span>
+                </a>`;
+            }
 
-        searchTimeout = setTimeout(async () => {
-            if (query.length === 0) {
-                loadRecentConversations();
+            let html = '';
+            if (isMe) {
+                html = `
+                <div class="flex flex-col items-end gap-1 self-end max-w-[80%] w-full">
+                    <div class="bg-primary text-white p-4 rounded-2xl rounded-br-none shadow-md">
+                        ${displayHtml}
+                        <span class="text-[9px] text-white/70 block mt-2 text-right">${time}</span>
+                    </div>
+                </div>`;
+            } else {
+                html = `
+                <div class="flex items-end gap-3 max-w-[80%] w-full">
+                    <img class="w-8 h-8 rounded-full object-cover" src="${avatarUrl || defaultAvatar}"/>
+                    <div class="bg-white border border-gray-200 p-4 rounded-2xl rounded-bl-none shadow-sm">
+                        ${displayHtml}
+                        <span class="text-[9px] text-outline block mt-2 text-right">${time}</span>
+                    </div>
+                </div>`;
+            }
+            chatCanvas.insertAdjacentHTML('beforeend', html);
+            chatCanvas.scrollTop = chatCanvas.scrollHeight;
+        }
+
+        async function loadHistory() {
+            if (!friendId) return; 
+            try {
+                const response = await fetch(`/api/chat/history/${myId}/${friendId}`);
+                if (response.ok) {
+                    const messages = await response.json();
+                    chatCanvas.innerHTML = `<div class="text-center w-full"><span class="px-3 py-1 bg-gray-200 rounded-full text-[10px] font-bold text-outline">LỊCH SỬ TRÒ CHUYỆN</span></div>`;
+                    messages.forEach(msg => appendMessage(msg.nguoiGuiId, msg.noiDung, msg.thoiGian, msg.anhDaiDien));
+                }
+            } catch (err) { console.error(err); }
+        }
+
+        const connection = new signalR.HubConnectionBuilder().withUrl("/chathub").withAutomaticReconnect().build();
+
+        connection.on("ReceiveMessage", async (senderId, receiverId, content, time) => {
+            if ((senderId === myId && receiverId === friendId) || (senderId === friendId && receiverId === myId)) {
+                appendMessage(senderId, content, time, null); 
+                if (senderId === friendId) await fetch(`/api/chat/mark-read/${myId}/${friendId}`, { method: 'POST' });
+            }
+            loadRecentConversations();
+        });
+        connection.start().catch(err => console.error(err));
+
+        // BẮT SỰ KIỆN GỬI TIN NHẮN CHỮ
+        btnSend.addEventListener('click', async () => {
+            if (!friendId) return alert("Vui lòng chọn nhân viên để chat!");
+            if (connection.state !== signalR.HubConnectionState.Connected) return alert("Đang kết nối máy chủ...");
+            const msg = txtMessage.value.trim();
+            if (msg) {
+                try {
+                    await connection.invoke("SendMessage", myId, friendId, msg);
+                    txtMessage.value = ''; 
+                    txtMessage.focus();
+                } catch (err) { console.error(err); }
+            }
+        });
+
+        txtMessage.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') { e.preventDefault(); btnSend.click(); }
+        });
+
+        // ==========================================
+        // XỬ LÝ UPLOAD FILE KHI BẤM NÚT ĐÍNH KÈM
+        // ==========================================
+        btnAttach.addEventListener('click', () => {
+            if (!friendId) return alert("Vui lòng chọn người nhận trước khi gửi file!");
+            fileAttach.click(); // Mở hộp thoại chọn file
+        });
+
+        fileAttach.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            // Kiểm tra dung lượng trên Client (50MB = 50 * 1024 * 1024 bytes)
+            if (file.size > 52428800) {
+                alert("Dung lượng file quá lớn! Vui lòng chọn file dưới 50MB.");
+                fileAttach.value = '';
                 return;
             }
 
-            try {
-                const response = await fetch(`/api/chat/search?q=${encodeURIComponent(query)}&currentUserId=${myId}`);
-                if (response.ok) {
-                    const users = await response.json();
-                    const mappedUsers = users.map(u => ({
-                        friendId: u.maNhanVien,
-                        friendName: u.hoTen,
-                        friendAvatar: u.anhDaiDien,
-                        lastMessageContent: 'Nhấn để bắt đầu chat',
-                        hasUnread: false 
-                    }));
-                    renderConversations(mappedUsers);
-                }
-            } catch (err) { console.error("Lỗi tìm kiếm: ", err); }
-        }, 500); 
-    });
+            // Hiển thị hiệu ứng tải
+            uploadOverlay.classList.remove('hidden');
 
-    // Bắt đầu
-    loadRecentConversations();
-</script>
+            const formData = new FormData();
+            formData.append("file", file);
+            formData.append("senderId", myId);
+
+            try {
+                const response = await fetch('/api/chat/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Tạo chuỗi định dạng đặc biệt để hệ thống biết đây là file
+                    // VD: [FILE]Bao_cao.pdf|https://supabase.co/.../Bao_cao.pdf
+                    const fileMessage = `[FILE]${data.fileName}|${data.url}`;
+                    
+                    // Gửi tin nhắn qua SignalR
+                    await connection.invoke("SendMessage", myId, friendId, fileMessage);
+                } else {
+                    const errorText = await response.text();
+                    alert("Lỗi upload: " + errorText);
+                }
+            } catch (error) {
+                console.error("Lỗi gửi file:", error);
+                alert("Có lỗi xảy ra khi gửi file!");
+            } finally {
+                // Ẩn hiệu ứng tải và reset input
+                uploadOverlay.classList.add('hidden');
+                fileAttach.value = '';
+            }
+        });
+
+        // TÌM KIẾM
+        let searchTimeout = null;
+        txtSearchUser.addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(async () => {
+                if (query.length === 0) { loadRecentConversations(); return; }
+                try {
+                    const response = await fetch(`/api/chat/search?q=${encodeURIComponent(query)}&currentUserId=${myId}`);
+                    if (response.ok) {
+                        const users = await response.json();
+                        const mappedUsers = users.map(u => ({ friendId: u.maNhanVien, friendName: u.hoTen, friendAvatar: u.anhDaiDien, lastMessageContent: 'Nhấn để bắt đầu chat', hasUnread: false }));
+                        renderConversations(mappedUsers);
+                    }
+                } catch (err) { console.error(err); }
+            }, 500); 
+        });
+
+        loadRecentConversations();
+    </script>
 </body>
 </html>
