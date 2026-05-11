@@ -19,8 +19,13 @@ namespace Web_quan_ly_nhan_su.Context
         public DbSet<Luong> Luong { get; set; }
         public DbSet<LuuTruFile> LuuTruFile { get; set; }
 
-        // Thêm DbSet cho bảng TinNhan
+        // CÁC BẢNG DÀNH CHO CHAT
         public DbSet<TinNhan> TinNhan { get; set; }
+        public DbSet<NhomChat> NhomChat { get; set; }
+        public DbSet<ThanhVienNhom> ThanhVienNhom { get; set; }
+        public DbSet<TinNhanNhom> TinNhanNhom { get; set; }
+
+        // ĐÃ XÓA: DbSet<CreateGroupRequest> vì đây không phải là bảng Database
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,10 +41,13 @@ namespace Web_quan_ly_nhan_su.Context
             modelBuilder.Entity<LuuTruFile>().ToTable("LuuTruFile");
             modelBuilder.Entity<NhanVienVaiTro>().ToTable("NhanVienVaiTro");
 
-            // Cấu hình bảng TinNhan
+            // Cấu hình các bảng Chat
             modelBuilder.Entity<TinNhan>().ToTable("TinNhan");
+            modelBuilder.Entity<NhomChat>().ToTable("NhomChat");
+            modelBuilder.Entity<ThanhVienNhom>().ToTable("ThanhVienNhom");
+            modelBuilder.Entity<TinNhanNhom>().ToTable("TinNhanNhom");
 
-            // Cấu hình Quan hệ Many-to-Many trung gian
+            // Cấu hình Quan hệ Many-to-Many trung gian (Nhân Viên - Vai Trò)
             modelBuilder.Entity<NhanVienVaiTro>()
                 .HasKey(x => new { x.MaNhanVien, x.MaVaiTro });
 
@@ -52,6 +60,25 @@ namespace Web_quan_ly_nhan_su.Context
                 .HasOne(x => x.VaiTro)
                 .WithMany(x => x.NhanVienVaiTro)
                 .HasForeignKey(x => x.MaVaiTro);
+
+            // --- NGĂN CHẶN LỖI MULTIPLE CASCADE PATHS CỦA POSTGRESQL ---
+            modelBuilder.Entity<TinNhan>()
+                .HasOne(t => t.NguoiGui)
+                .WithMany(n => n.TinNhanDaGui)
+                .HasForeignKey(t => t.NguoiGuiId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TinNhan>()
+                .HasOne(t => t.NguoiNhan)
+                .WithMany(n => n.TinNhanDaNhan)
+                .HasForeignKey(t => t.NguoiNhanId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            modelBuilder.Entity<TinNhanNhom>()
+                .HasOne(t => t.NguoiGui)
+                .WithMany()
+                .HasForeignKey(t => t.NguoiGuiId)
+                .OnDelete(DeleteBehavior.Restrict);
         }
     }
 }

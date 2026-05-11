@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Web_quan_ly_nhan_su.Context;
@@ -11,9 +12,11 @@ using Web_quan_ly_nhan_su.Context;
 namespace Web_quan_ly_nhan_su.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260511082039_AddChatRelations")]
+    partial class AddChatRelations
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -252,7 +255,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
                     b.HasIndex("NguoiTaoId");
 
-                    b.ToTable("NhomChat", (string)null);
+                    b.ToTable("NhomChat");
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.PhongBan", b =>
@@ -293,7 +296,7 @@ namespace Web_quan_ly_nhan_su.Migrations
 
                     b.HasIndex("MaNhom");
 
-                    b.ToTable("ThanhVienNhom", (string)null);
+                    b.ToTable("ThanhVienNhom");
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.TinNhan", b =>
@@ -332,36 +335,6 @@ namespace Web_quan_ly_nhan_su.Migrations
                     b.HasIndex("NguoiNhanId");
 
                     b.ToTable("TinNhan", (string)null);
-                });
-
-            modelBuilder.Entity("Web_quan_ly_nhan_su.Models.TinNhanNhom", b =>
-                {
-                    b.Property<int>("MaTinNhan")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MaTinNhan"));
-
-                    b.Property<int>("MaNhom")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("NguoiGuiId")
-                        .HasColumnType("integer");
-
-                    b.Property<string>("NoiDung")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<DateTime>("ThoiGianGui")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.HasKey("MaTinNhan");
-
-                    b.HasIndex("MaNhom");
-
-                    b.HasIndex("NguoiGuiId");
-
-                    b.ToTable("TinNhanNhom", (string)null);
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.VaiTro", b =>
@@ -488,42 +461,22 @@ namespace Web_quan_ly_nhan_su.Migrations
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.TinNhan", b =>
                 {
                     b.HasOne("Web_quan_ly_nhan_su.Models.NhomChat", "NhomChat")
-                        .WithMany()
+                        .WithMany("DanhSachTinNhan")
                         .HasForeignKey("MaNhom");
 
                     b.HasOne("Web_quan_ly_nhan_su.Models.NhanVien", "NguoiGui")
                         .WithMany("TinNhanDaGui")
                         .HasForeignKey("NguoiGuiId")
-                        .OnDelete(DeleteBehavior.Restrict)
+                        .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("Web_quan_ly_nhan_su.Models.NhanVien", "NguoiNhan")
                         .WithMany("TinNhanDaNhan")
-                        .HasForeignKey("NguoiNhanId")
-                        .OnDelete(DeleteBehavior.Restrict);
+                        .HasForeignKey("NguoiNhanId");
 
                     b.Navigation("NguoiGui");
 
                     b.Navigation("NguoiNhan");
-
-                    b.Navigation("NhomChat");
-                });
-
-            modelBuilder.Entity("Web_quan_ly_nhan_su.Models.TinNhanNhom", b =>
-                {
-                    b.HasOne("Web_quan_ly_nhan_su.Models.NhomChat", "NhomChat")
-                        .WithMany("DanhSachTinNhanNhom")
-                        .HasForeignKey("MaNhom")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Web_quan_ly_nhan_su.Models.NhanVien", "NguoiGui")
-                        .WithMany()
-                        .HasForeignKey("NguoiGuiId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.Navigation("NguoiGui");
 
                     b.Navigation("NhomChat");
                 });
@@ -543,7 +496,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                 {
                     b.Navigation("DanhSachThanhVien");
 
-                    b.Navigation("DanhSachTinNhanNhom");
+                    b.Navigation("DanhSachTinNhan");
                 });
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.PhongBan", b =>

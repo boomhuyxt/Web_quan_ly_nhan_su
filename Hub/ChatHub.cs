@@ -16,16 +16,15 @@ namespace Web_quan_ly_nhan_su.Hubs
             _context = context;
         }
 
-        // Hàm này sẽ được Javascript (Client) gọi mỗi khi bấm nút Gửi
+        // 1. GỬI TIN NHẮN CÁ NHÂN (1-1)
         public async Task SendMessage(int senderId, int receiverId, string message)
         {
-            // 1. Lưu tin nhắn vào Database (PostgreSQL)
+            // Lưu tin nhắn cá nhân vào bảng TinNhan
             var tinNhan = new TinNhan
             {
                 NguoiGuiId = senderId,
                 NguoiNhanId = receiverId,
                 NoiDung = message,
-                // Dùng UtcNow để không bị lỗi múi giờ với PostgreSQL
                 ThoiGianGui = DateTime.UtcNow,
                 DaDoc = false
             };
@@ -33,12 +32,36 @@ namespace Web_quan_ly_nhan_su.Hubs
             _context.TinNhan.Add(tinNhan);
             await _context.SaveChangesAsync();
 
-            // 2. Chuyển đổi giờ thành định dạng hh:mm tt để hiện lên web
+            // Chuyển đổi giờ hiển thị (GMT+7)
             string timeString = tinNhan.ThoiGianGui.AddHours(7).ToString("hh:mm tt");
 
-            // 3. Phát sóng (Broadcast) tin nhắn này tới TẤT CẢ các thiết bị đang mở web
-            // (Javascript ở Client sẽ bắt sự kiện "ReceiveMessage" và vẽ tin nhắn ra màn hình)
+            // Phát sóng tới Client qua hàm "ReceiveMessage"
             await Clients.All.SendAsync("ReceiveMessage", senderId, receiverId, message, timeString);
+        }
+
+        // 2. GỬI TIN NHẮN NHÓM (Group Chat)
+        public async Task SendGroupMessage(int senderId, int groupId, string message)
+        {
+            // ĐÃ SỬA: Sử dụng model TinNhanNhom mới bạn vừa tạo
+            var tinNhan = new TinNhanNhom
+            {
+                NguoiGuiId = senderId,
+                MaNhom = groupId,
+                NoiDung = message,
+                ThoiGianGui = DateTime.UtcNow
+            };
+
+            // Lưu vào bảng TinNhanNhom
+            _context.TinNhanNhom.Add(tinNhan);
+            await _context.SaveChangesAsync();
+
+            // Lấy thông tin người gửi để hiển thị tên và ảnh trong khung chat nhóm
+            var sender = await _context.NhanVien.FindAsync(senderId);
+            string timeString = tinNhan.ThoiGianGui.AddHours(7).ToString("hh:mm tt");
+
+            // Phát sóng tới Client qua hàm "ReceiveGroupMessage"
+            // Kèm theo HoTen và AnhDaiDien của người gửi để hiện avatar ngay lập tức
+            await Clients.All.SendAsync("ReceiveGroupMessage", senderId, groupId, message, timeString, sender?.HoTen, sender?.AnhDaiDien);
         }
     }
 }

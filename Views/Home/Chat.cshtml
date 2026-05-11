@@ -32,6 +32,9 @@
     </script>
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .chat-scroll::-webkit-scrollbar { width: 6px; }
+        .chat-scroll::-webkit-scrollbar-track { background: transparent; }
+        .chat-scroll::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 10px; }
         .no-scrollbar::-webkit-scrollbar { display: none; }
         body { min-height: max(884px, 100dvh); }
     </style>
@@ -43,31 +46,133 @@
         </div>
     </header>
 
+    <div id="toastContainer" class="fixed top-24 right-6 z-[200] flex flex-col gap-3 pointer-events-none"></div>
+
     <main class="pt-20 pb-32 min-h-screen flex flex-col md:flex-row max-w-7xl mx-auto px-4 md:px-6 gap-6">
         <aside class="w-full md:w-[380px] flex flex-col gap-4">
-            <div class="bg-surface-container-low rounded-[32px] p-2 flex items-center gap-3 px-4 h-14 border bg-gray-100">
-                <span class="material-symbols-outlined text-outline">search</span>
-                <input id="txtSearchUser" class="bg-transparent border-none focus:ring-0 w-full text-sm font-medium" placeholder="Tìm kiếm hội thoại..." type="text"/>
+            <div class="flex items-center gap-2">
+                <div class="flex-1 bg-surface-container-low rounded-[32px] p-2 flex items-center gap-3 px-4 h-14 border bg-gray-100">
+                    <span class="material-symbols-outlined text-outline">search</span>
+                    <input id="txtSearchUser" class="bg-transparent border-none focus:ring-0 w-full text-sm font-medium" placeholder="Tìm kiếm hội thoại..." type="text"/>
+                </div>
+                <button id="btnOpenCreateGroup" class="w-14 h-14 bg-primary text-white rounded-[24px] flex items-center justify-center hover:opacity-90 transition-opacity shadow-md" title="Tạo nhóm chat">
+                    <span class="material-symbols-outlined text-[28px]">group_add</span>
+                </button>
             </div>
-            <div id="userList" class="space-y-1 overflow-y-auto no-scrollbar">
+            
+            <div class="flex bg-gray-100 p-1.5 rounded-[20px] gap-1">
+                <button id="tab-all" onclick="switchTab('all')" class="flex-1 py-2 text-[13px] font-bold rounded-2xl bg-white shadow-sm text-primary transition-all">Tất cả</button>
+                <button id="tab-personal" onclick="switchTab('personal')" class="flex-1 py-2 text-[13px] font-bold rounded-2xl text-outline hover:text-on-surface transition-all">Cá nhân</button>
+                <button id="tab-group" onclick="switchTab('group')" class="flex-1 py-2 text-[13px] font-bold rounded-2xl text-outline hover:text-on-surface transition-all">Nhóm</button>
+            </div>
+
+            <div id="userList" class="space-y-1 overflow-y-auto no-scrollbar flex-1">
                 <p class="text-center text-sm text-outline mt-8">Đang tải cuộc trò chuyện...</p>
             </div>
         </aside>
 
-        <section class="flex-1 flex flex-col bg-white rounded-[40px] shadow-sm overflow-hidden border border-gray-200 h-[calc(100vh-180px)] md:h-auto">
+        <div id="modalGroupSettings" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+            <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md p-6 flex flex-col gap-4">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-headline font-bold text-xl">Quản lý nhóm</h2>
+                    <button onclick="closeGroupSettings()" class="text-outline hover:text-error transition-colors"><span class="material-symbols-outlined">close</span></button>
+                </div>
+                
+                <div class="flex flex-col items-center justify-center gap-3">
+                    <div class="relative group cursor-pointer" onclick="document.getElementById('fileUploadGroupAvatar').click()">
+                        <img id="settingGroupAvatar" src="/images/avatar_default.jpg" class="w-24 h-24 rounded-full object-cover shadow-md border-4 border-white" />
+                        <div class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                            <span class="material-symbols-outlined text-white">photo_camera</span>
+                        </div>
+                        <input type="file" id="fileUploadGroupAvatar" class="hidden" accept="image/*" />
+                    </div>
+                    
+                    <div id="boxDisplayName" class="flex items-center gap-2">
+                        <h3 id="settingGroupName" class="font-bold text-lg">Tên nhóm</h3>
+                        <button id="btnEditGroupName" onclick="enableEditGroupName()" class="hidden text-outline hover:text-primary p-1">
+                            <span class="material-symbols-outlined text-[18px]">edit</span>
+                        </button>
+                    </div>
+
+                    <div id="boxEditName" class="hidden flex items-center gap-2 w-full px-4">
+                        <input id="txtNewGroupName" type="text" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-primary outline-none" />
+                        <button onclick="submitUpdateGroupName()" class="text-primary material-symbols-outlined p-1 hover:bg-primary/10 rounded-full">check</button>
+                        <button onclick="cancelEditGroupName()" class="text-error material-symbols-outlined p-1 hover:bg-red-50 rounded-full">close</button>
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-2 mt-2">
+                    <div class="flex justify-between items-center mb-1">
+                        <span class="text-xs font-bold text-outline uppercase">Thành viên (<span id="countMembers">0</span>)</span>
+                        <button onclick="showAddMemberBox()" class="text-[12px] font-bold text-primary flex items-center gap-1 hover:underline">
+                            <span class="material-symbols-outlined text-[16px]">person_add</span> Thêm
+                        </button>
+                    </div>
+                    
+                    <div id="boxAddMember" class="hidden flex gap-2 mb-2">
+                        <input id="txtSearchNewMember" type="text" class="flex-1 bg-gray-50 border border-gray-200 rounded-xl px-3 py-2 text-sm" placeholder="Nhập tên nhân viên..."/>
+                        <button onclick="submitAddMember()" class="bg-primary text-white px-3 rounded-xl text-sm font-bold">Thêm</button>
+                    </div>
+                    <div id="listNewMemberResults" class="hidden flex-col gap-1 max-h-32 overflow-y-auto mb-2 chat-scroll"></div>
+
+                    <div id="listGroupMembers" class="flex flex-col gap-2 max-h-48 overflow-y-auto chat-scroll pr-2"></div>
+                </div>
+
+                <div class="flex gap-2 mt-4">
+                    <button onclick="leaveGroup()" class="flex-1 bg-gray-100 text-gray-700 py-3 rounded-2xl font-bold hover:bg-gray-200 transition-colors">
+                        Rời nhóm
+                    </button>
+                    <button id="btnDeleteGroup" onclick="deleteGroup()" class="hidden flex-1 bg-red-50 text-error py-3 rounded-2xl font-bold hover:bg-red-100 transition-colors">
+                        Xóa nhóm
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <div id="modalCreateGroup" class="hidden fixed inset-0 bg-black/60 z-[100] flex items-center justify-center p-4 backdrop-blur-sm transition-all">
+            <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-md p-6 flex flex-col gap-5">
+                <div class="flex justify-between items-center">
+                    <h2 class="font-headline font-bold text-xl">Tạo nhóm Chat mới</h2>
+                    <button id="btnCloseModal" class="text-outline hover:text-error transition-colors"><span class="material-symbols-outlined">close</span></button>
+                </div>
+                
+                <div>
+                    <label class="text-xs font-bold text-outline uppercase tracking-wider mb-2 block">Tên nhóm</label>
+                    <input id="txtGroupName" type="text" class="w-full bg-gray-100 border-none rounded-2xl px-4 py-3 focus:ring-2 focus:ring-primary text-sm font-medium" placeholder="Nhập tên nhóm..."/>
+                </div>
+
+                <div class="flex flex-wrap gap-2" id="selectedMembersContainer"></div>
+
+                <div class="relative">
+                    <span class="material-symbols-outlined absolute left-4 top-3 text-outline">search</span>
+                    <input id="txtSearchMember" type="text" class="w-full bg-gray-50 border border-gray-200 rounded-2xl pl-12 pr-4 py-3 focus:ring-2 focus:ring-primary text-sm font-medium" placeholder="Tìm nhân viên để thêm..."/>
+                </div>
+
+                <div id="searchMemberResults" class="max-h-48 overflow-y-auto flex flex-col gap-1 chat-scroll"></div>
+
+                <button id="btnSubmitGroup" class="w-full bg-primary text-white py-4 rounded-2xl font-bold shadow-lg shadow-primary/30 mt-2 hover:bg-primary/90 transition-colors">
+                    Tạo Nhóm Ngay
+                </button>
+            </div>
+        </div>
+
+        <section class="flex-1 flex flex-col bg-white rounded-[40px] shadow-sm overflow-hidden border border-gray-200 h-[calc(100vh-180px)] md:h-[600px]">
             <div class="px-6 py-4 flex justify-between items-center border-b border-gray-100">
-                <div class="flex items-center gap-3">
+                <div id="chatHeaderBox" class="flex items-center gap-3 transition-colors rounded-xl p-1 pr-3" style="cursor: default;">
                     <img id="chatHeaderAvatar" class="w-10 h-10 rounded-full object-cover" src="/images/avatar_default.jpg"/>
                     <div>
                         <h3 id="chatHeaderName" class="font-bold leading-tight">Chọn một cuộc hội thoại</h3>
-                        <span class="text-[11px] text-tertiary flex items-center gap-1 font-medium">
+                        <span id="chatHeaderStatus" class="text-[11px] text-tertiary flex items-center gap-1 font-medium">
                             <span class="w-1.5 h-1.5 bg-tertiary rounded-full animate-pulse"></span> Sẵn sàng
                         </span>
                     </div>
                 </div>
+                <button id="btnGroupSettings" onclick="openGroupSettings()" class="hidden w-10 h-10 rounded-full bg-gray-100 text-outline hover:bg-gray-200 hover:text-primary flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined">info</span>
+                </button>
             </div>
 
-            <div id="chatCanvas" class="flex-1 overflow-y-auto p-6 flex flex-col gap-6 bg-gray-50/50">
+            <div id="chatCanvas" class="flex-1 overflow-y-auto chat-scroll p-6 flex flex-col gap-6 bg-gray-50/50">
                 <div class="flex h-full items-center justify-center text-outline text-sm">Hãy chọn nhân viên để trò chuyện.</div>
             </div>
 
@@ -102,231 +207,378 @@
         if (isNaN(myId)) { window.location.href = "/Account/Login"; }
 
         let friendId = null; 
+        let isCurrentChatGroup = false; 
         const chatCanvas = document.getElementById('chatCanvas');
         const txtMessage = document.getElementById('txtMessage');
         const btnSend = document.getElementById('btnSend');
         const userList = document.getElementById('userList');
         const txtSearchUser = document.getElementById('txtSearchUser');
+        
+        const chatHeaderBox = document.getElementById('chatHeaderBox');
         const chatHeaderName = document.getElementById('chatHeaderName');
         const chatHeaderAvatar = document.getElementById('chatHeaderAvatar');
+        const chatHeaderStatus = document.getElementById('chatHeaderStatus');
+        const btnGroupSettings = document.getElementById('btnGroupSettings');
         
-        // CÁC PHẦN TỬ LIÊN QUAN ĐẾN UPLOAD FILE
         const btnAttach = document.getElementById('btnAttach');
         const fileAttach = document.getElementById('fileAttach');
         const uploadOverlay = document.getElementById('uploadOverlay');
 
-        async function loadRecentConversations() {
-            if(isNaN(myId)) return;
+        let allConversations = [];
+        let currentTab = 'all';
+
+        // ==========================================
+        // QUẢN LÝ NHÓM
+        // ==========================================
+        let currentGroupData = null;
+        let selectedNewMemberId = null;
+
+        async function openGroupSettings() {
+            if(!isCurrentChatGroup || !friendId) return;
             try {
-                const response = await fetch(`/api/chat/conversations/${myId}`);
-                if (response.ok) {
-                    const conversations = await response.json();
-                    renderConversations(conversations);
+                const res = await fetch(`/api/chat/group/${friendId}/details`);
+                if (res.ok) {
+                    currentGroupData = await res.json();
+                    document.getElementById('settingGroupName').textContent = currentGroupData.tenNhom;
+                    document.getElementById('settingGroupAvatar').src = currentGroupData.anhNhom || `https://ui-avatars.com/api/?name=${currentGroupData.tenNhom}&background=0058bc&color=fff&bold=true`;
+                    document.getElementById('countMembers').textContent = currentGroupData.members.length;
+                    
+                    const isOwner = currentGroupData.nguoiTaoId === myId;
+                    document.getElementById('btnDeleteGroup').classList.toggle('hidden', !isOwner);
+                    document.getElementById('btnEditGroupName').classList.toggle('hidden', !isOwner);
+
+                    cancelEditGroupName();
+                    renderGroupMembersList();
+                    document.getElementById('modalGroupSettings').classList.remove('hidden');
                 }
-            } catch (err) { console.error(err); }
+            } catch(e) { console.error(e); }
         }
 
-        function renderConversations(conversations) {
-            userList.innerHTML = '';
-            if (conversations.length === 0) {
-                userList.innerHTML = '<p class="text-center text-sm text-outline mt-8">Chưa có trò chuyện.</p>';
-                return;
-            }
-            conversations.forEach(c => {
-                const avatar = c.friendAvatar || "/images/avatar_default.jpg";
-                const redDotHtml = c.hasUnread ? `<div class="absolute -top-1 -right-1 w-4 h-4 bg-error border-2 border-white rounded-full animate-pulse"></div>` : '';
-                const textClass = c.hasUnread ? 'text-on-surface font-bold' : 'text-outline font-medium';
+        // --- CHỨC NĂNG SỬA TÊN NHÓM ---
+        function enableEditGroupName() {
+            document.getElementById('boxDisplayName').classList.add('hidden');
+            document.getElementById('boxEditName').classList.remove('hidden');
+            const input = document.getElementById('txtNewGroupName');
+            input.value = currentGroupData.tenNhom;
+            input.focus();
+        }
 
-                const html = `
-                <div onclick="selectChat(${c.friendId}, '${c.friendName}', '${avatar}')" class="flex items-center gap-4 p-4 rounded-3xl hover:bg-gray-100 transition-colors cursor-pointer">
-                    <div class="relative">
-                        <img alt="${c.friendName}" class="w-14 h-14 rounded-2xl object-cover" src="${avatar}"/>
-                        ${redDotHtml}
-                    </div>
-                    <div class="flex-1 min-w-0">
-                        <div class="flex justify-between items-center mb-0.5">
-                            <span class="font-bold truncate block">${c.friendName}</span>
-                            <span class="text-[10px] text-outline">${c.lastMessageTime || ''}</span>
+        function cancelEditGroupName() {
+            document.getElementById('boxDisplayName').classList.remove('hidden');
+            document.getElementById('boxEditName').classList.add('hidden');
+        }
+
+        async function submitUpdateGroupName() {
+            const newName = document.getElementById('txtNewGroupName').value.trim();
+            if (!newName) return alert("Tên nhóm không được để trống!");
+            if (newName === currentGroupData.tenNhom) return cancelEditGroupName();
+
+            try {
+                const res = await fetch(`/api/chat/group/${friendId}/name?requesterId=${myId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(newName)
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    currentGroupData.tenNhom = data.newName;
+                    document.getElementById('settingGroupName').textContent = data.newName;
+                    chatHeaderName.textContent = data.newName; 
+                    cancelEditGroupName();
+                    loadRecentConversations(); 
+                } else {
+                    const err = await res.text();
+                    alert("Lỗi: " + err);
+                }
+            } catch (e) { console.error(e); }
+        }
+
+        function closeGroupSettings() {
+            document.getElementById('modalGroupSettings').classList.add('hidden');
+            document.getElementById('boxAddMember').classList.add('hidden');
+            document.getElementById('listNewMemberResults').classList.add('hidden');
+        }
+
+        function renderGroupMembersList() {
+            const listContainer = document.getElementById('listGroupMembers');
+            listContainer.innerHTML = '';
+            const isCreator = currentGroupData.nguoiTaoId === myId;
+
+            currentGroupData.members.forEach(m => {
+                const isMe = m.maNhanVien === myId;
+                const isMemberCreator = m.maNhanVien === currentGroupData.nguoiTaoId;
+                let badge = isMemberCreator ? '<span class="px-2 py-0.5 bg-yellow-100 text-yellow-700 text-[10px] font-bold rounded-md ml-2">Trưởng nhóm</span>' : '';
+                if(isMe) badge += '<span class="px-2 py-0.5 bg-gray-100 text-outline text-[10px] font-bold rounded-md ml-1">Bạn</span>';
+
+                let kickBtn = (isCreator && !isMe) ? `<button onclick="kickMember(${m.maNhanVien})" class="text-outline hover:text-error transition-colors p-1"><span class="material-symbols-outlined text-[18px]">person_remove</span></button>` : '';
+
+                listContainer.insertAdjacentHTML('beforeend', `
+                    <div class="flex items-center justify-between p-2 hover:bg-gray-50 rounded-xl transition-colors border border-gray-100">
+                        <div class="flex items-center gap-3">
+                            <img src="${m.anhDaiDien || '/images/avatar_default.jpg'}" class="w-8 h-8 rounded-full object-cover"/>
+                            <span class="text-sm font-medium">${m.hoTen} ${badge}</span>
                         </div>
-                        <p class="text-sm ${textClass} truncate">${c.lastMessageContent || 'Nhấn để bắt đầu chat'}</p>
+                        ${kickBtn}
                     </div>
-                </div>`;
-                userList.insertAdjacentHTML('beforeend', html);
+                `);
             });
         }
 
-        window.selectChat = async function(id, name, avatar) {
-            friendId = id; 
-            chatHeaderName.textContent = name;
-            chatHeaderAvatar.src = avatar;
-            txtMessage.value = '';
-            try { await fetch(`/api/chat/mark-read/${myId}/${friendId}`, { method: 'POST' }); } catch (e) {}
-            await loadHistory();
-            loadRecentConversations();
+        document.getElementById('fileUploadGroupAvatar').addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if(!file) return;
+            const formData = new FormData();
+            formData.append('file', file);
+            try {
+                document.getElementById('settingGroupAvatar').style.opacity = '0.5';
+                const res = await fetch(`/api/chat/group/${friendId}/avatar`, { method: 'POST', body: formData });
+                if (res.ok) {
+                    const data = await res.json();
+                    document.getElementById('settingGroupAvatar').src = data.url;
+                    chatHeaderAvatar.src = data.url;
+                    loadRecentConversations();
+                }
+            } catch(e) { console.error(e); }
+            finally { document.getElementById('settingGroupAvatar').style.opacity = '1'; }
+        });
+
+        function showAddMemberBox() { document.getElementById('boxAddMember').classList.toggle('hidden'); }
+
+        document.getElementById('txtSearchNewMember').addEventListener('input', (e) => {
+            const query = e.target.value.trim();
+            const resultsBox = document.getElementById('listNewMemberResults');
+            if(!query) { resultsBox.classList.add('hidden'); return; }
+            setTimeout(async () => {
+                const res = await fetch(`/api/chat/search?q=${encodeURIComponent(query)}&currentUserId=${myId}`);
+                if (res.ok) {
+                    const users = await res.json();
+                    resultsBox.innerHTML = '';
+                    resultsBox.classList.remove('hidden');
+                    users.forEach(u => {
+                        if(currentGroupData.members.find(m => m.maNhanVien === u.maNhanVien)) return;
+                        resultsBox.insertAdjacentHTML('beforeend', `<div onclick="selectNewMember(${u.maNhanVien}, '${u.hoTen}')" class="flex items-center gap-2 p-2 hover:bg-primary/10 cursor-pointer rounded-lg"><img src="${u.anhDaiDien || '/images/avatar_default.jpg'}" class="w-6 h-6 rounded-full"/><span class="text-xs font-medium">${u.hoTen}</span></div>`);
+                    });
+                }
+            }, 300);
+        });
+
+        function selectNewMember(id, name) {
+            selectedNewMemberId = id;
+            document.getElementById('txtSearchNewMember').value = name;
+            document.getElementById('listNewMemberResults').classList.add('hidden');
+        }
+
+        async function submitAddMember() {
+            if(!selectedNewMemberId) return alert("Chọn nhân viên!");
+            const res = await fetch(`/api/chat/group/${friendId}/add-members`, {
+                method: 'POST',
+                headers: {'Content-Type': 'application/json'},
+                body: JSON.stringify([selectedNewMemberId])
+            });
+            if(res.ok) { selectedNewMemberId = null; document.getElementById('txtSearchNewMember').value = ''; openGroupSettings(); }
+        }
+
+        async function kickMember(userId) {
+            if(confirm("Xóa thành viên?")) {
+                const res = await fetch(`/api/chat/group/${friendId}/member/${userId}`, { method: 'DELETE' });
+                if(res.ok) openGroupSettings();
+            }
+        }
+
+        async function leaveGroup() {
+            if(confirm("Rời nhóm?")) {
+                const res = await fetch(`/api/chat/group/${friendId}/member/${myId}`, { method: 'DELETE' });
+                if(res.ok) { location.reload(); }
+            }
+        }
+
+        async function deleteGroup() {
+            if(confirm("Xóa nhóm vĩnh viễn?")) {
+                const res = await fetch(`/api/chat/group/${friendId}?requesterId=${myId}`, { method: 'DELETE' });
+                if(res.ok) { location.reload(); }
+            }
+        }
+
+        // ==========================================
+        // CÁC LOGIC CHAT VÀ TAB (GIỮ NGUYÊN)
+        // ==========================================
+        function showToast(title, message, avatar) {
+            const toast = document.createElement('div');
+            toast.className = "bg-white rounded-2xl shadow-2xl border border-gray-100 p-4 flex items-center gap-3 transform transition-all duration-500 translate-x-[120%] opacity-0 w-80 pointer-events-auto";
+            toast.innerHTML = `<img src="${avatar || '/images/avatar_default.jpg'}" class="w-10 h-10 rounded-full object-cover shrink-0"/><div class="flex-1 min-w-0"><h4 class="font-bold text-sm truncate">${title}</h4><p class="text-[13px] text-outline truncate">${message}</p></div>`;
+            document.getElementById('toastContainer').appendChild(toast);
+            requestAnimationFrame(() => setTimeout(() => toast.classList.remove('translate-x-[120%]', 'opacity-0'), 10));
+            setTimeout(() => { toast.classList.add('translate-x-[120%]', 'opacity-0'); setTimeout(() => toast.remove(), 500); }, 4000);
+        }
+
+        function switchTab(tab) {
+            currentTab = tab;
+            document.getElementById('tab-all').className = `flex-1 py-2 text-[13px] font-bold rounded-2xl transition-all ${tab === 'all' ? 'bg-white shadow-sm text-primary' : 'text-outline hover:text-on-surface'}`;
+            document.getElementById('tab-personal').className = `flex-1 py-2 text-[13px] font-bold rounded-2xl transition-all ${tab === 'personal' ? 'bg-white shadow-sm text-primary' : 'text-outline hover:text-on-surface'}`;
+            document.getElementById('tab-group').className = `flex-1 py-2 text-[13px] font-bold rounded-2xl transition-all ${tab === 'group' ? 'bg-white shadow-sm text-primary' : 'text-outline hover:text-on-surface'}`;
+            renderConversations();
+        }
+
+        async function loadRecentConversations() {
+            if(isNaN(myId)) return;
+            const res = await fetch(`/api/chat/conversations/${myId}`);
+            if (res.ok) { allConversations = await res.json(); renderConversations(); }
+        }
+
+        function renderConversations() {
+            userList.innerHTML = '';
+            let filtered = allConversations;
+            if (currentTab === 'personal') filtered = allConversations.filter(c => !c.isGroup);
+            else if (currentTab === 'group') filtered = allConversations.filter(c => c.isGroup);
+            if (filtered.length === 0) { userList.innerHTML = '<p class="text-center text-sm text-outline mt-8">Chưa có trò chuyện.</p>'; return; }
+            filtered.forEach(c => {
+                const avatar = c.friendAvatar || (c.isGroup ? `https://ui-avatars.com/api/?name=${c.friendName}&background=0058bc&color=fff&bold=true` : "/images/avatar_default.jpg");
+                const redDot = c.hasUnread ? `<div class="absolute -top-1 -right-1 w-4 h-4 bg-error border-2 border-white rounded-full animate-pulse"></div>` : '';
+                userList.insertAdjacentHTML('beforeend', `<div onclick="selectChat(${c.friendId}, '${c.friendName}', '${avatar}', ${c.isGroup})" class="flex items-center gap-4 p-4 rounded-3xl hover:bg-gray-100 cursor-pointer"><div class="relative"><img class="w-14 h-14 rounded-2xl object-cover" src="${avatar}"/>${redDot}</div><div class="flex-1 min-w-0"><div class="flex justify-between items-center mb-0.5"><span class="font-bold truncate">${c.isGroup?'[Nhóm] ':''}${c.friendName}</span><span class="text-[10px] text-outline">${c.lastMessageTime||''}</span></div><p class="text-sm truncate ${c.hasUnread?'font-bold text-on-surface':'text-outline'}">${c.lastMessageContent||'Bắt đầu chat'}</p></div></div>`);
+            });
+        }
+
+        window.selectChat = async function(id, name, avatar, isGroup) {
+            friendId = id; isCurrentChatGroup = isGroup || false;
+            chatHeaderName.textContent = name; chatHeaderAvatar.src = avatar;
+            if (isCurrentChatGroup) {
+                btnGroupSettings.classList.remove('hidden');
+                chatHeaderBox.classList.add('hover:bg-gray-100', 'cursor-pointer');
+                chatHeaderBox.onclick = openGroupSettings;
+                chatHeaderStatus.innerHTML = '<span class="text-[10px]">Cài đặt nhóm</span>';
+            } else {
+                btnGroupSettings.classList.add('hidden');
+                chatHeaderBox.classList.remove('hover:bg-gray-100', 'cursor-pointer');
+                chatHeaderBox.onclick = null;
+                chatHeaderStatus.innerHTML = '<span class="w-1.5 h-1.5 bg-tertiary rounded-full animate-pulse"></span> Trực tuyến';
+                await fetch(`/api/chat/mark-read/${myId}/${friendId}`, { method: 'POST' });
+            }
+            await loadHistory(); loadRecentConversations();
         };
 
-        // HÀM HIỂN THỊ TIN NHẮN (HỖ TRỢ HIỂN THỊ FILE)
-        function appendMessage(senderId, content, time, avatarUrl) {
+        function appendMessage(senderId, content, time, avatarUrl, senderName = null) {
             const isMe = senderId === myId;
-            const defaultAvatar = "/images/avatar_default.jpg"; 
-            
-            // Xử lý nếu nội dung là File đính kèm
-            let displayHtml = `<p class="text-sm leading-relaxed">${content}</p>`;
-            if (content.startsWith("[FILE]")) {
-                const parts = content.substring(6).split('|'); // Tách tên file và URL
-                const fileName = parts[0];
-                const fileUrl = parts[1];
-                
-                // Vẽ khung tải file đẹp mắt
-                displayHtml = `
-                <a href="${fileUrl}" target="_blank" download class="flex items-center gap-3 p-3 rounded-xl border transition-colors hover:opacity-80 decoration-transparent ${isMe ? 'bg-white/20 border-white/30 text-white' : 'bg-white border-gray-200 text-primary'}">
-                    <div class="${isMe ? 'bg-white/20' : 'bg-primary/10'} p-2 rounded-lg flex items-center justify-center">
-                        <span class="material-symbols-outlined text-[24px]">description</span>
-                    </div>
-                    <div class="flex-1 overflow-hidden">
-                        <p class="text-sm font-bold truncate max-w-[150px] leading-tight">${fileName}</p>
-                        <p class="text-[10px] mt-0.5 opacity-80">Nhấn để tải xuống</p>
-                    </div>
-                    <span class="material-symbols-outlined text-[20px] ml-2">download</span>
-                </a>`;
-            }
-
-            let html = '';
-            if (isMe) {
-                html = `
-                <div class="flex flex-col items-end gap-1 self-end max-w-[80%] w-full">
-                    <div class="bg-primary text-white p-4 rounded-2xl rounded-br-none shadow-md">
-                        ${displayHtml}
-                        <span class="text-[9px] text-white/70 block mt-2 text-right">${time}</span>
-                    </div>
-                </div>`;
-            } else {
-                html = `
-                <div class="flex items-end gap-3 max-w-[80%] w-full">
-                    <img class="w-8 h-8 rounded-full object-cover" src="${avatarUrl || defaultAvatar}"/>
-                    <div class="bg-white border border-gray-200 p-4 rounded-2xl rounded-bl-none shadow-sm">
-                        ${displayHtml}
-                        <span class="text-[9px] text-outline block mt-2 text-right">${time}</span>
-                    </div>
-                </div>`;
-            }
-            chatCanvas.insertAdjacentHTML('beforeend', html);
+            let displayHtml = content.startsWith("[FILE]") ? `<a href="${content.split('|')[1]}" target="_blank" download class="flex items-center gap-3 p-3 rounded-xl border ${isMe?'bg-white/20 text-white':'bg-white text-primary'}"><span class="material-symbols-outlined">description</span><div class="flex-1 truncate"><p class="text-sm font-bold truncate">${content.split('|')[0].substring(6)}</p></div></a>` : `<p class="text-sm">${content}</p>`;
+            let nameHtml = (senderName && !isMe) ? `<div class="text-[10px] font-bold text-primary mb-1">${senderName}</div>` : '';
+            chatCanvas.insertAdjacentHTML('beforeend', isMe ? `<div class="flex flex-col items-end gap-1 self-end max-w-[80%] w-full"><div class="bg-primary text-white p-4 rounded-2xl rounded-br-none shadow-md">${displayHtml}<span class="text-[9px] text-white/70 block mt-2 text-right">${time}</span></div></div>` : `<div class="flex items-end gap-3 max-w-[80%] w-full"><img class="w-8 h-8 rounded-full object-cover shrink-0" src="${avatarUrl || '/images/avatar_default.jpg'}"/><div class="bg-white border border-gray-200 p-4 rounded-2xl rounded-bl-none shadow-sm">${nameHtml}${displayHtml}<span class="text-[9px] text-outline block mt-2 text-right">${time}</span></div></div>`);
             chatCanvas.scrollTop = chatCanvas.scrollHeight;
         }
 
         async function loadHistory() {
-            if (!friendId) return; 
-            try {
-                const response = await fetch(`/api/chat/history/${myId}/${friendId}`);
-                if (response.ok) {
-                    const messages = await response.json();
-                    chatCanvas.innerHTML = `<div class="text-center w-full"><span class="px-3 py-1 bg-gray-200 rounded-full text-[10px] font-bold text-outline">LỊCH SỬ TRÒ CHUYỆN</span></div>`;
-                    messages.forEach(msg => appendMessage(msg.nguoiGuiId, msg.noiDung, msg.thoiGian, msg.anhDaiDien));
-                }
-            } catch (err) { console.error(err); }
+            if (!friendId) return;
+            const url = isCurrentChatGroup ? `/api/chat/group-history/${friendId}` : `/api/chat/history/${myId}/${friendId}`;
+            const res = await fetch(url);
+            if (res.ok) {
+                const msgs = await res.json();
+                chatCanvas.innerHTML = '<div class="text-center w-full my-4"><span class="px-3 py-1 bg-gray-200 rounded-full text-[10px] font-bold text-outline uppercase">Lịch sử chat</span></div>';
+                msgs.forEach(m => appendMessage(m.nguoiGuiId, m.noiDung, m.thoiGian, m.anhDaiDien, isCurrentChatGroup && m.nguoiGuiId !== myId ? m.hoTen : null));
+            }
         }
 
         const connection = new signalR.HubConnectionBuilder().withUrl("/chathub").withAutomaticReconnect().build();
-
-        connection.on("ReceiveMessage", async (senderId, receiverId, content, time) => {
-            if ((senderId === myId && receiverId === friendId) || (senderId === friendId && receiverId === myId)) {
-                appendMessage(senderId, content, time, null); 
-                if (senderId === friendId) await fetch(`/api/chat/mark-read/${myId}/${friendId}`, { method: 'POST' });
+        connection.on("ReceiveMessage", async (sId, rId, c, t) => {
+            if (myId !== sId && myId !== rId) return;
+            if (!isCurrentChatGroup && ((sId === myId && rId === friendId) || (sId === friendId && rId === myId))) {
+                appendMessage(sId, c, t, sId === friendId ? chatHeaderAvatar.src : null);
+                if (sId === friendId) await fetch(`/api/chat/mark-read/${myId}/${friendId}`, { method: 'POST' });
+            } else if (sId !== myId) {
+                const f = allConversations.find(conv => !conv.isGroup && conv.friendId === sId);
+                if(f) showToast(f.friendName, c.startsWith("[FILE]")?"📎 Tệp tin":c, f.friendAvatar);
             }
             loadRecentConversations();
         });
-        connection.start().catch(err => console.error(err));
+        connection.on("ReceiveGroupMessage", (sId, gId, c, t, sName, sAvatar) => {
+            const g = allConversations.find(conv => conv.isGroup && conv.friendId === gId);
+            if (!g) return;
+            if (isCurrentChatGroup && friendId === gId) appendMessage(sId, c, t, sAvatar, sId !== myId ? sName : null);
+            else if (sId !== myId) showToast(g.friendName, `${sName}: ${c.startsWith("[FILE]")?"📎 Tệp":c}`, sAvatar);
+            loadRecentConversations();
+        });
+        connection.start().catch(e => console.error(e));
 
-        // BẮT SỰ KIỆN GỬI TIN NHẮN CHỮ
-        btnSend.addEventListener('click', async () => {
-            if (!friendId) return alert("Vui lòng chọn nhân viên để chat!");
-            if (connection.state !== signalR.HubConnectionState.Connected) return alert("Đang kết nối máy chủ...");
+        btnSend.onclick = async () => {
             const msg = txtMessage.value.trim();
-            if (msg) {
+            if (msg && friendId) {
                 try {
-                    await connection.invoke("SendMessage", myId, friendId, msg);
-                    txtMessage.value = ''; 
-                    txtMessage.focus();
-                } catch (err) { console.error(err); }
+                    if (isCurrentChatGroup) await connection.invoke("SendGroupMessage", myId, friendId, msg);
+                    else await connection.invoke("SendMessage", myId, friendId, msg);
+                    txtMessage.value = ''; txtMessage.focus();
+                } catch (e) { console.error(e); }
             }
-        });
+        };
 
-        txtMessage.addEventListener('keydown', (e) => {
-            if (e.key === 'Enter') { e.preventDefault(); btnSend.click(); }
-        });
+        txtMessage.onkeydown = (e) => { if (e.key === 'Enter') btnSend.click(); };
+        btnAttach.onclick = () => { if(friendId) fileAttach.click(); };
 
-        // ==========================================
-        // XỬ LÝ UPLOAD FILE KHI BẤM NÚT ĐÍNH KÈM
-        // ==========================================
-        btnAttach.addEventListener('click', () => {
-            if (!friendId) return alert("Vui lòng chọn người nhận trước khi gửi file!");
-            fileAttach.click(); // Mở hộp thoại chọn file
-        });
-
-        fileAttach.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
-
-            // Kiểm tra dung lượng trên Client (50MB = 50 * 1024 * 1024 bytes)
-            if (file.size > 52428800) {
-                alert("Dung lượng file quá lớn! Vui lòng chọn file dưới 50MB.");
-                fileAttach.value = '';
-                return;
-            }
-
-            // Hiển thị hiệu ứng tải
+        fileAttach.onchange = async (e) => {
+            const f = e.target.files[0];
+            if (!f || f.size > 52428800) return;
             uploadOverlay.classList.remove('hidden');
-
-            const formData = new FormData();
-            formData.append("file", file);
-            formData.append("senderId", myId);
-
+            const fd = new FormData(); fd.append("file", f); fd.append("senderId", myId);
             try {
-                const response = await fetch('/api/chat/upload', {
-                    method: 'POST',
-                    body: formData
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    
-                    // Tạo chuỗi định dạng đặc biệt để hệ thống biết đây là file
-                    // VD: [FILE]Bao_cao.pdf|https://supabase.co/.../Bao_cao.pdf
-                    const fileMessage = `[FILE]${data.fileName}|${data.url}`;
-                    
-                    // Gửi tin nhắn qua SignalR
-                    await connection.invoke("SendMessage", myId, friendId, fileMessage);
-                } else {
-                    const errorText = await response.text();
-                    alert("Lỗi upload: " + errorText);
+                const res = await fetch('/api/chat/upload', { method: 'POST', body: fd });
+                if (res.ok) {
+                    const data = await res.json();
+                    const fMsg = `[FILE]${data.fileName}|${data.url}`;
+                    if (isCurrentChatGroup) await connection.invoke("SendGroupMessage", myId, friendId, fMsg);
+                    else await connection.invoke("SendMessage", myId, friendId, fMsg);
                 }
-            } catch (error) {
-                console.error("Lỗi gửi file:", error);
-                alert("Có lỗi xảy ra khi gửi file!");
-            } finally {
-                // Ẩn hiệu ứng tải và reset input
-                uploadOverlay.classList.add('hidden');
-                fileAttach.value = '';
-            }
-        });
+            } catch (e) { console.error(e); }
+            finally { uploadOverlay.classList.add('hidden'); fileAttach.value = ''; }
+        };
 
-        // TÌM KIẾM
-        let searchTimeout = null;
-        txtSearchUser.addEventListener('input', (e) => {
-            const query = e.target.value.trim();
-            clearTimeout(searchTimeout);
-            searchTimeout = setTimeout(async () => {
-                if (query.length === 0) { loadRecentConversations(); return; }
-                try {
-                    const response = await fetch(`/api/chat/search?q=${encodeURIComponent(query)}&currentUserId=${myId}`);
-                    if (response.ok) {
-                        const users = await response.json();
-                        const mappedUsers = users.map(u => ({ friendId: u.maNhanVien, friendName: u.hoTen, friendAvatar: u.anhDaiDien, lastMessageContent: 'Nhấn để bắt đầu chat', hasUnread: false }));
-                        renderConversations(mappedUsers);
-                    }
-                } catch (err) { console.error(err); }
-            }, 500); 
-        });
+        const modalCreateGroup = document.getElementById('modalCreateGroup');
+        const btnSubmitGroup = document.getElementById('btnSubmitGroup');
+        const txtGroupName = document.getElementById('txtGroupName');
+        let selectedMembers = [];
+
+        document.getElementById('btnOpenCreateGroup').onclick = () => modalCreateGroup.classList.remove('hidden');
+        document.getElementById('btnCloseModal').onclick = () => { modalCreateGroup.classList.add('hidden'); selectedMembers = []; renderSelectedMembers(); };
+
+        document.getElementById('txtSearchMember').oninput = (e) => {
+            const q = e.target.value.trim();
+            if(!q) return;
+            setTimeout(async () => {
+                const res = await fetch(`/api/chat/search?q=${encodeURIComponent(q)}&currentUserId=${myId}`);
+                if (res.ok) {
+                    const users = await res.json();
+                    const box = document.getElementById('searchMemberResults'); box.innerHTML = '';
+                    users.forEach(u => {
+                        if(selectedMembers.find(m => m.id === u.maNhanVien)) return;
+                        const d = document.createElement('div'); d.className = "flex items-center justify-between p-2 hover:bg-gray-100 cursor-pointer rounded-xl";
+                        d.innerHTML = `<div class="flex items-center gap-3"><img src="${u.anhDaiDien||'/images/avatar_default.jpg'}" class="w-8 h-8 rounded-full"/><span class="text-sm">${u.hoTen}</span></div>`;
+                        d.onclick = () => { selectedMembers.push({id: u.maNhanVien, name: u.hoTen}); renderSelectedMembers(); };
+                        box.appendChild(d);
+                    });
+                }
+            }, 300);
+        };
+
+        function renderSelectedMembers() {
+            const box = document.getElementById('selectedMembersContainer'); box.innerHTML = '';
+            selectedMembers.forEach(m => { box.insertAdjacentHTML('beforeend', `<div class="bg-primary/10 text-primary px-3 py-1 rounded-full text-xs flex items-center gap-1">${m.name}<span onclick="removeMember(${m.id})" class="material-symbols-outlined text-xs cursor-pointer">cancel</span></div>`); });
+        }
+        window.removeMember = (id) => { selectedMembers = selectedMembers.filter(m => m.id !== id); renderSelectedMembers(); };
+
+        btnSubmitGroup.onclick = async () => {
+            if(!txtGroupName.value.trim() || !selectedMembers.length) return;
+            const res = await fetch('/api/chat/create-group', { method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify({ groupName: txtGroupName.value.trim(), creatorId: myId, memberIds: selectedMembers.map(m => m.id) }) });
+            if(res.ok) { location.reload(); }
+        };
+
+        txtSearchUser.oninput = (e) => {
+            const q = e.target.value.trim();
+            if(!q) { loadRecentConversations(); return; }
+            setTimeout(async () => {
+                const res = await fetch(`/api/chat/search?q=${encodeURIComponent(q)}&currentUserId=${myId}`);
+                if (res.ok) {
+                    const users = await res.json();
+                    allConversations = users.map(u => ({ friendId: u.maNhanVien, friendName: u.hoTen, friendAvatar: u.anhDaiDien, isGroup: false }));
+                    renderConversations();
+                }
+            }, 500);
+        };
 
         loadRecentConversations();
     </script>
