@@ -3,6 +3,7 @@
 <head>
 <meta charset="utf-8"/>
 <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Chấm công FaceID</title>
 <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
@@ -71,24 +72,17 @@
       }
     </script>
 <style>
-      .material-symbols-outlined {
-        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-      }
-      .tonal-transition { transition: background-color 0.3s ease; }
-      body { -webkit-font-smoothing: antialiased; }
+      .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+      .tonal-transition { transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+      body { -webkit-font-smoothing: antialiased; min-height: max(884px, 100dvh); }
     </style>
-<style>
-    body {
-      min-height: max(884px, 100dvh);
-    }
-  </style>
 </head>
 <body class="bg-surface font-body text-on-surface selection:bg-primary/10">
 <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl tonal-transition shadow-[0_20px_40px_rgba(0,0,0,0.04)]">
 <div class="flex justify-between items-center px-6 py-4 w-full">
 <div class="flex items-center gap-3">
 <div class="w-10 h-10 rounded-full overflow-hidden ring-2 ring-primary/10">
-<img alt="Ảnh đại diện người dùng" class="w-full h-full object-cover" data-alt="Professional headshot of a smiling Vietnamese man with short hair in a bright modern office setting" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAIBAvVDnE39qLyNHqiFuUEy8B-Iq6wCIoZNlK7ZCbL2JjbGxIbFdSQAUcc7me0EGAzPXg4Ra6s6tSjzi-ke-xyIZeOXoANFugo2aCnXCPeMxmUu1V-nU-G8WnxvuHblu1nsoAmPmse6dAB5LnjcwDpOJkBfL3tgy97ch1H8F7iqfd1q_dvTVYAUgo9Nz2oB8AzGYSLuUOdFTOtWL06AAYeLm_esYkfmDZLzDjlyL0i0ZnAZdG7kwDKLtRfhd3HrIreWfDrjpeWpk5j"/>
+<img alt="Ảnh đại diện người dùng" class="w-full h-full object-cover" src="/images/avatar_default.jpg"/>
 </div>
 <h1 class="font-headline font-bold text-2xl tracking-tight text-zinc-900">Chấm công</h1>
 </div>
@@ -109,111 +103,56 @@
 </div>
 </div>
 
-<div class="flex flex-row items-center justify-center gap-4 w-full px-2">
-    
-    <button id="btnDangKy" class="group relative w-1/2 aspect-square max-w-[160px] flex flex-col items-center justify-center gap-3 rounded-[32px] bg-gradient-to-br from-slate-600 to-slate-800 text-white shadow-xl active:scale-95 transition-all duration-300 overflow-hidden">
+<div class="flex flex-row items-center justify-center gap-4 w-full px-2" id="cameraButtonsContainer">
+    <button id="btnDangKy" class="group relative w-1/2 aspect-square max-w-[160px] flex flex-col items-center justify-center gap-3 rounded-[32px] bg-gradient-to-br from-slate-600 to-slate-800 text-white shadow-xl active:scale-95 tonal-transition overflow-hidden">
         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-[32px] z-20"></div>
-        <video id="cameraStreamDangKy" autoplay playsinline class="hidden absolute inset-0 w-full h-full object-cover z-0"></video>
-        
+        <video id="cameraStreamDangKy" autoplay playsinline class="hidden absolute inset-0 w-full h-full object-cover z-0 scale-[1.15]"></video>
+         
         <div id="uiKhuonMatDangKy" class="z-10 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-300 drop-shadow-lg">
             <span class="material-symbols-outlined text-[56px] font-light" data-icon="person_add" style="font-variation-settings: 'wght' 200;">person_add</span>
             <span class="font-headline font-semibold text-sm px-2 mt-2 leading-tight">Đăng ký<br/>FaceID</span>
         </div>
     </button>
 
-    <button id="btnChamCong" class="group relative w-1/2 aspect-square max-w-[160px] flex flex-col items-center justify-center gap-3 rounded-[32px] bg-gradient-to-br from-primary to-primary-container text-white shadow-xl active:scale-95 transition-all duration-300 overflow-hidden">
+    <button id="btnChamCong" class="group relative w-1/2 aspect-square max-w-[160px] flex flex-col items-center justify-center gap-3 rounded-[32px] bg-gradient-to-br from-primary to-primary-container text-white shadow-xl active:scale-95 tonal-transition overflow-hidden">
         <div class="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity rounded-[32px] z-20"></div>
-        <video id="cameraStreamChamCong" autoplay playsinline class="hidden absolute inset-0 w-full h-full object-cover z-0"></video>
+        <video id="cameraStreamChamCong" autoplay playsinline class="hidden absolute inset-0 w-full h-full object-cover z-0 scale-[1.15]"></video>
         
         <div id="uiKhuonMatChamCong" class="z-10 flex flex-col items-center justify-center pointer-events-none transition-opacity duration-300 drop-shadow-lg">
             <span class="material-symbols-outlined text-[56px] font-light" data-icon="faceid" style="font-variation-settings: 'wght' 200;">face</span>
             <span class="font-headline font-semibold text-sm px-2 mt-2 leading-tight">Chấm công<br/>Khuôn mặt</span>
-        </div>
+         </div>
     </button>
-
 </div>
 
 <canvas id="captureCanvas" class="hidden"></canvas>
 <p id="instructionText" class="text-on-surface-variant text-sm max-w-[280px]">Vui lòng chọn Đăng ký nếu là lần đầu, hoặc Chấm công để ghi nhận giờ làm</p>
+<button id="btnCancelCamera" class="hidden mt-2 px-6 py-2 rounded-full bg-surface-container-high text-on-surface font-bold text-sm hover:bg-surface-dim transition-colors" onclick="location.reload()">Hủy thao tác</button>
 </div>
 </section>
 
 <section class="space-y-4">
-<div class="flex justify-between items-end px-2">
-<h3 class="font-headline font-bold text-xl text-on-surface">Vị trí hiện tại</h3>
-<span class="text-primary text-sm font-medium">Cập nhật lúc 08:30</span>
-</div>
-<div class="relative h-48 w-full rounded-[32px] overflow-hidden bg-surface-container shadow-sm">
-<img alt="Bản đồ xác thực" class="w-full h-full object-cover grayscale brightness-95 contrast-75" data-alt="Modern minimalist city map interface with a blue glowing pulse dot marking current location in a metropolitan area" data-location="Ho Chi Minh City" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA4-yLnyJy-vNOBHxPot6-g8zHFB0FWIx2yo9qi8QZwcAbOLirimFSWV4T38Z8uuCO5zVRmamUoJPiidkxaGb02nTYLZAleV-3t5QLLUVIzrScqOjkxQBa0OgVomiC7rv2WP1HvCaXs_tpzhU3EvqEM_XCoRbIIDcBRXT_CClEgyHxUOB0UVo8F5X5lCeAV1YSDCtQfq0I9xLJ7s4u-eTcVXcpy5-xUS67Zp59N-UdNCcPMBtoun-K6EDtvXBbMxq7iCmg4VDY0pJl5"/>
-<div class="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent"></div>
-<div class="absolute bottom-4 left-4 right-4 bg-white/90 backdrop-blur-md rounded-2xl p-4 flex items-center gap-3">
-<div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center">
-<span class="material-symbols-outlined text-primary" data-icon="location_on" style="font-variation-settings: 'FILL' 1;">location_on</span>
-</div>
-<div>
-<p class="text-sm font-bold text-on-surface leading-tight">Tòa nhà Atelier</p>
-<p class="text-xs text-secondary">Quận 1, TP. Hồ Chí Minh</p>
-</div>
-</div>
-</div>
-</section>
-<section class="space-y-4">
-<div class="flex justify-between items-end px-2">
-<h3 class="font-headline font-bold text-xl text-on-surface">Lịch sử tuần này</h3>
-<button class="text-secondary hover:text-primary transition-colors">
-<span class="material-symbols-outlined" data-icon="calendar_month">calendar_month</span>
-</button>
-</div>
-<div class="bg-surface-container-low rounded-[32px] p-2 space-y-1">
-<div class="flex items-center justify-between p-5 bg-white rounded-[24px] shadow-sm">
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-2xl bg-zinc-50 flex flex-col items-center justify-center leading-none">
-<span class="text-[10px] font-bold text-secondary">T2</span>
-<span class="text-lg font-bold text-on-surface">12</span>
-</div>
-<div>
-<p class="text-sm font-bold text-on-surface">Thứ Hai</p>
-<p class="text-xs text-tertiary font-medium">Hoàn thành</p>
-</div>
-</div>
-<div class="text-right">
-<p class="text-sm font-bold text-on-surface">08:02 - 17:35</p>
-<p class="text-[11px] text-secondary">8h 33m làm việc</p>
-</div>
-</div>
-<div class="flex items-center justify-between p-5 hover:bg-white/50 transition-colors rounded-[24px]">
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-2xl bg-zinc-100/50 flex flex-col items-center justify-center leading-none">
-<span class="text-[10px] font-bold text-secondary">T3</span>
-<span class="text-lg font-bold text-on-surface">13</span>
-</div>
-<div>
-<p class="text-sm font-bold text-on-surface">Thứ Ba</p>
-<p class="text-xs text-tertiary font-medium">Hoàn thành</p>
-</div>
-</div>
-<div class="text-right">
-<p class="text-sm font-bold text-on-surface">07:58 - 18:10</p>
-<p class="text-[11px] text-secondary">9h 12m làm việc</p>
-</div>
-</div>
-<div class="flex items-center justify-between p-5 hover:bg-white/50 transition-colors rounded-[24px]">
-<div class="flex items-center gap-4">
-<div class="w-12 h-12 rounded-2xl bg-zinc-100/50 flex flex-col items-center justify-center leading-none">
-<span class="text-[10px] font-bold text-secondary">T4</span>
-<span class="text-lg font-bold text-on-surface">14</span>
-</div>
-<div>
-<p class="text-sm font-bold text-on-surface">Thứ Tư (Hôm nay)</p>
-<p class="text-xs text-error font-medium">Chưa có dữ liệu</p>
-</div>
-</div>
-<div class="text-right">
-<p class="text-sm font-bold text-secondary">-- : --</p>
-<p class="text-[11px] text-zinc-400">Đang chờ</p>
-</div>
-</div>
-</div>
+    <div class="flex justify-between items-end px-2">
+        <h3 class="font-headline font-bold text-xl text-on-surface">Lịch sử 7 ngày gần đây</h3>
+        <button onclick="loadHistory()" class="text-primary hover:text-primary-container transition-colors" title="Làm mới dữ liệu">
+            <span class="material-symbols-outlined">refresh</span>
+        </button>
+    </div>
+    
+    <div class="bg-surface-container-lowest rounded-[32px] p-2 shadow-[0_10px_20px_rgba(0,0,0,0.02)] border border-gray-100 overflow-hidden">
+        <table class="w-full text-left border-collapse">
+            <thead>
+                <tr class="text-secondary text-xs uppercase tracking-wider border-b border-gray-100">
+                    <th class="p-4 font-semibold">Ngày</th>
+                    <th class="p-4 font-semibold text-center">Giờ vào</th>
+                    <th class="p-4 font-semibold text-center">Giờ ra</th>
+                </tr>
+            </thead>
+            <tbody id="historyTableBody" class="divide-y divide-gray-50">
+                <tr><td colspan="3" class="p-4 text-center text-sm text-outline animate-pulse">Đang tải dữ liệu...</td></tr>
+            </tbody>
+        </table>
+    </div>
 </section>
 </main>
 
@@ -231,7 +170,7 @@
 <span class="material-symbols-outlined" data-icon="fact_check" style="font-variation-settings: 'FILL' 1;">fact_check</span>
 <span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chấm công</span>
 </a>
-<a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
+<a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="/Chat">
 <span class="material-symbols-outlined" data-icon="forum">forum</span>
 <span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chat</span>
 </a>
@@ -243,51 +182,51 @@
 </nav>
 
 <script>
-    // Elements cho Đăng ký
     const btnDangKy = document.getElementById('btnDangKy');
     const cameraStreamDangKy = document.getElementById('cameraStreamDangKy');
     const uiKhuonMatDangKy = document.getElementById('uiKhuonMatDangKy');
 
-    // Elements cho Chấm công
     const btnChamCong = document.getElementById('btnChamCong');
     const cameraStreamChamCong = document.getElementById('cameraStreamChamCong');
     const uiKhuonMatChamCong = document.getElementById('uiKhuonMatChamCong');
 
-    // Shared Elements
     const canvas = document.getElementById('captureCanvas');
     const statusText = document.getElementById('statusText');
     const statusDot = document.getElementById('statusDot');
     const instructionText = document.getElementById('instructionText');
+    const btnCancelCamera = document.getElementById('btnCancelCamera');
     
     let currentStream = null;
-    let activeAction = null; // Sẽ là 'DANG_KY' hoặc 'CHAM_CONG'
+    let activeAction = null; 
 
+    // --- LOGIC XỬ LÝ CAMERA (GIỮ NGUYÊN) ---
     async function handleCameraAction(actionType) {
         const isDangKy = actionType === 'DANG_KY';
         const activeBtn = isDangKy ? btnDangKy : btnChamCong;
+        const inactiveBtn = isDangKy ? btnChamCong : btnDangKy; 
         const activeVideo = isDangKy ? cameraStreamDangKy : cameraStreamChamCong;
         const activeUI = isDangKy ? uiKhuonMatDangKy : uiKhuonMatChamCong;
         
-        // Cấu hình URL gọi API Backend
         const apiUrl = isDangKy ? '/ChamCong/DangKyKhuonMat' : '/ChamCong/NhanDienVaChamCong';
 
-        // Xử lý xung đột nếu bấm nhầm nút kia khi camera đang bật
         if (activeAction && activeAction !== actionType) {
             alert("Vui lòng hoàn thành thao tác hiện tại hoặc làm mới trang.");
             return;
         }
 
         if (!activeAction) {
-            // --- BƯỚC 1: XIN QUYỀN VÀ MỞ CAMERA ---
             try {
+                inactiveBtn.style.display = 'none';
+                activeBtn.classList.remove('w-1/2', 'max-w-[160px]', 'aspect-square');
+                activeBtn.classList.add('w-full', 'max-w-[340px]', 'aspect-[3/4]');
+
                 currentStream = await navigator.mediaDevices.getUserMedia({ video: true });
                 activeVideo.srcObject = currentStream;
                 activeVideo.classList.remove('hidden');
                 
-                // Làm mờ UI của nút để nhường chỗ cho video
-                activeUI.classList.add('opacity-0'); 
-                
-                // Cập nhật Text chỉ dẫn
+                activeUI.classList.add('opacity-0');
+                btnCancelCamera.classList.remove('hidden');
+
                 statusText.textContent = isDangKy ? "Sẵn sàng Đăng ký" : "Sẵn sàng Chấm công";
                 statusDot.classList.replace('bg-error', 'bg-yellow-400');
                 instructionText.textContent = `Bấm lại vào khung camera để hoàn tất quá trình ${isDangKy ? 'đăng ký' : 'chấm công'}`;
@@ -296,20 +235,19 @@
                 activeAction = actionType;
             } catch (err) {
                 alert("Không thể truy cập camera: " + err.message);
+                inactiveBtn.style.display = 'flex';
+                activeBtn.classList.remove('w-full', 'max-w-[340px]', 'aspect-[3/4]');
+                activeBtn.classList.add('w-1/2', 'max-w-[160px]', 'aspect-square');
             }
         } else {
-            // --- BƯỚC 2: CHỤP ẢNH VÀ GỬI LÊN SERVER ---
             canvas.width = activeVideo.videoWidth;
             canvas.height = activeVideo.videoHeight;
             canvas.getContext('2d').drawImage(activeVideo, 0, 0, canvas.width, canvas.height);
-            
             const base64Image = canvas.toDataURL('image/jpeg').split(',')[1];
             
-            // Thông báo UI đang xử lý
             statusText.textContent = "Đang xử lý...";
             statusDot.classList.replace('bg-yellow-400', 'bg-blue-500');
 
-            // Gọi AJAX về Controller C#
             fetch(apiUrl, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -339,9 +277,41 @@
         statusDot.classList.replace('bg-yellow-400', 'bg-error');
     }
 
-    // Gán sự kiện Click
     btnDangKy.addEventListener('click', () => handleCameraAction('DANG_KY'));
     btnChamCong.addEventListener('click', () => handleCameraAction('CHAM_CONG'));
+
+    // --- LOGIC LOAD LỊCH SỬ CHẤM CÔNG (MỚI THÊM) ---
+    async function loadHistory() {
+        const tbody = document.getElementById('historyTableBody');
+        tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-sm text-outline animate-pulse">Đang tải dữ liệu...</td></tr>';
+        
+        try {
+            const res = await fetch('/ChamCong/GetLichSuChamCong');
+            const result = await res.json();
+            
+            if(result.success && result.data.length > 0) {
+                tbody.innerHTML = '';
+                result.data.forEach(item => {
+                    const tr = document.createElement('tr');
+                    tr.className = "hover:bg-gray-50 transition-colors";
+                    tr.innerHTML = `
+                        <td class="p-4 font-medium text-sm text-gray-800">${item.ngay}</td>
+                        <td class="p-4 text-center text-sm text-primary font-bold">${item.gioVao}</td>
+                        <td class="p-4 text-center text-sm text-tertiary font-bold">${item.gioRa}</td>
+                    `;
+                    tbody.appendChild(tr);
+                });
+            } else {
+                tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-sm text-outline">Chưa có dữ liệu chấm công.</td></tr>';
+            }
+        } catch(e) {
+            console.error(e);
+            tbody.innerHTML = '<tr><td colspan="3" class="p-4 text-center text-sm text-error">Lỗi kết nối khi tải dữ liệu!</td></tr>';
+        }
+    }
+
+    // Tự động chạy lấy lịch sử khi trang vừa được load
+    document.addEventListener('DOMContentLoaded', loadHistory);
 </script>
 </body>
 </html>

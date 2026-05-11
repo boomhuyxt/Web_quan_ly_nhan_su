@@ -6,7 +6,7 @@ namespace Web_quan_ly_nhan_su.Controllers
     public class HomeController : Controller
     {
         // Trỏ đến Views/Home/TongQuat.cshtml
-        public IActionResult Index()
+        public IActionResult TongQuat()
         {
             return View("TongQuat");
         }
