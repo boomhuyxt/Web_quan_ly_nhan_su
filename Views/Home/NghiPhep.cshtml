@@ -1,0 +1,201 @@
+﻿@model IEnumerable<Web_quan_ly_nhan_su.Models.NghiPhep>
+
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>Quản lý Nghỉ Phép - Atelier HR</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+        theme: {
+        extend: {
+        colors: {
+        "primary": "#0058bc",
+        "primary-container": "#0070eb",
+        "tertiary": "#006b27",
+        "outline": "#717786",
+        "error": "#ba1a1a",
+        "surface-container": "#eeeef0",
+        "surface-container-lowest": "#ffffff"
+        },
+        fontFamily: { "headline": ["Be Vietnam Pro"], "body": ["Inter"] }
+        }
+        }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-[#f9f9fb] font-body text-[#1a1c1d] antialiased">
+
+    <main class="pt-24 pb-32 px-6 max-w-5xl mx-auto space-y-8">
+        @if (TempData["Success"] != null)
+        {
+            <div class="bg-emerald-50 text-emerald-700 p-4 rounded-2xl flex items-center gap-3 border border-emerald-100 shadow-sm animate-bounce">
+                <span class="material-symbols-outlined">check_circle</span>
+                <span class="font-medium">@TempData["Success"]</span>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="bg-red-50 text-error p-4 rounded-2xl flex items-center gap-3 border border-red-100 shadow-sm">
+                <span class="material-symbols-outlined">error</span>
+                <span class="font-medium">@TempData["Error"]</span>
+            </div>
+        }
+
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <a href="/Home/TongQuat" class="w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">
+                    <span class="material-symbols-outlined text-outline">arrow_back</span>
+                </a>
+                <div>
+                    <h1 class="font-headline text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-container">Đơn nghỉ phép của tôi</h1>
+                    <p class="opacity-80 text-sm text-outline mt-1">Xem lịch sử và gửi yêu cầu nghỉ phép mới</p>
+                </div>
+            </div>
+        
+            <button onclick="toggleModal('modalTaoDon')" class="bg-primary hover:bg-primary/90 text-white px-6 py-3 rounded-2xl font-semibold flex items-center gap-2 transition-all shadow-lg shadow-primary/20">
+                <span class="material-symbols-outlined text-xl">add_circle</span>
+                Tạo đơn mới
+            </button>
+        </div>
+
+        <div class="bg-white rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.03)] border border-zinc-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-gray-50 text-outline font-medium">
+                        <tr>
+                            <th class="px-6 py-4">Loại nghỉ</th>
+                            <th class="px-6 py-4">Thời gian</th>
+                            <th class="px-6 py-4">Lý do & Minh chứng</th>
+                            <th class="px-6 py-4 text-center">Trạng thái</th>
+                            <th class="px-6 py-4 text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-primary/5 transition-colors group">
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1 bg-primary/10 text-primary rounded-lg font-bold text-[10px] uppercase tracking-wide">@item.LoaiNghi</span>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="font-medium text-[#1a1c1d]">@item.NgayBatDau.ToString("dd/MM/yyyy")</div>
+                                        <div class="text-[11px] text-outline mt-0.5">đến @item.NgayKetThuc.ToString("dd/MM/yyyy")</div>
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <div class="flex items-center gap-2">
+                                            <span class="truncate max-w-[150px] text-[#1a1c1d]" title="@item.LyDo">@item.LyDo</span>
+                                            @if (!string.IsNullOrEmpty(item.MinhChungUrl))
+                                            {
+                                                <a href="@item.MinhChungUrl" target="_blank" class="text-primary hover:text-primary-container transition-colors" title="Xem minh chứng">
+                                                    <span class="material-symbols-outlined text-[18px]">attachment</span>
+                                                </a>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="px-6 py-4 text-center">
+                                        @{
+                                            var statusClass = item.TrangThai == "Đã duyệt" ? "bg-emerald-50 text-emerald-600 ring-emerald-500/20" :
+                                                              item.TrangThai == "Từ chối" ? "bg-red-50 text-error ring-red-500/20" : "bg-amber-50 text-amber-600 ring-amber-500/20";
+                                        }
+                                        <span class="px-3 py-1.5 @statusClass rounded-xl text-[11px] font-bold ring-1">@item.TrangThai</span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        @if (item.TrangThai == "Chờ duyệt")
+                                        {
+                                            <button class="text-error opacity-0 group-hover:opacity-100 transition-opacity p-2 hover:bg-red-50 rounded-xl">
+                                                <span class="material-symbols-outlined text-[20px]">delete</span>
+                                            </button>
+                                        }
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="5" class="py-16 text-center text-outline italic">
+                                    Bạn chưa tạo đơn nào. Bấm "Tạo đơn mới" để bắt đầu.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+    <div id="modalTaoDon" class="fixed inset-0 z-50 hidden flex items-center justify-center p-4 bg-[#1a1c1d]/40 backdrop-blur-sm">
+        <div class="bg-white w-full max-w-md rounded-[28px] shadow-[0_20px_40px_rgba(0,0,0,0.08)] border border-zinc-100 overflow-hidden animate-in fade-in zoom-in duration-300">
+            <div class="p-6 space-y-4">
+                <div class="flex justify-between items-center border-b border-gray-50 pb-3">
+                    <h2 class="font-headline text-xl font-bold text-[#1a1c1d]">Đăng ký nghỉ phép</h2>
+                    <button onclick="toggleModal('modalTaoDon')" class="w-8 h-8 rounded-full bg-gray-50 flex items-center justify-center text-outline hover:text-error hover:bg-red-50 transition-colors">
+                        <span class="material-symbols-outlined text-[18px]">close</span>
+                    </button>
+                </div>
+
+                <form asp-controller="NghiPhep" asp-action="TaoMoi" method="post" enctype="multipart/form-data" class="space-y-4">
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[12px] font-bold text-outline uppercase tracking-wider">Loại nghỉ</label>
+                        <select name="LoaiNghi" required class="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-[#1a1c1d]">
+                            <option value="Nghỉ phép">Nghỉ phép </option>
+                            <option value="Nghỉ ốm">Nghỉ ốm </option>
+                            <option value="Nghỉ phụ sản">Nghỉ thai sản/Phụ sản</option>
+                        </select>
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[12px] font-bold text-outline uppercase tracking-wider">Từ ngày</label>
+                            <input type="date" name="NgayBatDau" required class="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-[#1a1c1d]">
+                        </div>
+                        <div class="flex flex-col gap-1">
+                            <label class="text-[12px] font-bold text-outline uppercase tracking-wider">Đến ngày</label>
+                            <input type="date" name="NgayKetThuc" required class="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-[#1a1c1d]">
+                        </div>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[12px] font-bold text-outline uppercase tracking-wider">Lý do cụ thể</label>
+                        <textarea name="LyDo" rows="2" placeholder="Nhập lý do nghỉ..." required class="w-full px-4 py-2.5 rounded-xl border border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium resize-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all text-[#1a1c1d]"></textarea>
+                    </div>
+
+                    <div class="flex flex-col gap-1">
+                        <label class="text-[12px] font-bold text-outline uppercase tracking-wider">File minh chứng (nếu có)</label>
+                        <input type="file" name="FileMinhChung" accept="image/*,.pdf,.doc,.docx" class="w-full px-4 py-2 rounded-xl border border-zinc-200 bg-surface-container-lowest outline-none text-sm font-medium file:mr-3 file:py-1.5 file:px-4 file:rounded-lg file:border-0 file:text-[12px] file:font-bold file:bg-primary/10 file:text-primary hover:file:bg-primary/20 transition-all cursor-pointer text-outline">
+                    </div>
+
+                    <div class="pt-3 flex items-center gap-3 border-t border-gray-50">
+                        <button type="button" onclick="toggleModal('modalTaoDon')" class="flex-1 bg-gray-100 text-[#1a1c1d] py-3 rounded-xl font-bold hover:bg-gray-200 transition-colors">
+                            Hủy
+                        </button>
+                        <button type="submit" class="flex-1 bg-primary text-white py-3 rounded-xl font-bold shadow-lg shadow-primary/20 flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors">
+                            <span class="material-symbols-outlined text-[18px]">save</span> Gửi yêu cầu
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function toggleModal(id) {
+        const modal = document.getElementById(id);
+        modal.classList.toggle('hidden');
+        }
+    </script>
+
+</body>
+</html>

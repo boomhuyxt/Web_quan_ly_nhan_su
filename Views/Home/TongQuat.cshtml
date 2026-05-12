@@ -30,8 +30,8 @@
     </style>
 </head>
 <body class="bg-[#f9f9fb] font-body text-[#1a1c1d] antialiased">
-
 <main class="pt-24 pb-32 px-6 max-w-5xl mx-auto space-y-10">
+    
     <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div class="md:col-span-2 p-8 rounded-[32px] bg-gradient-to-br from-primary to-primary-container text-white flex flex-col justify-between min-h-[200px] shadow-lg relative overflow-hidden">
             <div class="relative z-10">
@@ -69,6 +69,21 @@
         </div>
     </section>
 
+    <section class="space-y-4">
+    <h3 class="font-headline font-bold text-xl">Truy cập nhanh</h3>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <a href="/Home/NghiPhep" class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:bg-primary/5 hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 group cursor-pointer text-center">
+            <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                <span class="material-symbols-outlined text-primary text-3xl">edit_calendar</span>
+            </div>
+            <div>
+                <div class="font-bold text-[#1a1c1d]">Nghỉ Phép</div>
+                <div class="text-[11px] text-outline mt-1">Quản lý & Duyệt đơn</div>
+            </div>
+        </a>
+    </div>
+</section>
+
     <section class="space-y-6">
         <div class="flex justify-between items-center">
             <h3 class="font-headline font-bold text-xl">Tin nhắn mới (2 giờ qua)</h3>
@@ -78,6 +93,7 @@
             <div class="text-center text-sm text-outline animate-pulse py-8">Đang tải dữ liệu...</div>
         </div>
     </section>
+
 </main>
 
 <script>
