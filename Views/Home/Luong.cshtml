@@ -1,0 +1,117 @@
+﻿@model IEnumerable<Web_quan_ly_nhan_su.Models.Luong>
+
+@{
+    ViewData["Title"] = "Quản lý Lương - Atelier HR";
+}
+
+<!DOCTYPE html>
+<html class="light" lang="vi">
+<head>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+    <title>@ViewData["Title"]</title>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
+    <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+    <script>
+        tailwind.config = {
+        theme: {
+        extend: {
+        colors: {
+        "primary": "#0058bc",
+        "primary-container": "#0070eb",
+        "tertiary": "#006b27",
+        "outline": "#717786",
+        "error": "#ba1a1a",
+        "surface-container": "#eeeef0",
+        "surface-container-lowest": "#ffffff"
+        },
+        fontFamily: { "headline": ["Be Vietnam Pro"], "body": ["Inter"] }
+        }
+        }
+        }
+    </script>
+    <style>
+        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    </style>
+</head>
+<body class="bg-[#f9f9fb] font-body text-[#1a1c1d] antialiased">
+
+    <main class="pt-24 pb-32 px-6 max-w-5xl mx-auto space-y-8">
+        
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div class="flex items-center gap-4">
+                <a href="/Home/TongQuat" class="w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">
+                    <span class="material-symbols-outlined text-outline">arrow_back</span>
+                </a>
+                <div>
+                    <h1 class="font-headline text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-container">Lịch sử nhận lương</h1>
+                    <p class="opacity-80 text-sm text-outline mt-1">Theo dõi chi tiết thu nhập hàng tháng của bạn</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.03)] border border-zinc-100 overflow-hidden">
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-sm whitespace-nowrap">
+                    <thead class="bg-gray-50 text-outline font-medium">
+                        <tr>
+                            <th class="px-6 py-4">Tháng/Năm</th>
+                            <th class="px-6 py-4">Lương cơ bản</th>
+                            <th class="px-6 py-4">Thưởng</th>
+                            <th class="px-6 py-4 text-error">Khấu trừ</th>
+                            <th class="px-6 py-4 text-primary font-bold">Tổng lương</th>
+                            <th class="px-6 py-4 text-right">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-50">
+                        @if (Model != null && Model.Any())
+                        {
+                            foreach (var item in Model)
+                            {
+                                <tr class="hover:bg-primary/5 transition-colors group">
+                                    <td class="px-6 py-4">
+                                        <div class="font-bold text-[#1a1c1d]">Tháng @item.Thang</div>
+                                        <div class="text-[11px] text-outline mt-0.5">Năm @item.Nam</div>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-[#1a1c1d]">
+                                        @item.LuongCoBan.ToString("N0") <span class="text-[10px] text-outline">VNĐ</span>
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-tertiary">
+                                        +@item.Thuong.ToString("N0")
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-error">
+                                        -@item.KhauTru.ToString("N0")
+                                    </td>
+                                    <td class="px-6 py-4">
+                                        <span class="px-3 py-1.5 bg-primary/10 text-primary rounded-xl font-bold text-[13px] ring-1 ring-primary/20">
+                                            @item.TongLuong.ToString("N0") VNĐ
+                                        </span>
+                                    </td>
+                                    <td class="px-6 py-4 text-right">
+                                        <button class="text-outline hover:text-primary p-2 transition-colors" title="Xem chi tiết phiếu lương">
+                                            <span class="material-symbols-outlined text-[20px]">description</span>
+                                        </button>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="6" class="py-16 text-center text-outline italic">
+                                    <div class="flex flex-col items-center justify-center gap-3">
+                                        <span class="material-symbols-outlined text-5xl opacity-40">payments</span>
+                                        <p class="font-medium text-[15px]">Chưa có dữ liệu lương được cập nhật.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </main>
+
+</body>
+</html>

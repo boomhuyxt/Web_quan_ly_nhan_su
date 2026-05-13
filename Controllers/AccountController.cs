@@ -7,6 +7,7 @@ using System.Text;
 using System.Security.Claims;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 namespace Web_quan_ly_nhan_su.Controllers
 {
@@ -42,38 +43,50 @@ namespace Web_quan_ly_nhan_su.Controllers
         {
             if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
             {
-                // 1. Tìm nhân viên theo Email 
-                var nhanVien = _context.NhanVien.FirstOrDefault(nv => nv.Email == email);
+                // Tìm nhân viên theo Email và nạp kèm bảng VaiTro để lấy MaCode [cite: 10, 23]
+                var nhanVien = _context.NhanVien
+                    .Include(nv => nv.NhanVienVaiTro)
+                    .ThenInclude(nvvt => nvvt.VaiTro)
+                    .FirstOrDefault(nv => nv.Email == email); 
 
                 if (nhanVien != null)
                 {
-                    // 2. Kiểm tra mật khẩu 
                     string hashedInputPassword = ComputeSha256Hash(password);
 
                     if (nhanVien.MatKhauHash == hashedInputPassword)
                     {
-                        // 3. TẠO DANH SÁCH CLAIMS 
+                        // 1. TẠO DANH SÁCH CLAIMS CƠ BẢN
                         var claims = new List<Claim>
                         {
                             new Claim(ClaimTypes.Name, nhanVien.HoTen),
-                            // QUAN TRỌNG: Lưu Email để NhanVienController lấy thông tin cập nhật
-                            new Claim(ClaimTypes.Email, nhanVien.Email), 
-                            // Lưu ID để hỗ trợ các chức năng khác nếu cần
+                            new Claim(ClaimTypes.Email, nhanVien.Email),
                             new Claim(ClaimTypes.NameIdentifier, nhanVien.MaNhanVien.ToString())
-                        };
+                        }; 
+
+                        // 2. NẠP TẤT CẢ VAI TRÒ (ADMIN, KETOAN...) VÀO CLAIMS 
+                        if (nhanVien.NhanVienVaiTro != null)
+                        {
+                            foreach (var nvvt in nhanVien.NhanVienVaiTro)
+                            {
+                                if (nvvt.VaiTro != null && !string.IsNullOrEmpty(nvvt.VaiTro.MaCode))
+                                {
+                                    // Thêm Role vào Cookie để dùng User.IsInRole("...") sau này
+                                     claims.Add(new Claim(ClaimTypes.Role, nvvt.VaiTro.MaCode)); 
+                                }
+                            }
+                        }
 
                         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                         var authProperties = new AuthenticationProperties
                         {
-                            IsPersistent = true, // Ghi nhớ đăng nhập
+                            IsPersistent = true,
                             ExpiresUtc = DateTimeOffset.UtcNow.AddDays(7)
                         };
 
-                        // 4. Đăng nhập bằng Cookie 
                         await HttpContext.SignInAsync(
                             CookieAuthenticationDefaults.AuthenticationScheme,
                             new ClaimsPrincipal(claimsIdentity),
-                            authProperties);
+                            authProperties); 
 
                         return RedirectToAction("TongQuat", "Account");
                     }
@@ -90,18 +103,14 @@ namespace Web_quan_ly_nhan_su.Controllers
         [HttpGet]
         public IActionResult TongQuat()
         {
-            // Kiểm tra quyền truy cập thông qua Identity 
             if (!User.Identity.IsAuthenticated) return RedirectToAction("Login", "Account");
-
-           // Chỉ định đường dẫn tới thư mục Home 
             return View("~/Views/Home/TongQuat.cshtml");
         }
 
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-           // Đăng xuất và xóa Cookie 
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme); 
             return RedirectToAction("Login", "Account");
         }
     }

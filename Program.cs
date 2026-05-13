@@ -33,7 +33,7 @@ namespace Web_quan_ly_nhan_su
                 {
                     options.LoginPath = "/Account/Login";
                     options.LogoutPath = "/Account/Logout";
-                    options.AccessDeniedPath = "/Account/AccessDenied";
+                    options.AccessDeniedPath = "/Account/AccessDenied"; // Đường dẫn khi bị chặn quyền ADMIN
                     options.ExpireTimeSpan = TimeSpan.FromDays(7); // Duy trì đăng nhập 7 ngày
                 });
 
@@ -69,14 +69,14 @@ namespace Web_quan_ly_nhan_su
             // 6. Kích hoạt Session (Phải nằm sau UseRouting và trước UseAuthentication)
             app.UseSession();
 
-            // 7. Kích hoạt Xác thực và Phân quyền
+            // 7. Kích hoạt Xác thực và Phân quyền (Thứ tự Authentication trước Authorization là bắt buộc)
             app.UseAuthentication();
             app.UseAuthorization();
 
             // 8. Mở đường dẫn kết nối "/chathub" cho Frontend gọi tới
             app.MapHub<ChatHub>("/chathub");
 
-            // 9. Cấu hình Route (Trỏ mặc định về Login)
+            // 9. Cấu hình Route (Trỏ mặc định về trang Login của Account)
             app.MapControllerRoute(
                 name: "default",
                 pattern: "{controller=Account}/{action=Login}/{id?}");

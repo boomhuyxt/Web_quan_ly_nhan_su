@@ -21,6 +21,15 @@
     // Lấy tên Action hiện tại để làm sáng (Active) nút dưới thanh điều hướng
     var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
 }
+
+@* CHỈ HIỂN THỊ NÚT CÀI ĐẶT NẾU LÀ ADMIN *@
+@if (User.Identity.IsAuthenticated && User.IsInRole("ADMIN"))
+{
+    <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(currentAction == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
+        <span class="material-symbols-outlined" style="@(currentAction == "CaiDat" ? "font-variation-settings: 'FILL' 1;" : "")">settings</span>
+        <span class="text-[11px] font-medium mt-1">Cài đặt</span>
+    </a>
+}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -157,10 +166,14 @@
             <span class="text-[11px] font-medium mt-1">Chat</span>
         </a>
 
-        <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(currentAction == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
-            <span class="material-symbols-outlined" style="@(currentAction == "CaiDat" ? "font-variation-settings: 'FILL' 1;" : "")">settings</span>
-            <span class="text-[11px] font-medium mt-1">Cài đặt</span>
-        </a>
+        @* CHỈ HIỂN THỊ NÚT CÀI ĐẶT NẾU LÀ ADMIN *@
+        @if (User.Identity.IsAuthenticated && User.IsInRole("ADMIN"))
+        {
+            <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(currentAction == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
+                <span class="material-symbols-outlined" style="@(currentAction == "CaiDat" ? "font-variation-settings: 'FILL' 1;" : "")">settings</span>
+                <span class="text-[11px] font-medium mt-1">Cài đặt</span>
+            </a>
+        }
     </nav>
 
     <script>

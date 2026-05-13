@@ -18,6 +18,7 @@
                     colors: {
                         "outline": "#717786",
                         "primary": "#0058bc",
+                        "primary-container": "#0070eb",
                         "surface-container": "#eeeef0",
                         "surface-container-lowest": "#ffffff",
                         "surface-container-low": "#f3f3f5",
@@ -39,7 +40,6 @@
     <style>
         .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
         .tonal-transition { transition: background-color 0.3s ease; }
-        /* Ẩn thanh cuộn nhưng vẫn cho phép cuộn */
         .no-scrollbar::-webkit-scrollbar { display: none; }
         .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
         body { min-height: max(884px, 100dvh); background-color: #f9f9fb;}
@@ -47,7 +47,7 @@
 </head>
 <body class="font-body text-on-surface selection:bg-primary/10">
 
-    <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] px-6 py-4 flex justify-between items-center">
+    <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0_20px_40_rgba(0,0,0,0.04)] px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-4">
             <h1 class="font-headline font-bold text-2xl tracking-tight text-zinc-900">Nhân viên</h1>
         </div>
@@ -60,11 +60,22 @@
 
     <main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
         <section class="space-y-6 mb-8">
-            <div class="relative">
-                <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
-                    <span class="material-symbols-outlined text-outline">search</span>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <div class="relative flex-1">
+                    <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
+                        <span class="material-symbols-outlined text-outline">search</span>
+                    </div>
+                    <input id="txtSearchNhanVien" class="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-outline shadow-sm" placeholder="Tìm kiếm theo Tên hoặc Email..." type="text"/>
                 </div>
-                <input id="txtSearchNhanVien" class="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-outline shadow-sm" placeholder="Tìm kiếm theo Tên hoặc Email..." type="text"/>
+
+                @* CHỈ HIỂN THỊ NÚT LƯƠNG NẾU LÀ ADMIN HOẶC KẾ TOÁN *@
+                @if (User.Identity.IsAuthenticated && (User.IsInRole("ADMIN") || User.IsInRole("KETOAN")))
+                {
+                    <a href="/Home/Luong" class="flex items-center justify-center gap-2 px-6 py-3.5 bg-white border border-gray-200 text-tertiary rounded-2xl font-bold hover:bg-gray-50 transition-all shadow-sm shrink-0">
+                        <span class="material-symbols-outlined text-[20px]">payments</span>
+                        <span class="text-sm">Lương</span>
+                    </a>
+                }
             </div>
             
             <div id="departmentFilters" class="flex gap-2 overflow-x-auto no-scrollbar pb-2 cursor-grab active:cursor-grabbing select-none">
@@ -97,7 +108,7 @@
         </section>
     </main>
 
-    <nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl shadow-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8 w-full">
+    <nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl shadow-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8">
         <a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="/Home/TongQuat">
             <span class="material-symbols-outlined">dashboard</span>
             <span class="font-['Inter'] text-[11px] font-medium tracking-wide">Tổng quan</span>
@@ -124,12 +135,10 @@
         let allEmployees = [];
         let departments = [];
         let currentSearch = "";
-        let currentDeptId = null; // null nghĩa là xem "Tất cả"
+        let currentDeptId = null;
 
-        // Hàm chạy khi tải trang
         async function loadData() {
             try {
-                // 1. Tải danh sách phòng ban
                 const resMaster = await fetch('/api/quanlynhanvien/master-data');
                 if (resMaster.ok) {
                     const dataMaster = await resMaster.json();
@@ -138,15 +147,10 @@
                         renderDepartmentFilters();
                     }
                 }
-
-                // 2. Tải danh sách nhân viên
                 await fetchEmployees();
-            } catch(e) { 
-                console.error("Lỗi khởi tạo:", e); 
-            }
+            } catch(e) { console.error("Lỗi khởi tạo:", e); }
         }
 
-        // Gọi API lấy nhân viên (Có truyền từ khóa Tìm kiếm)
         async function fetchEmployees() {
             try {
                 const res = await fetch(`/api/quanlynhanvien/danh-sach?q=${encodeURIComponent(currentSearch)}`);
@@ -157,45 +161,34 @@
                         renderEmployees();
                     }
                 }
-            } catch(e) { 
-                console.error("Lỗi lấy nhân viên:", e); 
-            }
+            } catch(e) { console.error("Lỗi lấy nhân viên:", e); }
         }
 
-        // Vẽ các nút Lọc Phòng Ban
         function renderDepartmentFilters() {
             const container = document.getElementById('departmentFilters');
             container.innerHTML = '';
-
-            // Nút "Tất cả"
             const allBtn = document.createElement('button');
-            allBtn.className = `whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all pointer-events-auto ${currentDeptId === null ? 'bg-primary text-white shadow-sm' : 'bg-white text-on-surface-variant border border-gray-200 hover:bg-gray-50'}`;
+            allBtn.className = `whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${currentDeptId === null ? 'bg-primary text-white shadow-sm' : 'bg-white text-on-surface-variant border border-gray-200 hover:bg-gray-50'}`;
             allBtn.innerText = 'Tất cả';
             allBtn.onclick = () => { currentDeptId = null; renderDepartmentFilters(); renderEmployees(); };
             container.appendChild(allBtn);
 
-            // Nút cho từng phòng ban
             departments.forEach(p => {
                 const btn = document.createElement('button');
-                btn.className = `whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all pointer-events-auto ${currentDeptId === p.maPhongBan ? 'bg-primary text-white shadow-sm' : 'bg-white text-on-surface-variant border border-gray-200 hover:bg-gray-50'}`;
+                btn.className = `whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${currentDeptId === p.maPhongBan ? 'bg-primary text-white shadow-sm' : 'bg-white text-on-surface-variant border border-gray-200 hover:bg-gray-50'}`;
                 btn.innerText = p.tenPhongBan;
                 btn.onclick = () => { currentDeptId = p.maPhongBan; renderDepartmentFilters(); renderEmployees(); };
                 container.appendChild(btn);
             });
         }
 
-        // Vẽ danh sách Nhân Viên
         function renderEmployees() {
             const list = document.getElementById('employeeList');
             list.innerHTML = '';
-
-            // Lọc theo phòng ban (Nếu đã chọn phòng ban)
             let filtered = allEmployees;
             if (currentDeptId !== null) {
                 filtered = allEmployees.filter(nv => nv.maPhongBan === currentDeptId);
             }
-
-            // Gắn số liệu
             document.getElementById('txtTongNhanSu').innerText = filtered.length;
 
             if (filtered.length === 0) {
@@ -204,7 +197,6 @@
             }
 
             filtered.forEach(nv => {
-                // Xác định trạng thái Hoạt động / Đã khóa
                 const isActive = (!nv.trangThai || nv.trangThai === 1);
                 const statusClass = isActive ? 'bg-tertiary/10 text-tertiary' : 'bg-red-50 text-error';
                 const statusText = isActive ? 'Đang hoạt động' : 'Đã khóa';
@@ -231,51 +223,23 @@
             });
         }
 
-        // ==========================================
-        // LOGIC KÉO (DRAG) ĐỂ CUỘN THANH PHÒNG BAN MƯỢT MÀ
-        // ==========================================
+        // Logic kéo cuộn mượt mà
         const slider = document.getElementById('departmentFilters');
-        let isDown = false;
-        let startX;
-        let scrollLeft;
+        let isDown = false, startX, scrollLeft;
+        slider.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; });
+        slider.addEventListener('mouseleave', () => { isDown = false; });
+        slider.addEventListener('mouseup', () => { isDown = false; });
+        slider.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 2; slider.scrollLeft = scrollLeft - walk; });
 
-        slider.addEventListener('mousedown', (e) => {
-            isDown = true;
-            startX = e.pageX - slider.offsetLeft;
-            scrollLeft = slider.scrollLeft;
-        });
-        
-        slider.addEventListener('mouseleave', () => {
-            isDown = false;
-        });
-        
-        slider.addEventListener('mouseup', () => {
-            isDown = false;
-        });
-        
-        slider.addEventListener('mousemove', (e) => {
-            if (!isDown) return;
-            e.preventDefault();
-            const x = e.pageX - slider.offsetLeft;
-            const walk = (x - startX) * 2; // Tốc độ trượt
-            slider.scrollLeft = scrollLeft - walk;
-        });
-
-        // Logic Tìm kiếm (Debounce - đợi gõ xong 400ms mới gọi API để đỡ lag web)
+        // Logic tìm kiếm
         let searchTimeout = null;
         document.getElementById('txtSearchNhanVien').addEventListener('input', (e) => {
             currentSearch = e.target.value.trim();
             clearTimeout(searchTimeout);
-            
-            // Hiện chữ đang tìm kiếm
             document.getElementById('employeeList').innerHTML = '<div class="text-center text-outline py-8 text-sm animate-pulse">Đang tìm kiếm...</div>';
-
-            searchTimeout = setTimeout(() => {
-                fetchEmployees();
-            }, 400);
+            searchTimeout = setTimeout(() => { fetchEmployees(); }, 400);
         });
 
-        // Kích hoạt load dữ liệu khi vào web
         document.addEventListener('DOMContentLoaded', loadData);
     </script>
 </body>

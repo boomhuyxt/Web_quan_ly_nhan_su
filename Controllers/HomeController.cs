@@ -1,7 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
 using System.Linq; // Cần thiết để sử dụng .Where, .OrderByDescending
+using System.Security.Claims;
 using Web_quan_ly_nhan_su.Context;
 using Web_quan_ly_nhan_su.Models; // Cần thiết để nhận dạng model NghiPhep
 
@@ -53,6 +54,9 @@ namespace Web_quan_ly_nhan_su.Controllers
         }
 
         // 6. Trỏ đến Views/Home/CaiDat.cshtml
+        [HttpGet]
+        // Chỉ cho phép người dùng có Role là "ADMIN" truy cập
+        [Authorize(Roles = "ADMIN")]
         public IActionResult CaiDat()
         {
             ViewData["PageHeader"] = "Cài đặt";
@@ -88,5 +92,30 @@ namespace Web_quan_ly_nhan_su.Controllers
             // Truyền danh sách qua View (file Views/Home/NghiPhep.cshtml) 
             return View(danhSachDon);
         }
+
+
+        // Trong HomeController.cs
+
+        [HttpGet]
+        // Chỉ cho phép người dùng có vai trò ADMIN hoặc KETOAN truy cập 
+        [Authorize(Roles = "ADMIN,KETOAN")]
+        public IActionResult Luong()
+        {
+             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier); 
+
+    if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int maNhanVien))
+            {
+                 return RedirectToAction("Login", "Account"); 
+    }
+
+            var danhSachLuong = _context.Luong
+                                        .Where(l => l.MaNhanVien == maNhanVien)
+                                        .OrderByDescending(l => l.Nam)
+                                        .ThenByDescending(l => l.Thang)
+                                        .ToList(); 
+
+            ViewData["PageHeader"] = "Phiếu lương cá nhân"; 
+            return View(danhSachLuong); 
+}
     }
 }
