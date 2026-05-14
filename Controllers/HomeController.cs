@@ -1,10 +1,10 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System.Linq; // Cần thiết để sử dụng .Where, .OrderByDescending
+using System.Linq;
 using System.Security.Claims;
 using Web_quan_ly_nhan_su.Context;
-using Web_quan_ly_nhan_su.Models; // Cần thiết để nhận dạng model NghiPhep
+using Web_quan_ly_nhan_su.Models;
 
 namespace Web_quan_ly_nhan_su.Controllers
 {
@@ -21,7 +21,6 @@ namespace Web_quan_ly_nhan_su.Controllers
         // 1. KHI VỪA MỞ WEB, TỰ ĐỘNG CHUYỂN SANG TRANG TỔNG QUAN
         public IActionResult Index()
         {
-            // Sửa lại thành "TongQuat" cho khớp với tên Action bên dưới
             return RedirectToAction("TongQuat");
         }
 
@@ -55,12 +54,20 @@ namespace Web_quan_ly_nhan_su.Controllers
 
         // 6. Trỏ đến Views/Home/CaiDat.cshtml
         [HttpGet]
-        // Chỉ cho phép người dùng có Role là "ADMIN" truy cập
         [Authorize(Roles = "ADMIN")]
         public IActionResult CaiDat()
         {
-            ViewData["PageHeader"] = "Cài đặt";
-            return View();
+            ViewData["PageHeader"] = "Cài đặt & Quản trị";
+
+            // TÌM LỖI LÀ Ở ĐÂY: Truy vấn toàn bộ Đơn xin nghỉ phép kèm thông tin Nhân viên
+            var danhSachDon = _context.NghiPhep
+                                      .Include(n => n.NhanVien) // Lấy thông tin họ tên, avatar
+                                      .OrderByDescending(n => n.TrangThai == "Chờ duyệt") // Đơn chờ duyệt ưu tiên lên đầu
+                                      .ThenByDescending(n => n.NgayBatDau) // Sau đó sắp xếp theo ngày
+                                      .ToList();
+
+            // Truyền danh sách này sang View để giao diện có data mà render (thẻ @foreach)
+            return View(danhSachDon);
         }
 
         // 7. Trỏ đến Views/Home/ThongTinUser.cshtml
@@ -89,33 +96,28 @@ namespace Web_quan_ly_nhan_su.Controllers
                                       .ToList();
 
             ViewData["PageHeader"] = "Nghỉ phép";
-            // Truyền danh sách qua View (file Views/Home/NghiPhep.cshtml) 
             return View(danhSachDon);
         }
 
-
-        // Trong HomeController.cs
-
-        [HttpGet]
-        // Chỉ cho phép người dùng có vai trò ADMIN hoặc KETOAN truy cập 
-        [Authorize(Roles = "ADMIN,KETOAN")]
         public IActionResult Luong()
         {
-             var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier); 
+            // 1. Lấy MaNhanVien từ Identity Cookie an toàn như trang Nghỉ phép
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
 
-    if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int maNhanVien))
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int maNhanVien))
             {
-                 return RedirectToAction("Login", "Account"); 
-    }
+                return RedirectToAction("Login", "Account");
+            }
 
+            // 2. Truy vấn danh sách lương của nhân viên từ model Luong
             var danhSachLuong = _context.Luong
                                         .Where(l => l.MaNhanVien == maNhanVien)
                                         .OrderByDescending(l => l.Nam)
                                         .ThenByDescending(l => l.Thang)
-                                        .ToList(); 
+                                        .ToList();
 
-            ViewData["PageHeader"] = "Phiếu lương cá nhân"; 
-            return View(danhSachLuong); 
-}
+            ViewData["PageHeader"] = "Phiếu lương cá nhân";
+            return View(danhSachLuong);
+        }
     }
 }

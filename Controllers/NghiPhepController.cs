@@ -7,6 +7,7 @@ using System.Security.Claims; // Bắt buộc thêm thư viện này để đọ
 using System.Threading.Tasks;
 using Web_quan_ly_nhan_su.Context;
 using Web_quan_ly_nhan_su.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace Web_quan_ly_nhan_su.Controllers
 {
@@ -116,6 +117,23 @@ namespace Web_quan_ly_nhan_su.Controllers
             }
 
             return RedirectToAction("Index");
+        }
+
+        [HttpGet]
+        // Bạn có thể thêm phân quyền [Authorize(Roles = "ADMIN")] nếu chỉ muốn Admin xem hết
+        public IActionResult TatCaDonNghiPhep()
+        {
+            // Truy vấn tất cả các đơn nghỉ phép từ Database
+            // Sử dụng .Include(n => n.NhanVien) để lấy thông tin họ tên nhân viên gửi đơn
+            var tatCaDon = _context.NghiPhep
+                                   .Include(n => n.NhanVien)
+                                   .OrderByDescending(n => n.Id) // Đơn mới nhất lên đầu
+                                   .ToList();
+
+            ViewData["PageHeader"] = "Quản lý toàn bộ đơn nghỉ phép";
+
+            // Trả về View cùng danh sách dữ liệu
+            return View(tatCaDon);
         }
     }
 }
