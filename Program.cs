@@ -52,6 +52,9 @@ namespace Web_quan_ly_nhan_su
             // 5. Kích hoạt dịch vụ SignalR trên máy chủ để chạy Chat Real-time
             builder.Services.AddSignalR();
 
+            // Đăng ký dịch vụ HttpClient cho toàn bộ hệ thống
+            builder.Services.AddHttpClient();
+
             var app = builder.Build();
 
             // Cấu hình Pipeline (Middleware)

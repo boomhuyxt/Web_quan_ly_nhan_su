@@ -21,15 +21,6 @@
     // Lấy tên Action hiện tại để làm sáng (Active) nút dưới thanh điều hướng
     var currentAction = ViewContext.RouteData.Values["Action"]?.ToString();
 }
-
-@* CHỈ HIỂN THỊ NÚT CÀI ĐẶT NẾU LÀ ADMIN *@
-@if (User.Identity.IsAuthenticated && User.IsInRole("ADMIN"))
-{
-    <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(currentAction == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
-        <span class="material-symbols-outlined" style="@(currentAction == "CaiDat" ? "font-variation-settings: 'FILL' 1;" : "")">settings</span>
-        <span class="text-[11px] font-medium mt-1">Cài đặt</span>
-    </a>
-}
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -96,7 +87,6 @@
 
             <h1 class="font-headline font-bold text-2xl tracking-tight text-zinc-900">@ViewData["PageHeader"]</h1>
         </div>
-    
     </header>
 
     <main class="pt-24 px-6 max-w-5xl mx-auto">
@@ -105,9 +95,46 @@
 
     @if (ViewData["HideFloatingAI"] == null)
     {
-        <button class="fixed right-6 bottom-32 w-16 h-16 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl z-[60] active:scale-90 transition-transform hover:shadow-primary/20 hover:shadow-xl">
-            <span class="material-symbols-outlined text-[32px]" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
+        <button id="floatingAiButton" onclick="toggleAiChat()" class="fixed right-6 bottom-32 w-16 h-16 bg-zinc-950 text-white rounded-full flex items-center justify-center shadow-2xl z-[60] hover:scale-105 active:scale-95 transition-all hover:shadow-primary/20 hover:shadow-xl group">
+            <span class="material-symbols-outlined text-[32px] group-hover:animate-pulse" style="font-variation-settings: 'FILL' 1;">smart_toy</span>
         </button>
+
+        <div id="aiChatWindow" class="hidden fixed right-6 bottom-32 w-80 bg-white rounded-3xl shadow-2xl z-[70] overflow-hidden flex-col border border-gray-100 transition-all transform origin-bottom-right">
+            
+            <div class="bg-gradient-to-r from-primary to-primary-container p-4 flex justify-between items-center text-white shadow-sm">
+                <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
+                        <span class="material-symbols-outlined text-[20px]">smart_toy</span>
+                    </div>
+                    <div>
+                        <h4 class="font-bold text-sm">Trợ lý AI Atelier</h4>
+                        <p class="text-[10px] text-blue-100">Đang trực tuyến</p>
+                    </div>
+                </div>
+                <button onclick="toggleAiChat()" class="w-8 h-8 rounded-full hover:bg-white/20 flex items-center justify-center transition-colors">
+                    <span class="material-symbols-outlined text-[20px]">close</span>
+                </button>
+            </div>
+
+            <div id="aiChatBody" class="p-4 h-80 overflow-y-auto flex flex-col gap-4 bg-gray-50/50">
+                <div class="flex gap-2 w-[85%]">
+                    <div class="w-7 h-7 shrink-0 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
+                        <span class="material-symbols-outlined text-[14px]">smart_toy</span>
+                    </div>
+                    <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-100 shadow-sm text-sm text-gray-800 leading-relaxed">
+                        Xin chào @(User.Identity?.Name ?? "bạn")! Mình là trợ lý AI tích hợp Gemini. Mình có thể giúp gì cho bạn hôm nay?
+                    </div>
+                </div>
+            </div>
+
+            <div class="p-3 bg-white border-t border-gray-100 flex items-center gap-2">
+                <input type="text" id="aiChatInput" placeholder="Nhập câu hỏi tại đây..." class="flex-1 bg-gray-50 border border-gray-200 focus:ring-2 focus:ring-primary/20 focus:border-primary rounded-full px-4 py-2.5 text-sm outline-none transition-all" onkeypress="handleAiChatEnter(event)">
+                <button onclick="sendAiMessage()" class="w-10 h-10 rounded-full bg-primary text-white flex items-center justify-center shadow-md hover:bg-primary-container transition-all shrink-0 active:scale-90">
+                    <span class="material-symbols-outlined text-[18px]">send</span>
+                </button>
+            </div>
+
+        </div>
     }
 
     @if (TempData["SuccessMessage"] != null)
@@ -145,7 +172,6 @@
     }
 
     <nav class="fixed bottom-0 w-full z-50 bg-white/80 backdrop-blur-2xl rounded-t-[32px] flex justify-around items-center px-4 py-3 pb-8 shadow-2xl">
-        
         <a asp-controller="Home" asp-action="TongQuat" class="flex flex-col items-center p-2 @(currentAction == "TongQuat" || currentAction == "Index" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
             <span class="material-symbols-outlined" style="@(currentAction == "TongQuat" || currentAction == "Index" ? "font-variation-settings: 'FILL' 1;" : "")">dashboard</span>
             <span class="text-[11px] font-medium mt-1">Tổng quan</span>
@@ -166,7 +192,6 @@
             <span class="text-[11px] font-medium mt-1">Chat</span>
         </a>
 
-        @* CHỈ HIỂN THỊ NÚT CÀI ĐẶT NẾU LÀ ADMIN *@
         @if (User.Identity.IsAuthenticated && User.IsInRole("ADMIN"))
         {
             <a asp-controller="Home" asp-action="CaiDat" class="flex flex-col items-center p-2 @(currentAction == "CaiDat" ? "text-blue-600 bg-blue-50/50 rounded-2xl px-4" : "text-zinc-400 hover:text-blue-500 transition-colors")">
@@ -193,6 +218,113 @@
         });
         }
         });
+
+        // ================= XỬ LÝ KHUNG CHAT AI =================
+        function toggleAiChat() {
+        const chatWin = document.getElementById('aiChatWindow');
+        const chatBtn = document.getElementById('floatingAiButton');
+
+        if(chatWin.classList.contains('hidden')) {
+        // Đang ẩn -> Mở khung chat, ẩn nút tròn
+        chatWin.classList.remove('hidden');
+        chatWin.classList.add('flex');
+                
+        if(chatBtn) {
+        chatBtn.classList.add('hidden');
+        chatBtn.classList.remove('flex');
+        }
+                
+        document.getElementById('aiChatInput').focus();
+        } else {
+        // Đang mở -> Đóng khung chat, hiện lại nút tròn
+        chatWin.classList.add('hidden');
+        chatWin.classList.remove('flex');
+                
+        if(chatBtn) {
+        chatBtn.classList.remove('hidden');
+        chatBtn.classList.add('flex');
+        }
+        }
+        }
+
+        function handleAiChatEnter(e) {
+        if (e.key === 'Enter') sendAiMessage();
+        }
+
+        async function sendAiMessage() {
+        const input = document.getElementById('aiChatInput');
+        const text = input.value.trim();
+        if (!text) return;
+
+        const body = document.getElementById('aiChatBody');
+            
+        // Hiện tin nhắn người dùng
+        body.insertAdjacentHTML('beforeend', `
+        <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] self-end text-sm leading-relaxed">
+        ${text}
+        </div>
+        `);
+        input.value = '';
+        body.scrollTop = body.scrollHeight;
+
+        // Hiện trạng thái AI đang tải
+        const loadingId = 'loading-' + Date.now();
+        body.insertAdjacentHTML('beforeend', `
+        <div id="${loadingId}" class="flex gap-2 w-[85%]">
+        <div class="w-7 h-7 shrink-0 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
+        <span class="material-symbols-outlined text-[14px]">smart_toy</span>
+        </div>
+        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-100 shadow-sm text-sm text-outline flex items-center gap-2">
+        <span class="material-symbols-outlined animate-spin text-[16px]">hourglass_empty</span>
+        Đang suy nghĩ...
+        </div>
+        </div>
+        `);
+        body.scrollTop = body.scrollHeight;
+
+        try {
+        // Gọi API tới C# Controller
+        const res = await fetch('/api/Ai/Chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ message: text }) // Chuyển câu hỏi thành JSON
+        });
+                
+        const data = await res.json();
+                
+        // Xóa biểu tượng loading
+        document.getElementById(loadingId).remove();
+
+        if(data.success) {
+        // Hiện câu trả lời từ Gemini
+        body.insertAdjacentHTML('beforeend', `
+        <div class="flex gap-2 w-[85%]">
+        <div class="w-7 h-7 shrink-0 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
+        <span class="material-symbols-outlined text-[14px]">smart_toy</span>
+        </div>
+        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-100 shadow-sm text-sm text-gray-800 leading-relaxed break-words">
+        ${data.reply}
+        </div>
+        </div>
+        `);
+        } else {
+        body.insertAdjacentHTML('beforeend', `
+        <div class="bg-red-50 text-error p-3 rounded-2xl rounded-tl-none border border-red-100 shadow-sm max-w-[85%] self-start text-sm">
+        ${data.reply}
+        </div>
+        `);
+        }
+
+        } catch (e) {
+        document.getElementById(loadingId).remove();
+        body.insertAdjacentHTML('beforeend', `
+        <div class="bg-red-50 text-error p-3 rounded-2xl rounded-tl-none border border-red-100 shadow-sm max-w-[85%] self-start text-sm">
+        Mất kết nối đến máy chủ. Vui lòng thử lại!
+        </div>
+        `);
+        }
+        body.scrollTop = body.scrollHeight;
+        }
     </script>
 
     @await RenderSectionAsync("Scripts", required: false)
