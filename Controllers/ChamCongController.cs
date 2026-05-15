@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -22,6 +23,25 @@ namespace Web_quan_ly_nhan_su.Controllers
             public string ImageBase64 { get; set; }
         }
 
+        // =========================================================
+        // HÀM HỖ TRỢ: LẤY ID NHÂN VIÊN ĐANG ĐĂNG NHẬP THỰC TẾ
+        // =========================================================
+        private int GetCurrentUserId()
+        {
+            // Thử lấy từ Session
+            int userId = HttpContext.Session.GetInt32("MaNhanVien") ?? 0;
+
+            // Nếu Session không có, thử lấy từ Cookie Authentication
+            if (userId == 0)
+            {
+                var claim = User.Claims.FirstOrDefault(c => c.Type == "MaNhanVien")?.Value
+                         ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                int.TryParse(claim, out userId);
+            }
+
+            return userId;
+        }
+
         // 1. API ĐĂNG KÝ KHUÔN MẶT
         [HttpPost]
         public async Task<IActionResult> DangKyKhuonMat([FromBody] FaceRequest request)
@@ -31,7 +51,10 @@ namespace Web_quan_ly_nhan_su.Controllers
                 if (string.IsNullOrEmpty(request.ImageBase64))
                     return Json(new { success = false, message = "Không nhận được dữ liệu ảnh." });
 
-                int maNhanVienCurrent = 1;
+                // 👉 ĐÃ SỬA: Lấy ID thật thay vì gán cứng số 1
+                int maNhanVienCurrent = GetCurrentUserId();
+                if (maNhanVienCurrent <= 0)
+                    return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại." });
 
                 var nhanVien = await _context.NhanVien.FindAsync(maNhanVienCurrent);
                 if (nhanVien == null)
@@ -55,7 +78,11 @@ namespace Web_quan_ly_nhan_su.Controllers
         {
             try
             {
-                int maNhanVienCurrent = 1;
+                // 👉 ĐÃ SỬA: Lấy ID thật
+                int maNhanVienCurrent = GetCurrentUserId();
+                if (maNhanVienCurrent <= 0)
+                    return Json(new { success = false, message = "Phiên đăng nhập đã hết hạn, vui lòng đăng nhập lại." });
+
                 var nhanVien = await _context.NhanVien.FindAsync(maNhanVienCurrent);
 
                 if (nhanVien == null || string.IsNullOrEmpty(nhanVien.FaceVector))
@@ -97,13 +124,17 @@ namespace Web_quan_ly_nhan_su.Controllers
             }
         }
 
-        // 3. API LẤY LỊCH SỬ CHẤM CÔNG (MỚI THÊM)
+        // 3. API LẤY LỊCH SỬ CHẤM CÔNG 
         [HttpGet]
         public async Task<IActionResult> GetLichSuChamCong()
         {
             try
             {
-                int maNhanVienCurrent = 1; // Giả lập ID đang đăng nhập
+                // 👉 ĐÃ SỬA: Lấy ID thật để lọc đúng lịch sử của nhân viên đó
+                int maNhanVienCurrent = GetCurrentUserId();
+                if (maNhanVienCurrent <= 0)
+                    return Json(new { success = true, data = new string[] { } });
+
                 var lichSu = await _context.ChamCong
                     .Where(c => c.MaNhanVien == maNhanVienCurrent)
                     .OrderByDescending(c => c.NgayLamViec)
