@@ -1,7 +1,9 @@
 using Microsoft.EntityFrameworkCore;
 using Web_quan_ly_nhan_su.Context;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Pgvector.EntityFrameworkCore;
 using System;
+using Npgsql;
 // Khai báo thư mục chứa ChatHub
 using Web_quan_ly_nhan_su.Hubs;
 
@@ -16,11 +18,21 @@ namespace Web_quan_ly_nhan_su
 
             var builder = WebApplication.CreateBuilder(args);
 
-            // 1. Cấu hình Database (PostgreSQL)
+            // =========================================================================
+            // 1. Cấu hình Database (PostgreSQL) - ĐÃ THÊM USEVECTOR() ĐỂ SỬA LỖI AI
+            // =========================================================================
             var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
+            // Khởi tạo DataSource và báo cho Npgsql biết hệ thống có xài Vector
+            var dataSourceBuilder = new NpgsqlDataSourceBuilder(connectionString);
+            dataSourceBuilder.UseVector(); // Bắt buộc phải có dòng này
+            var dataSource = dataSourceBuilder.Build();
+
+            // Đăng ký DbContext với DataSource đã kích hoạt Vector
             builder.Services.AddDbContext<AppDbContext>(options =>
-                options.UseNpgsql(connectionString, sqlOptions =>
+                options.UseNpgsql(dataSource, sqlOptions =>
                 {
+                    sqlOptions.UseVector(); // Kích hoạt Vector trong EF Core
                     sqlOptions.EnableRetryOnFailure(
                         maxRetryCount: 5,
                         maxRetryDelay: TimeSpan.FromSeconds(10),

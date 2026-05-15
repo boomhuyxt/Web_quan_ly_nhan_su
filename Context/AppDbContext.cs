@@ -25,11 +25,17 @@ namespace Web_quan_ly_nhan_su.Context
         public DbSet<ThanhVienNhom> ThanhVienNhom { get; set; }
         public DbSet<TinNhanNhom> TinNhanNhom { get; set; }
 
-        // ĐÃ XÓA: DbSet<CreateGroupRequest> vì đây không phải là bảng Database
+        // BẢNG LƯU TRỮ KIẾN THỨC AI
+        public DbSet<DanhMucKienThuc> DanhMucKienThuc { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
+
+            // =========================================================
+            // BẮT BUỘC PHẢI CÓ DÒNG NÀY ĐỂ POSTGRESQL HỖ TRỢ VECTOR
+            // =========================================================
+            modelBuilder.HasPostgresExtension("vector");
 
             // Cấu hình tên bảng thủ công
             modelBuilder.Entity<NhanVien>().ToTable("NhanVien");
@@ -40,6 +46,9 @@ namespace Web_quan_ly_nhan_su.Context
             modelBuilder.Entity<Luong>().ToTable("Luong");
             modelBuilder.Entity<LuuTruFile>().ToTable("LuuTruFile");
             modelBuilder.Entity<NhanVienVaiTro>().ToTable("NhanVienVaiTro");
+
+            // Cấu hình bảng AI
+            modelBuilder.Entity<DanhMucKienThuc>().ToTable("DanhMucKienThuc");
 
             // Cấu hình các bảng Chat
             modelBuilder.Entity<TinNhan>().ToTable("TinNhan");
