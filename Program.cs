@@ -18,6 +18,13 @@ namespace Web_quan_ly_nhan_su
 
             var builder = WebApplication.CreateBuilder(args);
 
+            // BƯỚC QUAN TRỌNG: Tắt IPv6 để tránh lỗi kết nối đến Supabase (ép dùng IPv4)
+            AppContext.SetSwitch("System.Net.DisableIPv6", true);
+
+            // 👉 THÊM DÒNG NÀY ĐỂ TẮT KIỂM TRA MÚI GIỜ KHẮT KHE CỦA POSTGRESQL 👈
+            AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
+
             // =========================================================================
             // 1. Cấu hình Database (PostgreSQL) - ĐÃ THÊM USEVECTOR() ĐỂ SỬA LỖI AI
             // =========================================================================

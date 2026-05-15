@@ -47,26 +47,42 @@ namespace Web_quan_ly_nhan_su.Controllers
 
             // 1. LOGIC GỬI FILE MẪU TRỰC TIẾP
             var danhSachFileMau = new List<(string TuKhoa, string TenFile, string Url, string Icon)>
-            {
+{
+    // Cần đảm bảo link URL này là link tải file Thôi Việc thật trên Supabase của ông
                 ("nghỉ việc", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
                 ("thôi việc", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
                 ("nghỉ việt", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
+                ("don nghi", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
                 ("hợp đồng", "Mẫu hợp đồng lao động tiêu chuẩn.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx", "description"),
-                ("lao động", "Mẫu hợp đồng lao động tiêu chuẩn.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx", "description")
-            };
+                ("lao động", "Mẫu hợp đồng lao động tiêu chuẩn.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx" +
+                "" +
+                "" +
+                "" +
+                "" +
+                "" +
+                "" +
+                "" +
+                "", "description")
+};
 
-            var fileDaThem = new HashSet<string>();
+            // Dùng Trim() để loại bỏ khoảng trắng thừa
+            string cleanMessage = lowerMessage.Trim();
+
             foreach (var bieuMau in danhSachFileMau)
             {
-                if (lowerMessage.Contains(bieuMau.TuKhoa) && !fileDaThem.Contains(bieuMau.Url))
+                // Kiểm tra chứa từ khóa (Contains) 
+                if (cleanMessage.Contains(bieuMau.TuKhoa.ToLower()))
                 {
-                    responseData.AttachedFiles.Add(new FileMau
+                    // Kiểm tra xem URL đã tồn tại trong list chưa để tránh lặp file
+                    if (!responseData.AttachedFiles.Any(f => f.Url == bieuMau.Url))
                     {
-                        TenFile = bieuMau.TenFile,
-                        Url = bieuMau.Url,
-                        Icon = bieuMau.Icon
-                    });
-                    fileDaThem.Add(bieuMau.Url);
+                        responseData.AttachedFiles.Add(new FileMau
+                        {
+                            TenFile = bieuMau.TenFile,
+                            Url = bieuMau.Url,
+                            Icon = bieuMau.Icon
+                        });
+                    }
                 }
             }
 

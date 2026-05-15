@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
     <Nullable>enable</Nullable>
+    <NuGetAudit>false</NuGetAudit>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>1ccd8412-a088-4eb4-8aca-48d26983c54a</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>

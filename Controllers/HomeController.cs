@@ -119,5 +119,10 @@ namespace Web_quan_ly_nhan_su.Controllers
             ViewData["PageHeader"] = "Phiếu lương cá nhân";
             return View(danhSachLuong);
         }
+
+        public IActionResult LichCongTac()
+        {
+            return View();
+        }
     }
 }

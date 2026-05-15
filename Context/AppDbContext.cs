@@ -28,6 +28,8 @@ namespace Web_quan_ly_nhan_su.Context
         // BẢNG LƯU TRỮ KIẾN THỨC AI
         public DbSet<DanhMucKienThuc> DanhMucKienThuc { get; set; }
 
+        public DbSet<LichCongTac> LichCongTacs { get; set; }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
