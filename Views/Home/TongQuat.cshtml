@@ -98,6 +98,16 @@
                     </div>
                 </a>
 
+                <a href="/Home/PhieuLuongCaNhan" class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col items-center gap-3 hover:bg-primary/5 hover:border-primary/20 hover:-translate-y-1 transition-all duration-300 group cursor-pointer text-center">
+                    <div class="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                        <span class="material-symbols-outlined text-primary text-3xl">payments</span>
+                    </div>
+                    <div>
+                        <div class="font-bold text-[#1a1c1d]">Phiếu Lương</div>
+                        <div class="text-[11px] text-outline mt-1">Xem & In biên lai</div>
+                    </div>
+                </a>
+
             </div>
         </section>
 
@@ -127,7 +137,6 @@
 
         const activityList = document.getElementById('recentActivityList');
         activityList.innerHTML = '';
-
         if(data.tinNhanMoi && data.tinNhanMoi.length > 0) {
         data.tinNhanMoi.forEach(msg => {
         // Tạo đường dẫn sang Chat kèm ID để tự động mở hội thoại

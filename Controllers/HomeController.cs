@@ -120,5 +120,29 @@ namespace Web_quan_ly_nhan_su.Controllers
         {
             return View();
         }
+
+        // ====================================================================
+        // TRANG XEM LƯƠNG CỦA CÁ NHÂN (DÀNH CHO NHÂN VIÊN)
+        // ====================================================================
+        public IActionResult PhieuLuongCaNhan()
+        {
+            // Lấy ID người đang đăng nhập
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int maNhanVienDangNhap))
+            {
+                return RedirectToAction("Login", "Account");
+            }
+
+            // Chỉ lấy bảng lương của người đang đăng nhập
+            var danhSachLuong = _context.Luong
+                                        .Include(l => l.NhanVien)
+                                        .Where(l => l.MaNhanVien == maNhanVienDangNhap)
+                                        .OrderByDescending(l => l.Nam)
+                                        .ThenByDescending(l => l.Thang)
+                                        .ToList();
+
+            ViewData["PageHeader"] = "Phiếu lương cá nhân";
+            return View(danhSachLuong);
+        }
     }
 }
