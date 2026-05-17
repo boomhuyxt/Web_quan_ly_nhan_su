@@ -108,7 +108,6 @@
 
 <div id="tabNhanSu" class="hidden animate-in fade-in duration-300">
     <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
-
         <div class="p-6 border-b border-gray-100 flex flex-col md:flex-row justify-between items-center gap-5 bg-gray-50/30">
             <div class="flex flex-col md:flex-row md:items-center gap-4 w-full md:w-auto">
                 <h3 class="font-headline font-bold text-xl text-gray-900 whitespace-nowrap">Danh sách nhân sự</h3>
@@ -143,7 +142,6 @@
 
 <div id="tabCongTac" class="hidden animate-in fade-in duration-300">
     <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden p-6">
-
         <div class="flex flex-col md:flex-row justify-between items-center gap-4 mb-8">
             <div>
                 <h3 class="font-headline font-bold text-xl text-gray-900">Kế hoạch công tác</h3>
@@ -162,7 +160,6 @@
 
 <div id="modalAddCongTac" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-all">
     <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-lg p-8 flex flex-col gap-6 transform scale-95 animate-in zoom-in-95 duration-200">
-
         <div class="flex justify-between items-center">
             <div>
                 <h2 class="font-headline font-bold text-2xl text-gray-900">Xếp lịch công tác</h2>
@@ -346,7 +343,6 @@
         else if (tab === 'congtac') {
             els.tabCongTac.classList.remove('hidden');
             els.btnTabCongTac.className = activeClass;
-            // 👉 Gọi hàm hiển thị danh sách Lịch Công Tác
             loadDanhSachCongTac();
         }
     }
@@ -400,20 +396,115 @@
     }
 
     /* === QUẢN LÝ NHÂN VIÊN VÀ QUYỀN === */
-    function openAddUserModal() { document.getElementById('modalAddUser').classList.remove('hidden'); }
-    function closeAddUserModal() { document.getElementById('modalAddUser').classList.add('hidden'); }
-    async function submitAddUser() { /* Logic cũ... */ }
-    function openEditModal(id, maPhongBan, currentRoles) { /* Logic cũ... */ }
-    function closeModal() { document.getElementById('modalEditRole').classList.add('hidden'); }
-    async function submitUpdateRole() { /* Logic cũ... */ }
-    async function toggleLockStatus(id, name, actionName) { /* Logic cũ... */ }
-    async function xuLyDonTu(id, trangThai) { /* Logic cũ... */ }
+    function openAddUserModal() {
+        document.getElementById('txtAddHoTen').value = '';
+        document.getElementById('txtAddEmail').value = '';
+        document.getElementById('txtAddMatKhau').value = '';
+        document.getElementById('modalAddUser').classList.remove('hidden');
+    }
+
+    function closeAddUserModal() {
+        document.getElementById('modalAddUser').classList.add('hidden');
+    }
+
+    async function submitAddUser() {
+        const payload = {
+            hoTen: document.getElementById('txtAddHoTen').value.trim(),
+            email: document.getElementById('txtAddEmail').value.trim(),
+            matKhau: document.getElementById('txtAddMatKhau').value.trim()
+        };
+
+        if(!payload.hoTen || !payload.email || !payload.matKhau) return alert("Vui lòng điền đủ thông tin!");
+
+        const btnSubmit = document.getElementById('btnSubmitAddUser');
+        btnSubmit.disabled = true;
+        btnSubmit.innerText = "Đang xử lý...";
+
+        try {
+            const res = await fetch('/api/quanlynhanvien/them', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const data = await res.json();
+
+            if(data.success) {
+                alert(data.message);
+                closeAddUserModal();
+                loadNhanVienData(els.txtSearch.value.trim());
+            } else alert(data.message);
+        } catch(e) { alert("Lỗi hệ thống!"); }
+        finally {
+            btnSubmit.disabled = false;
+            btnSubmit.innerText = "Xác nhận tạo";
+        }
+    }
+
+    function openEditModal(id, maPhongBan, currentRoles) {
+        editingUserId = id;
+        document.getElementById('selPhongBan').value = maPhongBan || "";
+
+        document.getElementById('boxVaiTros').innerHTML = masterData.vaiTros.map(vt => `
+            <label class="flex items-center gap-3 p-3 rounded-xl bg-white border border-gray-100 hover:border-primary/40 hover:shadow-sm cursor-pointer transition-all">
+                <input type="checkbox" value="${vt.maVaiTro}" class="role-checkbox w-5 h-5 text-primary rounded border-gray-300 focus:ring-primary/40 transition-colors" ${currentRoles.includes(vt.maVaiTro) ? 'checked' : ''}>
+                <span class="text-sm font-bold text-gray-800">${vt.tenVaiTro}</span>
+            </label>
+        `).join('');
+
+        document.getElementById('modalEditRole').classList.remove('hidden');
+    }
+
+    function closeModal() {
+        document.getElementById('modalEditRole').classList.add('hidden');
+        editingUserId = null;
+    }
+
+    async function submitUpdateRole() {
+        if(!editingUserId) return;
+
+        const maPhongBan = document.getElementById('selPhongBan').value;
+        const payload = {
+            maPhongBan: maPhongBan ? parseInt(maPhongBan) : null,
+            maVaiTros: Array.from(document.querySelectorAll('.role-checkbox:checked')).map(cb => parseInt(cb.value))
+        };
+
+        try {
+            const res = await fetch(`/api/quanlynhanvien/cap-nhat/${editingUserId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            if((await res.json()).success) {
+                alert("Cập nhật thành công!");
+                closeModal();
+                loadNhanVienData(els.txtSearch.value.trim());
+            } else alert("Có lỗi xảy ra!");
+        } catch(e) { console.error(e); }
+    }
+
+    async function toggleLockStatus(id, name, actionName) {
+        if(!confirm(`XÁC NHẬN: Bạn muốn ${actionName} tài khoản của [${name}]?`)) return;
+        try {
+            const res = await fetch(`/api/quanlynhanvien/toggle-status/${id}`, { method: 'PUT' });
+            if((await res.json()).success) loadNhanVienData(els.txtSearch.value.trim());
+        } catch(e) { console.error(e); }
+    }
+
+    async function xuLyDonTu(id, trangThai) {
+        if(!confirm(`XÁC NHẬN: Bạn muốn ${trangThai === "Đã duyệt" ? "PHÊ DUYỆT" : "TỪ CHỐI"} đơn này?`)) return;
+        try {
+            const res = await fetch(`/QuanTriNghiPhep/PheDuyet?id=${id}&trangThai=${encodeURIComponent(trangThai)}`, { method: 'POST' });
+            const data = await res.json();
+            if(data.success) location.reload();
+            else alert("Lỗi: " + data.message);
+        } catch(e) { alert("Lỗi kết nối."); }
+    }
+
 
     /* ============================================================== */
     /* === THAO TÁC LỊCH CÔNG TÁC (TẢI DANH SÁCH + THÊM LỊCH CÓ FILE) === */
     /* ============================================================== */
 
-    // 1. Hàm gọi API lấy danh sách Lịch Công Tác và in ra giao diện
     async function loadDanhSachCongTac() {
         const container = document.getElementById('listCongTacContainer');
         container.innerHTML = '<div class="col-span-full text-center py-10 text-outline animate-pulse">Đang tải danh sách lịch công tác...</div>';
@@ -433,7 +524,6 @@
                 }
 
                 container.innerHTML = data.data.map(item => {
-                    // Logic đổi màu theo trạng thái
                     let statusColor = "bg-blue-50 text-blue-600 ring-blue-200/50";
                     let colorBar = "bg-blue-500";
 
@@ -441,7 +531,6 @@
                     else if (item.trangThai === 'Sắp tới') { statusColor = "bg-amber-50 text-amber-600 ring-amber-200/50"; colorBar = "bg-amber-500"; }
                     else if (item.trangThai === 'Đã hủy') { statusColor = "bg-red-50 text-error ring-red-200/50"; colorBar = "bg-red-500"; }
 
-                    // Hiển thị nút tải file nếu có
                     const fileHtml = item.fileDinhKemUrl
                         ? `<div class="mb-4 pl-2">
                                <a href="${item.fileDinhKemUrl}" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary bg-primary/10 px-3 py-1.5 rounded-lg hover:bg-primary hover:text-white transition-colors">
@@ -484,10 +573,8 @@
         }
     }
 
-    // 2. Mở Modal Thêm lịch
     async function openAddCongTacModal() {
         document.getElementById('modalAddCongTac').classList.remove('hidden');
-
         const selNV = document.getElementById('selNhanVienCongTac');
         if (selNV.options.length <= 1) {
             selNV.innerHTML = '<option value="">Đang tải danh sách nhân viên...</option>';
@@ -502,22 +589,20 @@
         }
     }
 
-    // 3. Đóng Modal
     function closeCongTacModal() {
         document.getElementById('modalAddCongTac').classList.add('hidden');
         document.getElementById('selNhanVienCongTac').value = '';
         document.getElementById('dateStartCT').value = '';
         document.getElementById('dateEndCT').value = '';
         document.getElementById('txtMucDichCT').value = '';
-        document.getElementById('fileCongTac').value = ''; // Xóa file đã chọn
+        document.getElementById('fileCongTac').value = '';
     }
 
-    // 4. Lưu lịch & Xử lý File Upload
     async function submitAddCongTac() {
         const mucDichGopChung = document.getElementById('txtMucDichCT').value.trim();
-
         let diaDiem = "Chưa xác định";
         let noiDung = mucDichGopChung;
+
         if(mucDichGopChung.includes('-')) {
             const parts = mucDichGopChung.split('-');
             diaDiem = parts[0].trim();
@@ -530,12 +615,13 @@
             ngayKetThuc: document.getElementById('dateEndCT').value,
             diaDiem: diaDiem,
             noiDungCongViec: noiDung,
-            fileDinhKemUrl: "" // Sẽ được cập nhật nếu có upload file
+            fileDinhKemUrl: ""
         };
 
         if(!payload.maNhanVien || !payload.ngayBatDau || !payload.ngayKetThuc || !mucDichGopChung) {
             return alert("⚠️ Vui lòng nhập đầy đủ thông tin bắt buộc!");
         }
+
         if(new Date(payload.ngayBatDau) > new Date(payload.ngayKetThuc)) {
             return alert("⚠️ Ngày kết thúc không thể diễn ra trước ngày bắt đầu!");
         }
@@ -545,27 +631,13 @@
         btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang xử lý...';
 
         try {
-            // -- BƯỚC A: UPLOAD FILE (NẾU CÓ CHỌN FILE) --
             const fileInput = document.getElementById('fileCongTac');
             if (fileInput.files.length > 0) {
                 btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang tải tài liệu lên...';
-
-                // MẸO: Vì ông đang dùng Supabase, chỗ này ông cần gọi một API Upload để đẩy file lên bucket.
-                // Ở đây tui để sẵn khung chuẩn gọi FormData lên Server C#.
-                /* const formData = new FormData();
-                formData.append('file', fileInput.files[0]);
-                const uploadRes = await fetch('/api/UploadControllerCuaOng/UploadFile', { method: 'POST', body: formData });
-                const uploadData = await uploadRes.json();
-                if(uploadData.success) {
-                    payload.fileDinhKemUrl = uploadData.url;
-                }
-                */
-
                 // Tạm thời giả lập link file thành công để test giao diện
-                payload.fileDinhKemUrl = "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc";
+                payload.fileDinhKemUrl = "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx";
             }
 
-            // -- BƯỚC B: GỌI API LƯU LỊCH XUỐNG DATABASE --
             btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang lưu lịch...';
             const res = await fetch('/api/congtac/them', {
                 method: 'POST',
@@ -576,7 +648,7 @@
 
             if(data.success) {
                 closeCongTacModal();
-                loadDanhSachCongTac(); // Gọi load lại thẻ công tác cho nó xịn
+                loadDanhSachCongTac();
             } else {
                 alert("Lỗi Database: " + data.message);
             }
