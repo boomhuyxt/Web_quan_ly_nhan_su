@@ -32,6 +32,16 @@
         body {
         min-height: 100vh;
         }
+
+        /* Làm mượt thanh cuộn ngang nếu lương quá dài */
+        .no-scrollbar::-webkit-scrollbar {
+        display: none;
+        }
+
+        .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        }
     </style>
 </head>
 <body class="bg-[#f9f9fb] font-body text-[#1a1c1d] antialiased">
@@ -56,21 +66,22 @@
         </section>
 
         <section class="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col gap-1">
+            <div class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col justify-center gap-1">
                 <span class="text-[11px] font-bold text-outline uppercase">Tổng nhân viên</span>
                 <span id="txtTongNhanVien" class="text-2xl font-headline font-bold">--</span>
             </div>
-            <div class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col gap-1">
+            <div class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col justify-center gap-1">
                 <span class="text-[11px] font-bold text-outline uppercase">Phòng ban</span>
                 <span id="txtTongPhongBan" class="text-2xl font-headline font-bold">--</span>
             </div>
-            <div class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col gap-1 ring-1 ring-error/10 bg-error-container/5">
-                <span class="text-[11px] font-bold text-error uppercase">Chưa chấm công</span>
+            <div class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col justify-center gap-1 ring-1 ring-error/10 bg-error-container/5">
+                <span class="text-[11px] font-bold text-error uppercase">Ngày vắng (Tháng này)</span>
                 <span id="txtChuaChamCong" class="text-2xl font-headline font-bold text-error">--</span>
             </div>
-            <div class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col gap-1 ring-1 ring-emerald-500/10 bg-emerald-50/20">
+
+            <div class="bg-white p-6 rounded-[28px] shadow-sm border border-gray-100 flex flex-col justify-center gap-1 ring-1 ring-emerald-500/10 bg-emerald-50/20 overflow-hidden">
                 <span class="text-[11px] font-bold text-emerald-700 uppercase">Lương gần nhất</span>
-                <span id="txtLuongGanNhat" class="text-xl font-headline font-bold text-emerald-700 truncate">--</span>
+                <span id="txtLuongGanNhat" class="text-base md:text-lg lg:text-xl font-headline font-bold text-emerald-700 whitespace-nowrap overflow-x-auto no-scrollbar">--</span>
             </div>
         </section>
 
@@ -139,7 +150,6 @@
         activityList.innerHTML = '';
         if(data.tinNhanMoi && data.tinNhanMoi.length > 0) {
         data.tinNhanMoi.forEach(msg => {
-        // Tạo đường dẫn sang Chat kèm ID để tự động mở hội thoại
         const chatUrl = msg.maNhom
         ? `/Home/Chat?groupId=${msg.maNhom}`
         : `/Home/Chat?userId=${msg.nguoiGuiId}`;
