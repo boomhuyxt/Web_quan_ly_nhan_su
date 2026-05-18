@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -12,9 +13,11 @@ using Web_quan_ly_nhan_su.Context;
 namespace Web_quan_ly_nhan_su.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260515042206_AddBangLichCongTac")]
+    partial class AddBangLichCongTac
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -42,7 +45,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("NgayLamViec")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("MaChamCong");
 
@@ -103,13 +106,13 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("NgayBatDau")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("NgayKetThuc")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("NgayTao")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("NoiDungCongViec")
                         .IsRequired()
@@ -135,15 +138,6 @@ namespace Web_quan_ly_nhan_su.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MaLuong"));
 
-                    b.Property<decimal>("BaoHiemThatNghiep")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("BaoHiemXaHoi")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("BaoHiemYTe")
-                        .HasColumnType("numeric");
-
                     b.Property<decimal>("KhauTru")
                         .HasColumnType("numeric");
 
@@ -160,9 +154,6 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("integer");
 
                     b.Property<decimal>("Thuong")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("TienTangCa")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("TongLuong")
@@ -197,7 +188,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("NgayUpload")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TenFile")
                         .IsRequired()
@@ -234,10 +225,10 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("NgayBatDau")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("NgayKetThuc")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TrangThai")
                         .HasMaxLength(50)
@@ -286,13 +277,13 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("NgaySinh")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("NgayTao")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("NgayVaoLam")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SoDienThoai")
                         .HasColumnType("text");
@@ -334,7 +325,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("NgayTao")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("NguoiTaoId")
                         .HasColumnType("integer");
@@ -416,7 +407,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("ThoiGianGui")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("MaTinNhan");
 
@@ -448,7 +439,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("ThoiGianGui")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("MaTinNhan");
 

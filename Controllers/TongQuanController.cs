@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Linq;
@@ -23,70 +24,79 @@ namespace Web_quan_ly_nhan_su.Controllers
         {
             try
             {
-                // Giả định ID user đang đăng nhập là 1 
-                int currentUserId = 1;
+                // 👉 1. LẤY ID NHÂN VIÊN ĐANG ĐĂNG NHẬP THỰC TẾ
+                int currentUserId = HttpContext.Session.GetInt32("MaNhanVien") ?? 0;
+                if (currentUserId == 0)
+                {
+                    var claim = User.Claims.FirstOrDefault(c => c.Type == "MaNhanVien")?.Value
+                             ?? User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+                    int.TryParse(claim, out currentUserId);
+                }
 
-                // 1. Tổng nhân viên và Phòng ban
+                // Backup trong trường hợp test chưa đăng nhập
+                if (currentUserId == 0) currentUserId = 1;
+
+                // 2. Tổng nhân viên và Phòng ban (Vẫn giữ nguyên cho toàn công ty)
                 int tongNhanVien = await _context.NhanVien.CountAsync();
                 int tongPhongBan = await _context.PhongBan.CountAsync();
 
-                // 2. Xử lý logic Chấm công (Mốc 8:00 AM)
+                // 3. Xử lý logic Chấm công
                 DateTime vietnamTime = DateTime.UtcNow.AddHours(7);
                 DateTime homNay = DateTime.SpecifyKind(vietnamTime.Date, DateTimeKind.Utc);
 
-                var danhSachChamCong = await _context.ChamCong
+                // 👉 TÍNH SỐ NGÀY CHƯA CHẤM CÔNG CỦA CÁ NHÂN (TRONG THÁNG NÀY)
+                int soNgayDaQuaTrongThang = homNay.Day;
+                int soNgayDaChamCong = await _context.ChamCong
+                    .Where(c => c.MaNhanVien == currentUserId && c.NgayLamViec.Month == homNay.Month && c.NgayLamViec.Year == homNay.Year)
+                    .CountAsync();
+
+                // Số ngày vắng = Tổng ngày đã qua - Số ngày có đi làm
+                int chuaChamCong = Math.Max(0, soNgayDaQuaTrongThang - soNgayDaChamCong);
+
+                // Tỷ lệ đi đúng giờ (Vẫn giữ chung cho toàn công ty trong ngày hôm nay)
+                var danhSachChamCongHnay = await _context.ChamCong
                     .Where(c => c.NgayLamViec == homNay && c.GioVao.HasValue)
                     .ToListAsync();
-
-                int soNguoiDaChamCong = danhSachChamCong.Count;
-                int chuaChamCong = Math.Max(0, tongNhanVien - soNguoiDaChamCong);
-
+                int soNguoiDaChamCong = danhSachChamCongHnay.Count;
                 TimeSpan gioVaoChuan = new TimeSpan(8, 0, 0);
-                int diDungGio = danhSachChamCong.Count(c => c.GioVao.Value <= gioVaoChuan);
+                int diDungGio = danhSachChamCongHnay.Count(c => c.GioVao.Value <= gioVaoChuan);
+                double tyLeDungGio = soNguoiDaChamCong > 0 ? Math.Round((double)diDungGio / soNguoiDaChamCong * 100, 1) : 0;
 
-                double tyLeDungGio = soNguoiDaChamCong > 0
-                    ? Math.Round((double)diDungGio / soNguoiDaChamCong * 100, 1)
-                    : 0;
+                // 👉 4. LẤY LƯƠNG GẦN NHẤT CỦA CÁ NHÂN
+                string luongGanNhat = "0 VNĐ";
+                var checkLuong = await _context.Luong
+                    .Where(l => l.MaNhanVien == currentUserId)
+                    .OrderByDescending(l => l.Nam)
+                    .ThenByDescending(l => l.Thang)
+                    .FirstOrDefaultAsync();
 
-                // 3. Lấy Lương gần nhất của User
-                //string luongGanNhat = "0 VNĐ";
-                //var checkLuong = await _context.Luong
-                //    .Where(l => l.MaNhanVien == currentUserId)
-                //    .OrderByDescending(l => l.Id) // Thay 'Id' bằng khóa chính bảng Lương của bạn nếu bị lỗi
-                //    .FirstOrDefaultAsync();
-
-                //if (checkLuong != null)
-                //{
-                //    luongGanNhat = string.Format("{0:N0} đ", 15000000); // Thay 15000000 bằng số tiền thực tế
-                //}
+                if (checkLuong != null)
+                {
+                    // Lấy TongLuong và định dạng tiền tệ
+                    luongGanNhat = string.Format("{0:N0} VNĐ", checkLuong.TongLuong);
+                }
 
                 // =========================================================
-                // 4. LẤY TIN NHẮN MỚI NHẤT DO NGƯỜI KHÁC GỬI TRONG 2 GIỜ QUA
+                // 5. LẤY TIN NHẮN MỚI NHẤT
                 // =========================================================
                 var myGroupIds = await _context.ThanhVienNhom
                     .Where(tv => tv.MaNhanVien == currentUserId)
                     .Select(tv => tv.MaNhom)
                     .ToListAsync();
 
-                // Mốc thời gian 2 giờ trước tính theo giờ chuẩn UTC
                 DateTime mốc2GioTruoc = DateTime.UtcNow.AddHours(-2);
 
-                // Kéo dữ liệu từ CSDL lên RAM trước để tránh lỗi EF Core khi dùng Substring
                 var rawMessages = await _context.TinNhan
                     .Include(t => t.NguoiGui)
                     .Where(t =>
-                        // 1. Nhận được cá nhân hoặc nằm trong nhóm của mình
                         (t.NguoiNhanId == currentUserId || (t.MaNhom != null && myGroupIds.Contains(t.MaNhom.Value)))
-                        // 2. Phải là NGƯỜI KHÁC gửi cho mình
                         && t.NguoiGuiId != currentUserId
-                        // 3. Gửi trong vòng 2 tiếng trở lại đây
                         && t.ThoiGianGui >= mốc2GioTruoc
                     )
                     .OrderByDescending(t => t.ThoiGianGui)
-                    .Take(5) // Lấy tối đa 5 tin để giao diện không bị tràn
+                    .Take(5)
                     .ToListAsync();
 
-                // Định dạng lại nội dung
                 var tinNhanMoi = rawMessages.Select(t => new
                 {
                     nguoiGuiId = t.NguoiGuiId,
@@ -99,14 +109,15 @@ namespace Web_quan_ly_nhan_su.Controllers
                     thoiGian = TinhThoiGianTuongDoi(t.ThoiGianGui)
                 }).ToList();
 
+                // TRẢ DỮ LIỆU VỀ GIAO DIỆN
                 return Ok(new
                 {
                     success = true,
                     tongNhanVien,
                     tongPhongBan,
-                    chuaChamCong,
+                    chuaChamCong,   // Trả về số ngày cá nhân đó chưa chấm công trong tháng
                     tyLeDungGio,
-                    //luongGanNhat,
+                    luongGanNhat,   // Mở comment và trả về lương cá nhân
                     tinNhanMoi
                 });
             }

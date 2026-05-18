@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 using Pgvector;
@@ -12,13 +13,15 @@ using Web_quan_ly_nhan_su.Context;
 namespace Web_quan_ly_nhan_su.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260514182653_AddPgVectorToDanhMuc")]
+    partial class AddPgVectorToDanhMuc
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "10.0.8")
+                .HasAnnotation("ProductVersion", "10.0.6")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.HasPostgresExtension(modelBuilder, "vector");
@@ -42,7 +45,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("NgayLamViec")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("MaChamCong");
 
@@ -82,51 +85,6 @@ namespace Web_quan_ly_nhan_su.Migrations
                     b.ToTable("DanhMucKienThuc", (string)null);
                 });
 
-            modelBuilder.Entity("Web_quan_ly_nhan_su.Models.LichCongTac", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("DiaDiem")
-                        .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("character varying(255)");
-
-                    b.Property<string>("FileDinhKemUrl")
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<int>("MaNhanVien")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("NgayBatDau")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("NgayKetThuc")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("NgayTao")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<string>("NoiDungCongViec")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.Property<string>("TrangThai")
-                        .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("MaNhanVien");
-
-                    b.ToTable("LichCongTac");
-                });
-
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.Luong", b =>
                 {
                     b.Property<int>("MaLuong")
@@ -134,15 +92,6 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("integer");
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("MaLuong"));
-
-                    b.Property<decimal>("BaoHiemThatNghiep")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("BaoHiemXaHoi")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("BaoHiemYTe")
-                        .HasColumnType("numeric");
 
                     b.Property<decimal>("KhauTru")
                         .HasColumnType("numeric");
@@ -160,9 +109,6 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("integer");
 
                     b.Property<decimal>("Thuong")
-                        .HasColumnType("numeric");
-
-                    b.Property<decimal>("TienTangCa")
                         .HasColumnType("numeric");
 
                     b.Property<decimal>("TongLuong")
@@ -197,7 +143,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime>("NgayUpload")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TenFile")
                         .IsRequired()
@@ -234,10 +180,10 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("NgayBatDau")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("NgayKetThuc")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("TrangThai")
                         .HasMaxLength(50)
@@ -286,13 +232,13 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("NgaySinh")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime>("NgayTao")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<DateTime?>("NgayVaoLam")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("SoDienThoai")
                         .HasColumnType("text");
@@ -334,7 +280,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("NgayTao")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<int>("NguoiTaoId")
                         .HasColumnType("integer");
@@ -416,7 +362,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("ThoiGianGui")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("MaTinNhan");
 
@@ -448,7 +394,7 @@ namespace Web_quan_ly_nhan_su.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime>("ThoiGianGui")
-                        .HasColumnType("timestamp without time zone");
+                        .HasColumnType("timestamp with time zone");
 
                     b.HasKey("MaTinNhan");
 
@@ -484,17 +430,6 @@ namespace Web_quan_ly_nhan_su.Migrations
                 {
                     b.HasOne("Web_quan_ly_nhan_su.Models.NhanVien", "NhanVien")
                         .WithMany()
-                        .HasForeignKey("MaNhanVien")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("NhanVien");
-                });
-
-            modelBuilder.Entity("Web_quan_ly_nhan_su.Models.LichCongTac", b =>
-                {
-                    b.HasOne("Web_quan_ly_nhan_su.Models.NhanVien", "NhanVien")
-                        .WithMany("LichCongTacs")
                         .HasForeignKey("MaNhanVien")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -636,8 +571,6 @@ namespace Web_quan_ly_nhan_su.Migrations
 
             modelBuilder.Entity("Web_quan_ly_nhan_su.Models.NhanVien", b =>
                 {
-                    b.Navigation("LichCongTacs");
-
                     b.Navigation("NhanVienVaiTro");
 
                     b.Navigation("NhomDaThamGia");

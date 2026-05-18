@@ -1,0 +1,147 @@
+﻿@{
+    ViewData["Title"] = "Lịch công tác";
+    ViewData["PageHeader"] = "Theo dõi Lịch công tác";
+}
+
+<div class="mb-4">
+    <a href="/Home/Index" class="inline-flex items-center gap-2 px-4 py-2.5 text-sm font-bold text-outline bg-white border border-gray-200 rounded-full hover:text-primary hover:border-primary/30 hover:shadow-md transition-all active:scale-95 w-fit">
+        <span class="material-symbols-outlined text-[18px]">arrow_back</span>
+        Quay lại Tổng quan
+    </a>
+</div>
+
+<div class="mb-8 flex flex-col md:flex-row justify-between items-center gap-4 bg-white p-6 rounded-[32px] shadow-sm border border-gray-100">
+    <div>
+        <h2 class="font-headline font-bold text-2xl text-gray-900">Danh sách Lịch Công Tác</h2>
+        <p class="text-sm text-outline mt-1">Theo dõi kế hoạch và tài liệu phân công nhiệm vụ</p>
+    </div>
+
+    <div class="flex gap-2 bg-gray-50/80 p-1.5 rounded-full border border-gray-200/60 shadow-inner overflow-x-auto no-scrollbar">
+        <button onclick="filterCongTac('Tất cả', this)" class="btn-filter-ct px-5 py-2 rounded-full bg-primary text-white text-sm font-bold transition-all shadow-md whitespace-nowrap">Tất cả</button>
+        <button onclick="filterCongTac('Sắp tới', this)" class="btn-filter-ct px-5 py-2 rounded-full bg-transparent text-outline hover:text-gray-900 text-sm font-bold transition-all whitespace-nowrap">Sắp tới</button>
+        <button onclick="filterCongTac('Đang diễn ra', this)" class="btn-filter-ct px-5 py-2 rounded-full bg-transparent text-outline hover:text-gray-900 text-sm font-bold transition-all whitespace-nowrap">Đang diễn ra</button>
+        <button onclick="filterCongTac('Đã hoàn thành', this)" class="btn-filter-ct px-5 py-2 rounded-full bg-transparent text-outline hover:text-gray-900 text-sm font-bold transition-all whitespace-nowrap">Đã hoàn thành</button>
+    </div>
+</div>
+
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6" id="viewCongTacContainer">
+    <div class="col-span-full py-20 text-center animate-pulse text-outline bg-white rounded-[32px] border border-gray-100 shadow-sm">
+        <span class="material-symbols-outlined text-4xl mb-2 opacity-50">hourglass_empty</span>
+        <p class="font-medium">Đang đồng bộ dữ liệu lịch công tác...</p>
+    </div>
+</div>
+
+<script>
+    let allCongTacData = [];
+
+    // Tự động gọi API ngay khi người dùng vừa vào trang
+    document.addEventListener('DOMContentLoaded', () => {
+        fetchLichCongTac();
+    });
+
+    // 1. Hàm gọi API lấy dữ liệu từ Backend C#
+    async function fetchLichCongTac() {
+        try {
+            // 👉 ĐÃ SỬA: Gọi API danh-sach-cua-toi để chỉ lấy lịch của nhân viên đang đăng nhập
+            const res = await fetch('/api/congtac/danh-sach-cua-toi');
+            const data = await res.json();
+
+            if(data.success) {
+                allCongTacData = data.data;
+                renderCongTac('Tất cả');
+            } else {
+                document.getElementById('viewCongTacContainer').innerHTML = `<div class="col-span-full text-error font-bold text-center py-10 bg-red-50 rounded-2xl">Lỗi: ${data.message}</div>`;
+            }
+        } catch(e) {
+            console.error(e);
+            document.getElementById('viewCongTacContainer').innerHTML = '<div class="col-span-full text-error font-bold text-center py-10 bg-red-50 rounded-2xl">Lỗi mất kết nối đến máy chủ!</div>';
+        }
+    }
+
+    // 2. Hàm xử lý nút Bấm (Lọc trạng thái)
+    function filterCongTac(status, btnElement) {
+        document.querySelectorAll('.btn-filter-ct').forEach(btn => {
+            btn.className = "btn-filter-ct px-5 py-2 rounded-full bg-transparent text-outline hover:text-gray-900 text-sm font-bold transition-all whitespace-nowrap";
+        });
+        btnElement.className = "btn-filter-ct px-5 py-2 rounded-full bg-primary text-white text-sm font-bold shadow-md transition-all active:scale-95 whitespace-nowrap";
+
+        renderCongTac(status);
+    }
+
+    // 3. Hàm in giao diện ra màn hình (Render)
+    function renderCongTac(statusFilter) {
+        const container = document.getElementById('viewCongTacContainer');
+
+        const filteredData = statusFilter === 'Tất cả'
+            ? allCongTacData
+            : allCongTacData.filter(x => x.trangThai === statusFilter);
+
+        if(filteredData.length === 0) {
+            container.innerHTML = `
+            <div class="col-span-full py-24 flex flex-col items-center justify-center text-outline bg-white rounded-[32px] border border-dashed border-gray-200">
+                <span class="material-symbols-outlined text-6xl mb-4 opacity-20">event_available</span>
+                <p class="font-bold text-lg text-gray-400">Trống</p>
+                <p class="font-medium text-sm mt-1">Không có lịch công tác nào phù hợp với bộ lọc này.</p>
+            </div>`;
+            return;
+        }
+
+        container.innerHTML = filteredData.map(item => {
+            let statusColor = "bg-blue-50 text-blue-600 ring-blue-200/50";
+            let colorBar = "bg-blue-500";
+
+            if (item.trangThai === 'Đã hoàn thành') { statusColor = "bg-emerald-50 text-emerald-600 ring-emerald-200/50"; colorBar = "bg-emerald-500"; }
+            else if (item.trangThai === 'Sắp tới') { statusColor = "bg-amber-50 text-amber-600 ring-amber-200/50"; colorBar = "bg-amber-500"; }
+            else if (item.trangThai === 'Đã hủy') { statusColor = "bg-red-50 text-error ring-red-200/50"; colorBar = "bg-red-500"; }
+
+            const fileHtml = item.fileDinhKemUrl
+                ? `<div class="mb-4 pl-2 mt-auto">
+                        <a href="${item.fileDinhKemUrl}" target="_blank" class="inline-flex items-center gap-1.5 text-[11px] font-bold text-primary bg-primary/10 px-3 py-2 rounded-xl hover:bg-primary hover:text-white transition-colors shadow-sm hover:shadow-md w-full justify-center">
+                            <span class="material-symbols-outlined text-[16px]">cloud_download</span> Tải tài liệu công việc
+                        </a>
+                    </div>`
+                : `<div class="mb-4 pl-2 mt-auto"><span class="block text-center w-full text-[11px] font-medium text-outline italic">Không có file đính kèm</span></div>`;
+
+            return `
+            <div class="bg-white p-6 rounded-[28px] border border-gray-100 shadow-sm hover:shadow-2xl hover:border-primary/20 transform hover:-translate-y-1.5 transition-all duration-300 group relative flex flex-col h-full overflow-hidden">
+                <div class="absolute left-0 top-0 bottom-0 w-1.5 ${colorBar} rounded-l-[28px] opacity-80 group-hover:opacity-100 transition-opacity"></div>
+
+                <div class="flex justify-between items-start mb-4 pl-2">
+                    <span class="px-3 py-1.5 rounded-full ${statusColor} text-[10px] font-bold uppercase tracking-wider ring-1">
+                        ${item.trangThai}
+                    </span>
+                    <span class="text-outline text-xs font-bold bg-gray-50 px-2.5 py-1 rounded-lg border border-gray-100">#CT${item.id}</span>
+                </div>
+
+                <h4 class="font-headline font-bold text-gray-900 mb-2 text-xl pl-2 group-hover:text-primary transition-colors line-clamp-2" title="${item.diaDiem}">${item.diaDiem}</h4>
+                <p class="text-sm text-gray-600 mb-4 pl-2 line-clamp-3 leading-relaxed" title="${item.noiDungCongViec}">${item.noiDungCongViec}</p>
+
+                <div class="pl-2 mb-4 w-full">
+                    <div class="text-[12px] text-gray-800 flex items-start gap-2.5 font-bold bg-gray-50/80 py-3 px-4 rounded-xl border border-gray-100">
+                        <span class="material-symbols-outlined text-[20px] text-primary shrink-0 mt-1">schedule</span>
+                        <div class="flex flex-col w-full gap-1.5">
+                            <div class="flex justify-between w-full border-b border-gray-200/60 pb-1.5">
+                                <span class="text-outline font-normal">Từ:</span>
+                                <span>${item.ngayBatDau}</span>
+                            </div>
+                            <div class="flex justify-between w-full pt-0.5">
+                                <span class="text-outline font-normal">Đến:</span>
+                                <span class="text-error">${item.ngayKetThuc}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                ${fileHtml}
+
+                <div class="pt-5 border-t border-gray-50 flex items-center gap-3 pl-2">
+                    <img src="${item.anhDaiDien}" class="w-11 h-11 rounded-full ring-2 ring-gray-100 object-cover shadow-sm group-hover:ring-primary/30 transition-all" />
+                    <div>
+                        <p class="text-sm font-bold text-gray-900">${item.tenNhanVien}</p>
+                        <p class="text-[11px] font-medium text-outline mt-0.5">Nhân sự thực hiện</p>
+                    </div>
+                </div>
+            </div>`;
+        }).join('');
+    }
+</script>

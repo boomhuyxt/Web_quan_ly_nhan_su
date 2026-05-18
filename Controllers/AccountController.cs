@@ -47,7 +47,7 @@ namespace Web_quan_ly_nhan_su.Controllers
                 var nhanVien = _context.NhanVien
                     .Include(nv => nv.NhanVienVaiTro)
                     .ThenInclude(nvvt => nvvt.VaiTro)
-                    .FirstOrDefault(nv => nv.Email == email); 
+                    .FirstOrDefault(nv => nv.Email == email);
 
                 if (nhanVien != null)
                 {
@@ -61,7 +61,7 @@ namespace Web_quan_ly_nhan_su.Controllers
                             new Claim(ClaimTypes.Name, nhanVien.HoTen),
                             new Claim(ClaimTypes.Email, nhanVien.Email),
                             new Claim(ClaimTypes.NameIdentifier, nhanVien.MaNhanVien.ToString())
-                        }; 
+                        };
 
                         // 2. NẠP TẤT CẢ VAI TRÒ (ADMIN, KETOAN...) VÀO CLAIMS 
                         if (nhanVien.NhanVienVaiTro != null)
@@ -71,7 +71,7 @@ namespace Web_quan_ly_nhan_su.Controllers
                                 if (nvvt.VaiTro != null && !string.IsNullOrEmpty(nvvt.VaiTro.MaCode))
                                 {
                                     // Thêm Role vào Cookie để dùng User.IsInRole("...") sau này
-                                     claims.Add(new Claim(ClaimTypes.Role, nvvt.VaiTro.MaCode)); 
+                                    claims.Add(new Claim(ClaimTypes.Role, nvvt.VaiTro.MaCode));
                                 }
                             }
                         }
@@ -86,7 +86,7 @@ namespace Web_quan_ly_nhan_su.Controllers
                         await HttpContext.SignInAsync(
                             CookieAuthenticationDefaults.AuthenticationScheme,
                             new ClaimsPrincipal(claimsIdentity),
-                            authProperties); 
+                            authProperties);
 
                         return RedirectToAction("TongQuat", "Account");
                     }
@@ -110,7 +110,7 @@ namespace Web_quan_ly_nhan_su.Controllers
         [HttpGet]
         public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme); 
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
             return RedirectToAction("Login", "Account");
         }
     }

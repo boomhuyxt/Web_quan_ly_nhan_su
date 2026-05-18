@@ -46,5 +46,8 @@ namespace Web_quan_ly_nhan_su.Models
 
         [InverseProperty("NguoiNhan")]
         public virtual ICollection<TinNhan> TinNhanDaNhan { get; set; } = new List<TinNhan>();
+
+        // 1 Nhân viên có nhiều lịch công tác
+        public virtual ICollection<LichCongTac> LichCongTacs { get; set; } = new List<LichCongTac>();
     }
 }

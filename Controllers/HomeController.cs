@@ -59,7 +59,7 @@ namespace Web_quan_ly_nhan_su.Controllers
         {
             ViewData["PageHeader"] = "Cài đặt & Quản trị";
 
-            // TÌM LỖI LÀ Ở ĐÂY: Truy vấn toàn bộ Đơn xin nghỉ phép kèm thông tin Nhân viên
+            // Truy vấn toàn bộ Đơn xin nghỉ phép kèm thông tin Nhân viên
             var danhSachDon = _context.NghiPhep
                                       .Include(n => n.NhanVien) // Lấy thông tin họ tên, avatar
                                       .OrderByDescending(n => n.TrangThai == "Chờ duyệt") // Đơn chờ duyệt ưu tiên lên đầu
@@ -99,19 +99,44 @@ namespace Web_quan_ly_nhan_su.Controllers
             return View(danhSachDon);
         }
 
+        // ====================================================================
+        // 👉 ĐÃ SỬA: HIỂN THỊ TẤT CẢ LƯƠNG TRONG DATA KÈM HÌNH ẢNH + TÊN NHÂN VIÊN
+        // ====================================================================
         public IActionResult Luong()
         {
-            // 1. Lấy MaNhanVien từ Identity Cookie an toàn như trang Nghỉ phép
-            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            // 1. Xóa bỏ hoàn toàn phần .Where() để lấy TẤT CẢ dữ liệu lương có trong bảng
+            // 2. Thêm lệnh .Include(l => l.NhanVien) để liên kết bảng lấy Hình ảnh, Tên và Email của từng người
+            var danhSachLuong = _context.Luong
+                                        .Include(l => l.NhanVien)
+                                        .OrderByDescending(l => l.Nam)
+                                        .ThenByDescending(l => l.Thang)
+                                        .ToList();
 
-            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int maNhanVien))
+            ViewData["PageHeader"] = "Quản lý Bảng Lương";
+            return View(danhSachLuong);
+        }
+
+        public IActionResult LichCongTac()
+        {
+            return View();
+        }
+
+        // ====================================================================
+        // TRANG XEM LƯƠNG CỦA CÁ NHÂN (DÀNH CHO NHÂN VIÊN)
+        // ====================================================================
+        public IActionResult PhieuLuongCaNhan()
+        {
+            // Lấy ID người đang đăng nhập
+            var userIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(userIdString) || !int.TryParse(userIdString, out int maNhanVienDangNhap))
             {
                 return RedirectToAction("Login", "Account");
             }
 
-            // 2. Truy vấn danh sách lương của nhân viên từ model Luong
+            // Chỉ lấy bảng lương của người đang đăng nhập
             var danhSachLuong = _context.Luong
-                                        .Where(l => l.MaNhanVien == maNhanVien)
+                                        .Include(l => l.NhanVien)
+                                        .Where(l => l.MaNhanVien == maNhanVienDangNhap)
                                         .OrderByDescending(l => l.Nam)
                                         .ThenByDescending(l => l.Thang)
                                         .ToList();

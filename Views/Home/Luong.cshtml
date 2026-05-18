@@ -1,7 +1,6 @@
 ﻿@model IEnumerable<Web_quan_ly_nhan_su.Models.Luong>
-
 @{
-    ViewData["Title"] = "Quản lý Lương - Atelier HR";
+    ViewData["Title"] = "Quản lý Bảng Lương - Atelier HR";
 }
 
 <!DOCTYPE html>
@@ -18,13 +17,8 @@
         theme: {
         extend: {
         colors: {
-        "primary": "#0058bc",
-        "primary-container": "#0070eb",
-        "tertiary": "#006b27",
-        "outline": "#717786",
-        "error": "#ba1a1a",
-        "surface-container": "#eeeef0",
-        "surface-container-lowest": "#ffffff"
+        "primary": "#0058bc", "primary-container": "#0070eb", "tertiary": "#006b27",
+        "outline": "#717786", "error": "#ba1a1a", "surface-container": "#eeeef0"
         },
         fontFamily: { "headline": ["Be Vietnam Pro"], "body": ["Inter"] }
         }
@@ -32,23 +26,32 @@
         }
     </script>
     <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+        .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        input[type=number]::-webkit-inner-spin-button,
+        input[type=number]::-webkit-outer-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+        }
     </style>
 </head>
 <body class="bg-[#f9f9fb] font-body text-[#1a1c1d] antialiased">
-
-    <main class="pt-24 pb-32 px-6 max-w-5xl mx-auto space-y-8">
-        
+    <main class="pt-24 pb-32 px-6 max-w-[1400px] mx-auto space-y-8">
         <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div class="flex items-center gap-4">
-                <a href="/Home/TongQuat" class="w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all">
+                <a href="/Home/TongQuat" class="w-12 h-12 rounded-full bg-white shadow-sm border border-gray-100 flex items-center justify-center hover:bg-gray-50 transition-all active:scale-90">
                     <span class="material-symbols-outlined text-outline">arrow_back</span>
                 </a>
                 <div>
-                    <h1 class="font-headline text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-container">Lịch sử nhận lương</h1>
-                    <p class="opacity-80 text-sm text-outline mt-1">Theo dõi chi tiết thu nhập hàng tháng của bạn</p>
+                    <h1 class="font-headline text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-primary-container">Quản lý Bảng Lương</h1>
+                    <p class="opacity-80 text-sm text-outline mt-1">Theo dõi danh sách trả lương cho toàn bộ nhân viên công ty</p>
                 </div>
             </div>
+            <button onclick="openAddLuongModal()" class="bg-primary text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary-container active:scale-95 flex items-center justify-center gap-2 transition-all shrink-0">
+                <span class="material-symbols-outlined text-[20px]">add_card</span> Nhập dữ liệu lương
+            </button>
         </div>
 
         <div class="bg-white rounded-[32px] shadow-[0_20px_40px_rgba(0,0,0,0.03)] border border-zinc-100 overflow-hidden">
@@ -56,9 +59,12 @@
                 <table class="w-full text-left text-sm whitespace-nowrap">
                     <thead class="bg-gray-50 text-outline font-medium">
                         <tr>
-                            <th class="px-6 py-4">Tháng/Năm</th>
+                            <th class="px-6 py-4">Nhân viên</th>
+                            <th class="px-6 py-4">Kỳ lương</th>
                             <th class="px-6 py-4">Lương cơ bản</th>
+                            <th class="px-6 py-4">Tăng ca</th>
                             <th class="px-6 py-4">Thưởng</th>
+                            <th class="px-6 py-4 text-orange-600">Bảo hiểm (10.5%)</th>
                             <th class="px-6 py-4 text-error">Khấu trừ</th>
                             <th class="px-6 py-4 text-primary font-bold">Tổng lương</th>
                             <th class="px-6 py-4 text-right">Thao tác</th>
@@ -71,6 +77,16 @@
                             {
                                 <tr class="hover:bg-primary/5 transition-colors group">
                                     <td class="px-6 py-4">
+                                        <div class="flex items-center gap-3">
+                                            <img src="@(item.NhanVien?.AnhDaiDien ?? "/images/avatar_default.jpg")" class="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100 shadow-sm" />
+                                            <div>
+                                                <p class="text-sm font-bold text-gray-900">@(item.NhanVien?.HoTen ?? "Chưa rõ")</p>
+                                                <p class="text-[11px] font-medium text-outline mt-0.5">@(item.NhanVien?.Email ?? "Không có email")</p>
+                                            </div>
+                                        </div>
+                                    </td>
+
+                                    <td class="px-6 py-4">
                                         <div class="font-bold text-[#1a1c1d]">Tháng @item.Thang</div>
                                         <div class="text-[11px] text-outline mt-0.5">Năm @item.Nam</div>
                                     </td>
@@ -78,7 +94,13 @@
                                         @item.LuongCoBan.ToString("N0") <span class="text-[10px] text-outline">VNĐ</span>
                                     </td>
                                     <td class="px-6 py-4 font-medium text-tertiary">
+                                        +@item.TienTangCa.ToString("N0")
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-tertiary">
                                         +@item.Thuong.ToString("N0")
+                                    </td>
+                                    <td class="px-6 py-4 font-medium text-orange-600">
+                                        -@((item.BaoHiemXaHoi + item.BaoHiemYTe + item.BaoHiemThatNghiep).ToString("N0"))
                                     </td>
                                     <td class="px-6 py-4 font-medium text-error">
                                         -@item.KhauTru.ToString("N0")
@@ -99,7 +121,7 @@
                         else
                         {
                             <tr>
-                                <td colspan="6" class="py-16 text-center text-outline italic">
+                                <td colspan="9" class="py-16 text-center text-outline italic">
                                     <div class="flex flex-col items-center justify-center gap-3">
                                         <span class="material-symbols-outlined text-5xl opacity-40">payments</span>
                                         <p class="font-medium text-[15px]">Chưa có dữ liệu lương được cập nhật.</p>
@@ -113,5 +135,136 @@
         </div>
     </main>
 
+    <div id="modalAddLuong" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-all">
+        <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-lg p-8 flex flex-col gap-6 transform scale-95 animate-in zoom-in-95 duration-200">
+            <div class="flex justify-between items-center">
+                <div>
+                    <h2 class="font-headline font-bold text-2xl text-gray-900">Tính & Nhập Lương</h2>
+                    <p class="text-xs text-outline mt-1">Hệ thống sẽ tự động trừ BHXH, BHYT, BHTN</p>
+                </div>
+                <button onclick="closeAddLuongModal()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-outline hover:bg-red-50 hover:text-error transition-colors active:scale-90"><span class="material-symbols-outlined">close</span></button>
+            </div>
+
+            <div class="space-y-4">
+                <div>
+                    <label class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5 block ml-1">Chọn nhân viên</label>
+                    <select id="selNhanVienLuong" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-medium outline-none transition-all cursor-pointer">
+                        <option value="">-- Đang tải danh sách --</option>
+                    </select>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5 block ml-1">Kỳ lương (Tháng)</label>
+                        <input id="txtThang" type="number" min="1" max="12" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-medium outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5 block ml-1">Năm</label>
+                        <input id="txtNam" type="number" min="2000" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-medium outline-none transition-all">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5 block ml-1">Lương cơ bản (VNĐ)</label>
+                        <input id="txtLuongCoBan" type="number" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-medium outline-none transition-all" placeholder="VD: 10000000">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5 block ml-1">Giờ Tăng Ca (HS 1.2)</label>
+                        <input id="txtSoGioTangCa" type="number" value="0" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-medium outline-none transition-all" placeholder="Nhập số giờ">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5 block ml-1 text-tertiary">Thưởng (+)</label>
+                        <input id="txtThuong" type="number" value="0" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-2 focus:ring-tertiary/20 focus:border-tertiary text-sm font-medium outline-none transition-all">
+                    </div>
+                    <div>
+                        <label class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5 block ml-1 text-error">Khấu trừ (-)</label>
+                        <input id="txtKhauTru" type="number" value="0" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-2 focus:ring-error/20 focus:border-error text-sm font-medium outline-none transition-all">
+                    </div>
+                </div>
+            </div>
+
+            <button onclick="submitLuong()" id="btnSubmitLuong" class="w-full bg-primary text-white py-4 rounded-full font-bold shadow-lg shadow-primary/30 hover:bg-primary-container active:scale-95 transition-all mt-2 flex items-center justify-center gap-2">
+                <span class="material-symbols-outlined text-[20px]">calculate</span> Tính & Lưu Lương
+            </button>
+        </div>
+    </div>
+
+    <script>
+        async function openAddLuongModal() {
+        document.getElementById('modalAddLuong').classList.remove('hidden');
+        const now = new Date();
+        document.getElementById('txtThang').value = now.getMonth() + 1;
+        document.getElementById('txtNam').value = now.getFullYear();
+
+        const selNV = document.getElementById('selNhanVienLuong');
+        if (selNV.options.length <= 1) {
+        selNV.innerHTML = '<option value="">Đang tải danh sách nhân viên...</option>';
+        try {
+        const res = await fetch('/api/quanlynhanvien/danh-sach');
+        const data = await res.json();
+        if(data.success) {
+        selNV.innerHTML = '<option value="">-- Vui lòng chọn nhân viên --</option>' +
+        data.data.map(nv => `<option value="${nv.maNhanVien}">${nv.hoTen} (${nv.tenPhongBan || 'Chưa phân phòng'})</option>`).join('');
+        }
+        } catch(e) { selNV.innerHTML = '<option value="">Lỗi tải dữ liệu</option>'; }
+        }
+        }
+
+        function closeAddLuongModal() {
+        document.getElementById('modalAddLuong').classList.add('hidden');
+        document.getElementById('selNhanVienLuong').value = '';
+        document.getElementById('txtLuongCoBan').value = '';
+        document.getElementById('txtSoGioTangCa').value = '0';
+        document.getElementById('txtThuong').value = '0';
+        document.getElementById('txtKhauTru').value = '0';
+        }
+
+        async function submitLuong() {
+        const payload = {
+        maNhanVien: parseInt(document.getElementById('selNhanVienLuong').value),
+        thang: parseInt(document.getElementById('txtThang').value),
+        nam: parseInt(document.getElementById('txtNam').value),
+        luongCoBan: parseFloat(document.getElementById('txtLuongCoBan').value),
+        soGioTangCa: parseFloat(document.getElementById('txtSoGioTangCa').value || 0),
+        thuong: parseFloat(document.getElementById('txtThuong').value || 0),
+        khauTru: parseFloat(document.getElementById('txtKhauTru').value || 0)
+        };
+
+        if(!payload.maNhanVien || !payload.thang || !payload.nam || isNaN(payload.luongCoBan)) {
+        return alert("⚠️ Vui lòng nhập đầy đủ thông tin nhân viên, kỳ lương và lương cơ bản!");
+        }
+
+        const btnSubmit = document.getElementById('btnSubmitLuong');
+        btnSubmit.disabled = true;
+        btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang xử lý...';
+
+        try {
+        const res = await fetch('/api/luong/tinh-luong', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+
+        if(data.success) {
+        alert(`✅ ${data.message}\nTổng lương sau khi tính: ${data.tongLuong.toLocaleString('vi-VN')} VNĐ`);
+        closeAddLuongModal();
+        location.reload();
+        } else {
+        alert("Lỗi: " + data.message);
+        }
+        } catch(e) {
+        alert("Lỗi kết nối máy chủ!");
+        }
+        finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerHTML = '<span class="material-symbols-outlined text-[20px]">calculate</span> Tính & Lưu Lương';
+        }
+        }
+    </script>
 </body>
 </html>
