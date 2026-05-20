@@ -67,7 +67,6 @@ Dự án được xây dựng theo định hướng ứng dụng AI vào quản 
 - Quản lý hồ sơ nhân viên
 - Quản lý phòng ban
 - Quản lý chức vụ
-- Quản lý hợp đồng
 - Quản lý tài khoản
 - Phân quyền người dùng
 - Theo dõi thông tin nhân sự
