@@ -1,0 +1,21 @@
+﻿/* File: wwwroot/css/TheoDoiCongTac.css */
+
+/* Định dạng cấu hình biểu tượng Google Material Symbols */
+.material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+}
+
+/* Hiệu ứng dịch chuyển mềm mại khi rê chuột vào Card lịch công tác */
+.transform.hover\:-translate-y-1\.5:hover {
+    transform: translateY(-0.375rem);
+}
+
+/* Ẩn hoàn toàn thanh cuộn ngang trên các trình duyệt đối với bộ lọc */
+.no-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+
+.no-scrollbar {
+    -ms-overflow-style: none; /* IE và Edge */
+    scrollbar-width: none; /* Firefox */
+}

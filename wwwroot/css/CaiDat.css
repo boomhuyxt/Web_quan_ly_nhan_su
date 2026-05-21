@@ -1,0 +1,15 @@
+﻿/* File: wwwroot/css/CaiDat.css */
+
+/* Tùy biến thanh cuộn mượt cho hộp danh sách phân quyền */
+.custom-scrollbar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: #d1d5db;
+    border-radius: 20px;
+}
