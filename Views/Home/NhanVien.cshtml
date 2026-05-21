@@ -4,49 +4,64 @@
 <!DOCTYPE html>
 <html class="light" lang="vi">
 <head>
-    <meta charset="utf-8"/>
-    <meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+    <meta charset="utf-8" />
+    <meta content="width=device-width, initial-scale=1.0" name="viewport" />
     <title>Atelier HR - Danh sách Nhân viên</title>
-    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet"/>
+    <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
     <script id="tailwind-config">
         tailwind.config = {
-            darkMode: "class",
-            theme: {
-                extend: {
-                    colors: {
-                        "outline": "#717786",
-                        "primary": "#0058bc",
-                        "primary-container": "#0070eb",
-                        "surface-container": "#eeeef0",
-                        "surface-container-lowest": "#ffffff",
-                        "surface-container-low": "#f3f3f5",
-                        "error": "#ba1a1a",
-                        "tertiary": "#006b27",
-                        "outline-variant": "#c1c6d7",
-                        "on-surface": "#1a1c1d",
-                        "on-surface-variant": "#414755",
-                    },
-                    fontFamily: {
-                        "headline": ["Be Vietnam Pro"],
-                        "body": ["Inter"]
-                    },
-                    borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-                },
-            },
+        darkMode: "class",
+        theme: {
+        extend: {
+        colors: {
+        "outline": "#717786",
+        "primary": "#0058bc",
+        "primary-container": "#0070eb",
+        "surface-container": "#eeeef0",
+        "surface-container-lowest": "#ffffff",
+        "surface-container-low": "#f3f3f5",
+        "error": "#ba1a1a",
+        "tertiary": "#006b27",
+        "outline-variant": "#c1c6d7",
+        "on-surface": "#1a1c1d",
+        "on-surface-variant": "#414755",
+        },
+        fontFamily: {
+        "headline": ["Be Vietnam Pro"],
+        "body": ["Inter"]
+        },
+        borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
+        },
+        },
         }
     </script>
     <style>
-        .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-        .tonal-transition { transition: background-color 0.3s ease; }
-        .no-scrollbar::-webkit-scrollbar { display: none; }
-        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-        body { min-height: max(884px, 100dvh); background-color: #f9f9fb;}
+        .material-symbols-outlined {
+        font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+
+        .tonal-transition {
+        transition: background-color 0.3s ease;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+        display: none;
+        }
+
+        .no-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+        }
+
+        body {
+        min-height: max(884px, 100dvh);
+        background-color: #f9f9fb;
+        }
     </style>
 </head>
 <body class="font-body text-on-surface selection:bg-primary/10">
-
 
     <main class="pt-24 pb-32 px-6 max-w-2xl mx-auto">
         <section class="space-y-6 mb-8">
@@ -55,7 +70,7 @@
                     <div class="absolute inset-y-0 left-4 flex items-center pointer-events-none">
                         <span class="material-symbols-outlined text-outline">search</span>
                     </div>
-                    <input id="txtSearchNhanVien" class="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-outline shadow-sm" placeholder="Tìm kiếm theo Tên hoặc Email..." type="text"/>
+                    <input id="txtSearchNhanVien" class="w-full bg-white border border-gray-200 rounded-2xl py-3.5 pl-12 pr-4 text-sm font-medium focus:ring-2 focus:ring-primary/50 transition-all placeholder:text-outline shadow-sm" placeholder="Tìm kiếm theo Tên hoặc Email..." type="text" />
                 </div>
 
                 @* CHỈ HIỂN THỊ NÚT LƯƠNG NẾU LÀ ADMIN HOẶC KẾ TOÁN *@
@@ -67,7 +82,7 @@
                     </a>
                 }
             </div>
-            
+
             <div id="departmentFilters" class="flex gap-2 overflow-x-auto no-scrollbar pb-2 cursor-grab active:cursor-grabbing select-none">
                 <button class="whitespace-nowrap px-4 py-2 rounded-full bg-primary text-white text-sm font-medium shadow-sm transition-all animate-pulse">Đang tải...</button>
             </div>
@@ -117,116 +132,6 @@
         </a>
     </nav>
 
-    <script>
-        let allEmployees = [];
-        let departments = [];
-        let currentSearch = "";
-        let currentDeptId = null;
-
-        async function loadData() {
-            try {
-                const resMaster = await fetch('/api/quanlynhanvien/master-data');
-                if (resMaster.ok) {
-                    const dataMaster = await resMaster.json();
-                    if(dataMaster.success) {
-                        departments = dataMaster.phongBans;
-                        renderDepartmentFilters();
-                    }
-                }
-                await fetchEmployees();
-            } catch(e) { console.error("Lỗi khởi tạo:", e); }
-        }
-
-        async function fetchEmployees() {
-            try {
-                const res = await fetch(`/api/quanlynhanvien/danh-sach?q=${encodeURIComponent(currentSearch)}`);
-                if (res.ok) {
-                    const data = await res.json();
-                    if(data.success) {
-                        allEmployees = data.data;
-                        renderEmployees();
-                    }
-                }
-            } catch(e) { console.error("Lỗi lấy nhân viên:", e); }
-        }
-
-        function renderDepartmentFilters() {
-            const container = document.getElementById('departmentFilters');
-            container.innerHTML = '';
-            const allBtn = document.createElement('button');
-            allBtn.className = `whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${currentDeptId === null ? 'bg-primary text-white shadow-sm' : 'bg-white text-on-surface-variant border border-gray-200 hover:bg-gray-50'}`;
-            allBtn.innerText = 'Tất cả';
-            allBtn.onclick = () => { currentDeptId = null; renderDepartmentFilters(); renderEmployees(); };
-            container.appendChild(allBtn);
-
-            departments.forEach(p => {
-                const btn = document.createElement('button');
-                btn.className = `whitespace-nowrap px-4 py-2 rounded-full text-sm font-medium transition-all ${currentDeptId === p.maPhongBan ? 'bg-primary text-white shadow-sm' : 'bg-white text-on-surface-variant border border-gray-200 hover:bg-gray-50'}`;
-                btn.innerText = p.tenPhongBan;
-                btn.onclick = () => { currentDeptId = p.maPhongBan; renderDepartmentFilters(); renderEmployees(); };
-                container.appendChild(btn);
-            });
-        }
-
-        function renderEmployees() {
-            const list = document.getElementById('employeeList');
-            list.innerHTML = '';
-            let filtered = allEmployees;
-            if (currentDeptId !== null) {
-                filtered = allEmployees.filter(nv => nv.maPhongBan === currentDeptId);
-            }
-            document.getElementById('txtTongNhanSu').innerText = filtered.length;
-
-            if (filtered.length === 0) {
-                list.innerHTML = '<div class="text-center text-outline py-8 text-sm">Không tìm thấy nhân viên nào phù hợp.</div>';
-                return;
-            }
-
-            filtered.forEach(nv => {
-                const isActive = (!nv.trangThai || nv.trangThai === 1);
-                const statusClass = isActive ? 'bg-tertiary/10 text-tertiary' : 'bg-red-50 text-error';
-                const statusText = isActive ? 'Đang hoạt động' : 'Đã khóa';
-                const dotClass = isActive ? 'bg-tertiary' : 'bg-outline';
-                const imgClass = isActive ? '' : 'grayscale';
-
-                const html = `
-                <div class="relative overflow-hidden rounded-[24px] bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-                    <div class="p-4 flex items-center gap-4">
-                        <div class="relative shrink-0">
-                            <img alt="${nv.hoTen}" class="w-14 h-14 rounded-2xl object-cover bg-surface-container ${imgClass}" src="${nv.anhDaiDien || '/images/avatar_default.jpg'}"/>
-                            <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${dotClass}"></div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <h3 class="font-headline font-semibold text-on-surface truncate">${nv.hoTen}</h3>
-                            <p class="text-xs text-on-surface-variant mt-0.5 truncate">${nv.tenPhongBan} • ${nv.email}</p>
-                        </div>
-                        <div class="flex flex-col items-end gap-1 shrink-0">
-                            <span class="px-2.5 py-1 rounded-lg ${statusClass} text-[10px] font-bold uppercase tracking-wider">${statusText}</span>
-                        </div>
-                    </div>
-                </div>`;
-                list.insertAdjacentHTML('beforeend', html);
-            });
-        }
-
-        // Logic kéo cuộn mượt mà
-        const slider = document.getElementById('departmentFilters');
-        let isDown = false, startX, scrollLeft;
-        slider.addEventListener('mousedown', (e) => { isDown = true; startX = e.pageX - slider.offsetLeft; scrollLeft = slider.scrollLeft; });
-        slider.addEventListener('mouseleave', () => { isDown = false; });
-        slider.addEventListener('mouseup', () => { isDown = false; });
-        slider.addEventListener('mousemove', (e) => { if (!isDown) return; e.preventDefault(); const x = e.pageX - slider.offsetLeft; const walk = (x - startX) * 2; slider.scrollLeft = scrollLeft - walk; });
-
-        // Logic tìm kiếm
-        let searchTimeout = null;
-        document.getElementById('txtSearchNhanVien').addEventListener('input', (e) => {
-            currentSearch = e.target.value.trim();
-            clearTimeout(searchTimeout);
-            document.getElementById('employeeList').innerHTML = '<div class="text-center text-outline py-8 text-sm animate-pulse">Đang tìm kiếm...</div>';
-            searchTimeout = setTimeout(() => { fetchEmployees(); }, 400);
-        });
-
-        document.addEventListener('DOMContentLoaded', loadData);
-    </script>
+    <script src="~/js/DanhSachNhanVien.js"></script>
 </body>
 </html>
