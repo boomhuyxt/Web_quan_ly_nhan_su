@@ -12,13 +12,17 @@
     <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <script>
+    <script id="tailwind-config">
         tailwind.config = {
         theme: {
         extend: {
         colors: {
-        "primary": "#0058bc", "primary-container": "#0070eb", "tertiary": "#006b27",
-        "outline": "#717786", "error": "#ba1a1a", "surface-container": "#eeeef0"
+        "primary": "#0058bc",
+        "primary-container": "#0070eb",
+        "tertiary": "#006b27",
+        "outline": "#717786",
+        "error": "#ba1a1a",
+        "surface-container": "#eeeef0"
         },
         fontFamily: { "headline": ["Be Vietnam Pro"], "body": ["Inter"] }
         }
@@ -30,7 +34,7 @@
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
-        /* 👉 ĐÃ SỬA: Dùng @@ để tránh lỗi Razor C# */
+        /* Đã sửa: Dùng @@media để trình biên dịch Razor không nhận nhầm thành mã C# */
         @@media print {
         body * {
         visibility: hidden;
@@ -48,7 +52,7 @@
         margin: 0;
         padding: 20px;
         }
-
+        /* Đã sửa: Dùng @@page để không bị lỗi RZ3906 và RZ1016 */
         @@page {
         margin: 1cm;
         size: A4 portrait;
@@ -217,34 +221,6 @@
         <p class="text-center text-xs text-gray-500 italic mt-12 border-t pt-2">Phiếu lương được xuất tự động từ Hệ thống Atelier HR.</p>
     </div>
 
-    <script>
-        function inPhieuLuong(ten, thang, nam, luongCB, tangCa, thuong, khauTru, bhxh, bhyt, bhtn, tongLuong) {
-
-        const formatVN = (num) => parseFloat(num).toLocaleString('vi-VN');
-
-        document.getElementById('pTenNhanVien').innerText = ten;
-        document.getElementById('pKyLuong').innerText = `Kỳ lương: Tháng ${thang}/${nam}`;
-
-        document.getElementById('pLuongCoBan').innerText = formatVN(luongCB);
-        document.getElementById('pTangCa').innerText = formatVN(tangCa);
-        document.getElementById('pThuong').innerText = formatVN(thuong);
-
-        document.getElementById('pBHXH').innerText = formatVN(bhxh);
-        document.getElementById('pBHYT').innerText = formatVN(bhyt);
-        document.getElementById('pBHTN').innerText = formatVN(bhtn);
-        document.getElementById('pKhauTru').innerText = formatVN(khauTru);
-
-        document.getElementById('pTongLuong').innerText = formatVN(tongLuong);
-
-        const printArea = document.getElementById('printArea');
-        printArea.classList.remove('hidden');
-        printArea.classList.add('block');
-
-        window.print();
-
-        printArea.classList.add('hidden');
-        printArea.classList.remove('block');
-        }
-    </script>
+    <script src="~/js/PhieuLuong.js"></script>
 </body>
 </html>

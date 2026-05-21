@@ -28,10 +28,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] Atelier HR</title>
     <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
-    <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    <link class="tonal-transition" rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
-    
-    <script>
+
+    <script id="tailwind-config">
         tailwind.config = {
         theme: {
         extend: {
@@ -57,21 +57,21 @@
     </script>
 </head>
 <body class="bg-surface font-body text-on-surface antialiased pb-32">
-    
+
     <header class="fixed top-0 w-full z-50 bg-white/70 backdrop-blur-xl shadow-[0_20px_40px_rgba(0,0,0,0.04)] px-6 py-4 flex justify-between items-center">
         <div class="flex items-center gap-4">
-            
+
             <div class="relative">
                 <button id="userMenuBtn" class="w-10 h-10 rounded-full overflow-hidden bg-surface-container hover:ring-2 hover:ring-primary transition-all cursor-pointer block focus:outline-none">
                     <img src="@avatarUrl" class="w-full h-full object-cover" alt="User">
                 </button>
-                
+
                 <div id="userDropdown" class="hidden absolute left-0 mt-3 w-60 bg-white rounded-2xl shadow-xl border border-surface-container overflow-hidden z-[60] transition-all transform origin-top-left">
                     <div class="px-4 py-3 bg-surface-container-lowest border-b border-surface-container">
                         <p class="text-xs text-outline mb-0.5">Đang đăng nhập dưới tên</p>
                         <p class="text-sm text-on-surface font-bold truncate">@(User.Identity?.Name ?? "Nhân viên")</p>
                     </div>
-                    
+
                     <div class="py-2">
                         <a asp-controller="NhanVien" asp-action="ThongTinUser" class="flex items-center gap-3 px-4 py-2.5 text-sm text-on-surface hover:bg-surface-container-low transition-colors">
                             <span class="material-symbols-outlined text-[20px]">manage_accounts</span>
@@ -100,7 +100,7 @@
         </button>
 
         <div id="aiChatWindow" class="hidden fixed right-6 bottom-32 w-80 bg-white rounded-3xl shadow-2xl z-[70] overflow-hidden flex-col border border-gray-100 transition-all transform origin-bottom-right">
-            
+
             <div class="bg-gradient-to-r from-primary to-primary-container p-4 flex justify-between items-center text-white shadow-sm">
                 <div class="flex items-center gap-3">
                     <div class="w-8 h-8 bg-white/20 rounded-full flex items-center justify-center">
@@ -201,152 +201,7 @@
         }
     </nav>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", function () {
-        const userMenuBtn = document.getElementById('userMenuBtn');
-        const userDropdown = document.getElementById('userDropdown');
-
-        if (userMenuBtn && userDropdown) {
-        userMenuBtn.addEventListener('click', function (e) {
-        e.stopPropagation();
-        userDropdown.classList.toggle('hidden');
-        });
-        document.addEventListener('click', function (e) {
-        if (!userMenuBtn.contains(e.target) && !userDropdown.contains(e.target)) {
-        userDropdown.classList.add('hidden');
-        }
-        });
-        }
-        });
-
-        // ================= XỬ LÝ KHUNG CHAT AI =================
-        function toggleAiChat() {
-        const chatWin = document.getElementById('aiChatWindow');
-        const chatBtn = document.getElementById('floatingAiButton');
-
-        if(chatWin.classList.contains('hidden')) {
-        // Đang ẩn -> Mở khung chat, ẩn nút tròn
-        chatWin.classList.remove('hidden');
-        chatWin.classList.add('flex');
-                
-        if(chatBtn) {
-        chatBtn.classList.add('hidden');
-        chatBtn.classList.remove('flex');
-        }
-                
-        document.getElementById('aiChatInput').focus();
-        } else {
-        // Đang mở -> Đóng khung chat, hiện lại nút tròn
-        chatWin.classList.add('hidden');
-        chatWin.classList.remove('flex');
-                
-        if(chatBtn) {
-        chatBtn.classList.remove('hidden');
-        chatBtn.classList.add('flex');
-        }
-        }
-        }
-
-        function handleAiChatEnter(e) {
-        if (e.key === 'Enter') sendAiMessage();
-        }
-
-        async function sendAiMessage() {
-        const input = document.getElementById('aiChatInput');
-        const text = input.value.trim();
-        if (!text) return;
-
-        const body = document.getElementById('aiChatBody');
-            
-        // Hiện tin nhắn người dùng
-        body.insertAdjacentHTML('beforeend', `
-        <div class="bg-primary text-white p-3 rounded-2xl rounded-tr-none shadow-sm max-w-[85%] self-end text-sm leading-relaxed">
-        ${text}
-        </div>
-        `);
-        input.value = '';
-        body.scrollTop = body.scrollHeight;
-
-        // Hiện trạng thái AI đang tải
-        const loadingId = 'loading-' + Date.now();
-        body.insertAdjacentHTML('beforeend', `
-        <div id="${loadingId}" class="flex gap-2 w-[85%]">
-        <div class="w-7 h-7 shrink-0 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
-        <span class="material-symbols-outlined text-[14px]">smart_toy</span>
-        </div>
-        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-100 shadow-sm text-sm text-outline flex items-center gap-2">
-        <span class="material-symbols-outlined animate-spin text-[16px]">hourglass_empty</span>
-        Đang suy nghĩ...
-        </div>
-        </div>
-        `);
-        body.scrollTop = body.scrollHeight;
-
-        try {
-        // Gọi API tới C# Controller
-        const res = await fetch('/api/Ai/Chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text }) // Chuyển câu hỏi thành JSON
-        });
-                
-        const data = await res.json();
-                
-        // Xóa biểu tượng loading
-        document.getElementById(loadingId).remove();
-
-        if(data.success) {
-        // TẠO HTML CHO CÂU TRẢ LỜI CỦA AI VÀ CÁC NÚT TẢI FILE
-        let messageHtml = `
-        <div class="flex gap-2 w-[85%] mb-4">
-        <div class="w-7 h-7 shrink-0 rounded-full bg-primary text-white flex items-center justify-center shadow-sm">
-        <span class="material-symbols-outlined text-[14px]">smart_toy</span>
-        </div>
-        <div class="flex flex-col gap-2 w-full">
-        <div class="bg-white p-3 rounded-2xl rounded-tl-none border border-gray-100 shadow-sm text-sm text-gray-800 leading-relaxed break-words">
-        ${data.reply}
-        </div>`;
-
-        // KIỂM TRA NẾU CÓ FILE THÌ VẼ NÚT TẢI
-        if (data.attachedFiles && data.attachedFiles.length > 0) {
-        messageHtml += `<div class="flex flex-col gap-1.5 mt-1">`;
-        data.attachedFiles.forEach(file => {
-        messageHtml += `
-        <a href="${file.url}" target="_blank" class="flex items-center gap-2 p-2 bg-blue-50 border border-blue-100 rounded-xl text-primary hover:bg-primary hover:text-white transition-colors active:scale-95 shadow-sm text-xs font-bold w-fit">
-        <span class="material-symbols-outlined text-[16px]">${file.icon}</span>
-        ${file.tenFile}
-        <span class="material-symbols-outlined text-[16px] ml-1">download</span>
-        </a>
-        `;
-        });
-        messageHtml += `</div>`;
-        }
-
-        // Đóng các thẻ
-        messageHtml += `</div></div>`;
-            
-        // In kết quả ra màn hình
-        body.insertAdjacentHTML('beforeend', messageHtml);
-            
-        } else {
-        body.insertAdjacentHTML('beforeend', `
-        <div class="bg-red-50 text-error p-3 rounded-2xl rounded-tl-none border border-red-100 shadow-sm max-w-[85%] self-start text-sm">
-        ${data.reply}
-        </div>
-        `);
-        }
-
-        } catch (e) {
-        document.getElementById(loadingId).remove();
-        body.insertAdjacentHTML('beforeend', `
-        <div class="bg-red-50 text-error p-3 rounded-2xl rounded-tl-none border border-red-100 shadow-sm max-w-[85%] self-start text-sm">
-        Mất kết nối đến máy chủ. Vui lòng thử lại!
-        </div>
-        `);
-        }
-        body.scrollTop = body.scrollHeight;
-        }
-    </script>
+    <script src="~/js/Layout.js"></script>
 
     @await RenderSectionAsync("Scripts", required: false)
 </body>
