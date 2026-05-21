@@ -53,23 +53,38 @@ namespace Web_quan_ly_nhan_su.Controllers
         }
 
         // 6. Trỏ đến Views/Home/CaiDat.cshtml
+        // 👉 ĐÃ SỬA: Đồng bộ Role thành "Admin" để tránh lỗi không khớp ký tự viết hoa chữ thường
         [HttpGet]
-        [Authorize(Roles = "ADMIN")]
         public IActionResult CaiDat()
         {
-            ViewData["PageHeader"] = "Cài đặt & Quản trị";
+            var currentUserIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserIdString) || !int.TryParse(currentUserIdString, out int currentUserId))
+            {
+                return RedirectToAction("Login", "Account");
+            }
 
-            // Truy vấn toàn bộ Đơn xin nghỉ phép kèm thông tin Nhân viên
+            var isAdmin = _context.NhanVienVaiTro
+                                  .Include(nvvt => nvvt.VaiTro)
+                                  .Any(nvvt => nvvt.MaNhanVien == currentUserId &&
+                                               (nvvt.VaiTro.MaCode == "ADMIN" ||
+                                                nvvt.VaiTro.TenVaiTro == "Admin" ||
+                                                nvvt.VaiTro.TenVaiTro == "ADMIN"));
+
+            if (!isAdmin)
+            {
+                TempData["ErrorMessage"] = "Bạn không có quyền truy cập khu vực quản trị!";
+                return RedirectToAction("TongQuat", "Home");
+            }
+
+            ViewData["PageHeader"] = "Cài đặt & Quản trị";
             var danhSachDon = _context.NghiPhep
-                                      .Include(n => n.NhanVien) // Lấy thông tin họ tên, avatar
-                                      .OrderByDescending(n => n.TrangThai == "Chờ duyệt") // Đơn chờ duyệt ưu tiên lên đầu
-                                      .ThenByDescending(n => n.NgayBatDau) // Sau đó sắp xếp theo ngày
+                                      .Include(n => n.NhanVien)
+                                      .OrderByDescending(n => n.TrangThai == "Chờ duyệt")
+                                      .ThenByDescending(n => n.NgayBatDau)
                                       .ToList();
 
-            // Truyền danh sách này sang View để giao diện có data mà render (thẻ @foreach)
             return View(danhSachDon);
         }
-
         // 7. Trỏ đến Views/Home/ThongTinUser.cshtml
         public IActionResult ThongTinUser()
         {
@@ -100,12 +115,10 @@ namespace Web_quan_ly_nhan_su.Controllers
         }
 
         // ====================================================================
-        // 👉 ĐÃ SỬA: HIỂN THỊ TẤT CẢ LƯƠNG TRONG DATA KÈM HÌNH ẢNH + TÊN NHÂN VIÊN
+        // HIỂN THỊ TẤT CẢ LƯƠNG TRONG DATA KÈM HÌNH ẢNH + TÊN NHÂN VIÊN
         // ====================================================================
         public IActionResult Luong()
         {
-            // 1. Xóa bỏ hoàn toàn phần .Where() để lấy TẤT CẢ dữ liệu lương có trong bảng
-            // 2. Thêm lệnh .Include(l => l.NhanVien) để liên kết bảng lấy Hình ảnh, Tên và Email của từng người
             var danhSachLuong = _context.Luong
                                         .Include(l => l.NhanVien)
                                         .OrderByDescending(l => l.Nam)
@@ -143,6 +156,45 @@ namespace Web_quan_ly_nhan_su.Controllers
 
             ViewData["PageHeader"] = "Phiếu lương cá nhân";
             return View(danhSachLuong);
+        }
+
+        [HttpGet]
+        // 👉 BƯỚC 1: Bỏ thuộc tính [Authorize(Roles = "Admin")] để tự xử lý logic bằng mã lệnh bên dưới
+        public IActionResult ThongTinChiTiet(int id)
+        {
+            // 1. Lấy ID của nhân viên đang thao tác đăng nhập hiện tại trên hệ thống
+            var currentUserIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (string.IsNullOrEmpty(currentUserIdString) || !int.TryParse(currentUserIdString, out int currentUserId))
+            {
+                // Nếu phiên đăng nhập hết hạn hoặc chưa đăng nhập, đá ra trang Login
+                return RedirectToAction("Login", "Account");
+            }
+
+            // 2. Tìm kiếm trực tiếp trong Database xem nhân viên này có sở hữu mã quyền Quản trị hay không
+            // (Kiểm tra cả trường hợp Database lưu là "ADMIN" hoặc "Admin")
+            var isAdmin = _context.NhanVienVaiTro
+                                  .Include(nvvt => nvvt.VaiTro)
+                                  .Any(nvvt => nvvt.MaNhanVien == currentUserId &&
+                                               (nvvt.VaiTro.MaCode == "ADMIN" ||
+                                                nvvt.VaiTro.TenVaiTro == "Admin" ||
+                                                nvvt.VaiTro.TenVaiTro == "ADMIN"));
+
+            // 3. Nếu KHÔNG PHẢI Admin, chặn đứng hành động và đẩy ngược về danh sách kèm thông báo lỗi
+            if (!isAdmin)
+            {
+                
+                return RedirectToAction("NhanVien", "Home");
+            }
+
+            // 4. Nếu ĐÚNG LÀ Admin, tiến hành lấy thông tin nhân viên cần xem như bình thường
+            var nhanVien = _context.NhanVien
+                                   .Include(n => n.PhongBan)
+                                   .FirstOrDefault(n => n.MaNhanVien == id);
+
+            if (nhanVien == null) return NotFound();
+
+            ViewData["PageHeader"] = "Chi tiết nhân viên";
+            return View(nhanVien);
         }
     }
 }

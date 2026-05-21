@@ -72,6 +72,7 @@ function renderEmployees() {
         return;
     }
 
+    // BÊN TRONG HÀM RENDER INTERFACE CỦA FILE DanhSachNhanVien.js:
     filtered.forEach(nv => {
         const isActive = (!nv.trangThai || nv.trangThai === 1);
         const statusClass = isActive ? 'bg-tertiary/10 text-tertiary' : 'bg-red-50 text-error';
@@ -79,22 +80,23 @@ function renderEmployees() {
         const dotClass = isActive ? 'bg-tertiary' : 'bg-outline';
         const imgClass = isActive ? '' : 'grayscale';
 
+        // ĐÃ SỬA: Thay đổi thẻ div ngoài cùng thành thẻ <a> và trỏ href tới Action xem chi tiết hồ sơ
         const html = `
-        <div class="relative overflow-hidden rounded-[24px] bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all group">
-            <div class="p-4 flex items-center gap-4">
-                <div class="relative shrink-0">
-                    <img alt="${nv.hoTen}" class="w-14 h-14 rounded-2xl object-cover bg-surface-container ${imgClass}" src="${nv.anhDaiDien || '/images/avatar_default.jpg'}"/>
-                    <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${dotClass}"></div>
-                </div>
-                <div class="flex-1 min-w-0">
-                    <h3 class="font-headline font-semibold text-on-surface truncate">${nv.hoTen}</h3>
-                    <p class="text-xs text-on-surface-variant mt-0.5 truncate">${nv.tenPhongBan || 'Chưa phân bổ'} • ${nv.email}</p>
-                </div>
-                <div class="flex flex-col items-end gap-1 shrink-0">
-                    <span class="px-2.5 py-1 rounded-lg ${statusClass} text-[10px] font-bold uppercase tracking-wider">${statusText}</span>
-                </div>
+    <a href="/Home/ThongTinChiTiet?id=${nv.maNhanVien}" class="block relative overflow-hidden rounded-[24px] bg-white border border-gray-100 shadow-sm hover:shadow-md transition-all group active:scale-[0.99]">
+        <div class="p-4 flex items-center gap-4">
+            <div class="relative shrink-0">
+                <img alt="${nv.hoTen}" class="w-14 h-14 rounded-2xl object-cover bg-surface-container ${imgClass}" src="${nv.anhDaiDien || '/images/avatar_default.jpg'}"/>
+                <div class="absolute -bottom-1 -right-1 w-4 h-4 rounded-full border-2 border-white ${dotClass}"></div>
             </div>
-        </div>`;
+            <div class="flex-1 min-w-0">
+                <h3 class="font-headline font-semibold text-on-surface group-hover:text-primary transition-colors truncate">${nv.hoTen}</h3>
+                <p class="text-xs text-on-surface-variant mt-0.5 truncate">${nv.tenPhongBan || 'Chưa phân bổ'} • ${nv.email}</p>
+            </div>
+            <div class="flex flex-col items-end gap-1 shrink-0">
+                <span class="px-2.5 py-1 rounded-lg ${statusClass} text-[10px] font-bold uppercase tracking-wider">${statusText}</span>
+            </div>
+        </div>
+    </a>`;
         list.insertAdjacentHTML('beforeend', html);
     });
 }
