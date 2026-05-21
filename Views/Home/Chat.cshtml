@@ -35,6 +35,7 @@
         font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
         }
 
+        /* Thanh cuộn mượt cho danh sách chat */
         .chat-scroll::-webkit-scrollbar {
         width: 6px;
         }
@@ -54,6 +55,12 @@
 
         body {
         min-height: max(884px, 100dvh);
+        }
+
+        /* 👉 ĐÃ CẬP NHẬT: Khống chế chiều cao hiển thị vừa vặn khoảng 5 tài khoản và bật cuộn chuột */
+        #userList {
+        max-height: 440px; /* Chiều cao chuẩn cho 5 item (mỗi item khoảng 88px bao gồm khoảng cách) */
+        overflow-y: auto;
         }
     </style>
 </head>
@@ -81,7 +88,7 @@
                 <button id="tab-group" onclick="switchTab('group')" class="flex-1 py-2 text-[13px] font-bold rounded-2xl text-outline hover:text-on-surface transition-all">Nhóm</button>
             </div>
 
-            <div id="userList" class="space-y-1 overflow-y-auto no-scrollbar flex-1">
+            <div id="userList" class="space-y-1 chat-scroll flex-1">
                 <p class="text-center text-sm text-outline mt-8">Đang tải cuộc trò chuyện...</p>
             </div>
         </aside>

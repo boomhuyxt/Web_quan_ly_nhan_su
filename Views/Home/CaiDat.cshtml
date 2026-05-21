@@ -18,15 +18,18 @@
 
 <link href="~/css/CaiDat.css" rel="stylesheet" />
 
-<div class="flex gap-8 border-b border-gray-200 mb-8 px-2">
-    <button id="btnTabDonTu" onclick="switchTab('dontu')" class="pb-3 text-sm font-bold text-primary border-b-2 border-primary transition-all active:scale-95">
+<div class="flex gap-8 border-b border-gray-200 mb-8 px-2 overflow-x-auto no-scrollbar">
+    <button id="btnTabDonTu" onclick="switchTab('dontu')" class="pb-3 text-sm font-bold text-primary border-b-2 border-primary transition-all active:scale-95 whitespace-nowrap">
         Quản lý Đơn từ
     </button>
-    <button id="btnTabNhanSu" onclick="switchTab('nhansu')" class="pb-3 text-sm font-bold text-outline border-b-2 border-transparent hover:text-primary transition-all active:scale-95">
+    <button id="btnTabNhanSu" onclick="switchTab('nhansu')" class="pb-3 text-sm font-bold text-outline border-b-2 border-transparent hover:text-primary transition-all active:scale-95 whitespace-nowrap">
         Quản lý Nhân sự
     </button>
-    <button id="btnTabCongTac" onclick="switchTab('congtac')" class="pb-3 text-sm font-bold text-outline border-b-2 border-transparent hover:text-primary transition-all active:scale-95">
+    <button id="btnTabCongTac" onclick="switchTab('congtac')" class="pb-3 text-sm font-bold text-outline border-b-2 border-transparent hover:text-primary transition-all active:scale-95 whitespace-nowrap">
         Lịch công tác
+    </button>
+    <button id="btnTabPhongBan" onclick="switchTab('phongban')" class="pb-3 text-sm font-bold text-outline border-b-2 border-transparent hover:text-primary transition-all active:scale-95 whitespace-nowrap">
+        Quản lý Phòng ban
     </button>
 </div>
 
@@ -44,7 +47,6 @@
             foreach (var item in Model)
             {
                 <div class="dontu-item bg-white p-6 rounded-[28px] shadow-sm hover:shadow-xl border border-gray-100 hover:border-primary/20 transform hover:-translate-y-1 transition-all duration-300 group" data-status="@item.TrangThai">
-
                     <div class="flex justify-between items-start mb-5">
                         <div class="p-3 bg-primary/5 rounded-2xl text-primary group-hover:bg-primary group-hover:text-white transition-colors">
                             <span class="material-symbols-outlined text-[26px]">event_busy</span>
@@ -58,7 +60,6 @@
 
                     <div class="flex justify-between items-center mb-6 gap-3 min-h-[40px]">
                         <p class="text-outline text-sm line-clamp-2 flex-1 leading-relaxed" title="@item.LyDo">@item.LyDo</p>
-
                         @if (!string.IsNullOrEmpty(item.MinhChungUrl))
                         {
                             <a href="@item.MinhChungUrl" target="_blank" class="w-10 h-10 rounded-full bg-blue-50 text-primary hover:bg-primary hover:text-white hover:shadow-lg flex items-center justify-center transition-all shrink-0" title="Xem file minh chứng">
@@ -157,6 +158,56 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="listCongTacContainer">
             <div class="col-span-full text-center py-10 text-outline animate-pulse">Đang tải danh sách lịch công tác...</div>
         </div>
+    </div>
+</div>
+
+<div id="tabPhongBan" class="hidden animate-in fade-in duration-300">
+    <div class="bg-white rounded-[32px] shadow-sm border border-gray-100 overflow-hidden">
+        <div class="p-6 border-b border-gray-100 flex flex-col sm:flex-row justify-between items-center gap-5 bg-gray-50/30">
+            <div>
+                <h3 class="font-headline font-bold text-xl text-gray-900">Danh mục Phòng ban</h3>
+                <p class="text-sm text-outline mt-1">Cấu trúc tổ chức hệ thống phòng ban nội bộ</p>
+            </div>
+            <button onclick="openAddPhongBanModal()" class="w-full sm:w-auto bg-primary text-white px-6 py-3 rounded-full text-sm font-bold shadow-lg shadow-primary/20 hover:bg-primary-container active:scale-95 flex items-center justify-center gap-2 transition-all">
+                <span class="material-symbols-outlined text-[20px]">domain_add</span> Thêm Phòng ban
+            </button>
+        </div>
+
+        <div class="overflow-x-auto">
+            <table class="w-full text-left border-collapse">
+                <thead>
+                    <tr class="bg-gray-50/50 text-outline text-xs uppercase tracking-wider border-b border-gray-100">
+                        <th class="px-6 py-4 font-bold w-24">Mã số</th>
+                        <th class="px-6 py-4 font-bold">Tên phòng ban thực tế</th>
+                        <th class="px-6 py-4 font-bold text-right w-32">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody id="tablePhongBan" class="divide-y divide-gray-100">
+                    <tr><td colspan="3" class="p-12 text-center text-outline animate-pulse font-medium">Đang kết nối dữ liệu danh mục...</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<div id="modalAddPhongBan" class="hidden fixed inset-0 bg-gray-900/40 backdrop-blur-md z-[100] flex items-center justify-center p-4 transition-all">
+    <div class="bg-white rounded-[32px] shadow-2xl w-full max-w-sm p-8 flex flex-col gap-6 transform scale-95 animate-in zoom-in-95 duration-200">
+        <div class="flex justify-between items-center">
+            <div>
+                <h2 class="font-headline font-bold text-2xl text-gray-900">Thêm tổ chức</h2>
+                <p class="text-xs text-outline mt-1">Thiết lập thêm phòng ban hoạt động mới</p>
+            </div>
+            <button onclick="closeAddPhongBanModal()" class="w-10 h-10 rounded-full bg-gray-50 flex items-center justify-center text-outline hover:bg-red-50 hover:text-error transition-colors active:scale-90"><span class="material-symbols-outlined">close</span></button>
+        </div>
+        <div class="space-y-4">
+            <div>
+                <label class="text-[11px] font-bold text-outline uppercase tracking-wider mb-1.5 block ml-1">Tên phòng ban</label>
+                <input id="txtAddTenPhongBan" type="text" class="w-full bg-gray-50/50 border border-gray-200 rounded-2xl px-5 py-3.5 focus:bg-white focus:ring-2 focus:ring-primary/20 focus:border-primary text-sm font-medium outline-none transition-all" placeholder="Vd: Phòng Công Nghệ Thông Tin">
+            </div>
+        </div>
+        <button onclick="submitAddPhongBan()" id="btnSubmitAddPhongBan" class="w-full bg-primary text-white py-4 rounded-full font-bold shadow-lg shadow-primary/30 hover:bg-primary-container active:scale-95 transition-all mt-2">
+            Xác nhận thiết lập
+        </button>
     </div>
 </div>
 

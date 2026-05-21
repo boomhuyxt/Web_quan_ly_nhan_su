@@ -7,25 +7,31 @@ const els = {
     tabDonTu: null,
     tabNhanSu: null,
     tabCongTac: null,
+    tabPhongBan: null,
     btnTabDonTu: null,
     btnTabNhanSu: null,
     btnTabCongTac: null,
+    btnTabPhongBan: null,
     tbodyNhanVien: null,
+    tbodyPhongBan: null,
     txtSearch: null
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-    // Ánh xạ các phần tử DOM thực tế
+    // Ánh xạ các phần tử DOM thực tế từ giao diện
     els.tabDonTu = document.getElementById('tabDonTu');
     els.tabNhanSu = document.getElementById('tabNhanSu');
     els.tabCongTac = document.getElementById('tabCongTac');
+    els.tabPhongBan = document.getElementById('tabPhongBan');
     els.btnTabDonTu = document.getElementById('btnTabDonTu');
     els.btnTabNhanSu = document.getElementById('btnTabNhanSu');
     els.btnTabCongTac = document.getElementById('btnTabCongTac');
+    els.btnTabPhongBan = document.getElementById('btnTabPhongBan');
     els.tbodyNhanVien = document.getElementById('tableNhanVien');
+    els.tbodyPhongBan = document.getElementById('tablePhongBan');
     els.txtSearch = document.getElementById('txtSearchNhanVien');
 
-    // Lắng nghe sự kiện tìm kiếm nhân viên (nếu có thanh tìm kiếm)
+    // Lắng nghe sự kiện tìm kiếm nhân viên thời gian thực
     if (els.txtSearch) {
         els.txtSearch.addEventListener('input', (e) => {
             loadNhanVienData(e.target.value.trim());
@@ -33,7 +39,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Hàm lọc đơn từ
+// ==============================================================
+// === HỆ THỐNG ĐIỀU HƯỚNG VÀ LỌC (TABS & FILTERS) ===
+// ==============================================================
+
+// Hàm lọc danh sách đơn từ nghỉ phép
 function filterDonTu(status, btn) {
     document.querySelectorAll('.btn-filter-dontu').forEach(b => {
         b.className = "btn-filter-dontu px-6 py-2 rounded-full bg-white border border-gray-200 text-outline text-sm font-bold whitespace-nowrap hover:bg-gray-50 active:scale-95 transition-all";
@@ -52,20 +62,22 @@ function filterDonTu(status, btn) {
     document.getElementById('emptyFilterMsg').style.display = visibleCount === 0 ? 'flex' : 'none';
 }
 
-// Hàm chuyển đổi tab
+// Hàm chuyển đổi tab chức năng quản trị
 function switchTab(tab) {
     if (!els.tabDonTu) return; // Đảm bảo DOM đã sẵn sàng
 
     els.tabDonTu.classList.add('hidden');
     els.tabNhanSu.classList.add('hidden');
     els.tabCongTac.classList.add('hidden');
+    if (els.tabPhongBan) els.tabPhongBan.classList.add('hidden');
 
-    const defaultClass = "pb-3 text-sm font-bold text-outline border-b-2 border-transparent hover:text-primary transition-all active:scale-95";
-    const activeClass = "pb-3 text-sm font-bold text-primary border-b-2 border-primary transition-all active:scale-95";
+    const defaultClass = "pb-3 text-sm font-bold text-outline border-b-2 border-transparent hover:text-primary transition-all active:scale-95 whitespace-nowrap";
+    const activeClass = "pb-3 text-sm font-bold text-primary border-b-2 border-primary transition-all active:scale-95 whitespace-nowrap";
 
     els.btnTabDonTu.className = defaultClass;
     els.btnTabNhanSu.className = defaultClass;
     els.btnTabCongTac.className = defaultClass;
+    if (els.btnTabPhongBan) els.btnTabPhongBan.className = defaultClass;
 
     if (tab === 'dontu') {
         els.tabDonTu.classList.remove('hidden');
@@ -81,9 +93,119 @@ function switchTab(tab) {
         els.btnTabCongTac.className = activeClass;
         loadDanhSachCongTac();
     }
+    else if (tab === 'phongban') {
+        if (els.tabPhongBan) els.tabPhongBan.classList.remove('hidden');
+        if (els.btnTabPhongBan) els.btnTabPhongBan.className = activeClass;
+        loadDanhSachPhongBanGrid();
+    }
 }
 
-// Tải Master Data cho phòng ban và quyền
+// ==============================================================
+// === LOGIC XỬ LÝ QUẢN LÝ PHÒNG BAN (ĐÃ CẬP NHẬT CHẶN PHÒNG BAN) ===
+// ==============================================================
+
+// Tải dữ liệu danh mục phòng ban lên bảng quản trị
+async function loadDanhSachPhongBanGrid() {
+    if (!els.tbodyPhongBan) return;
+    els.tbodyPhongBan.innerHTML = '<tr><td colspan="3" class="p-12 text-center text-outline animate-pulse font-medium">Đang tải danh sách phòng ban...</td></tr>';
+
+    try {
+        const res = await fetch('/api/phongban/danh-sach');
+        const result = await res.json();
+
+        if (result.success) {
+            if (result.data.length === 0) {
+                els.tbodyPhongBan.innerHTML = '<tr><td colspan="3" class="p-12 text-center text-outline">Chưa thành lập phòng ban nào hoặc toàn bộ phòng ban đã bị chặn.</td></tr>';
+                return;
+            }
+
+            els.tbodyPhongBan.innerHTML = result.data.map(pb => `
+                <tr class="hover:bg-primary/5 transition-colors">
+                    <td class="px-6 py-4 text-sm font-medium text-gray-600">#${pb.maPhongBan}</td>
+                    <td class="px-6 py-4 text-sm font-bold text-gray-900">${pb.tenPhongBan}</td>
+                    <td class="px-6 py-4 text-right">
+                        <button onclick="deletePhongBan(${pb.maPhongBan}, '${pb.tenPhongBan}')" class="w-9 h-9 rounded-xl bg-white border border-gray-200 text-error hover:border-error hover:bg-error/5 transition-all shadow-sm flex items-center justify-center ml-auto" title="Chặn phòng ban này">
+                            <span class="material-symbols-outlined text-[18px]">block</span>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+    } catch (e) {
+        console.error(e);
+        els.tbodyPhongBan.innerHTML = '<tr><td colspan="3" class="p-12 text-center text-error font-semibold">Gặp sự cố kết nối khi đồng bộ phòng ban!</td></tr>';
+    }
+}
+
+// Điều khiển đóng mở modal thêm phòng ban
+function openAddPhongBanModal() {
+    document.getElementById('txtAddTenPhongBan').value = '';
+    document.getElementById('modalAddPhongBan').classList.remove('hidden');
+}
+
+function closeAddPhongBanModal() {
+    document.getElementById('modalAddPhongBan').classList.add('hidden');
+}
+
+// Gửi yêu cầu API thiết lập thêm phòng ban hoạt động mới
+async function submitAddPhongBan() {
+    const tenPhongBan = document.getElementById('txtAddTenPhongBan').value.trim();
+    if (!tenPhongBan) return alert("⚠️ Vui lòng điền tên phòng ban mới!");
+
+    const btnSubmit = document.getElementById('btnSubmitAddPhongBan');
+    btnSubmit.disabled = true;
+    btnSubmit.innerText = "Đang xử lý...";
+
+    try {
+        const res = await fetch('/api/phongban/them', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ tenPhongBan: tenPhongBan })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            closeAddPhongBanModal();
+            loadDanhSachPhongBanGrid();
+            loadMasterData();
+        } else {
+            alert("Lỗi: " + data.message);
+        }
+    } catch (e) {
+        alert("Gặp sự cố hệ thống khi gửi dữ liệu!");
+    } finally {
+        btnSubmit.disabled = false;
+        btnSubmit.innerText = "Xác nhận thiết lập";
+    }
+}
+
+// ĐÃ CẬP NHẬT: Gửi yêu cầu API CHẶN hoạt động phòng ban thay vì xóa thực tế khỏi database
+async function deletePhongBan(id, name) {
+    if (!confirm(`⚠️ XÁC NHẬN CHẶN: Bạn có chắc chắn muốn khóa/chặn phòng ban [${name}]?\nSau khi chặn, nhân viên mới hoặc điều động phân quyền sẽ không thể thêm vào phòng ban này nữa.`)) return;
+
+    try {
+        const res = await fetch(`/api/phongban/xoa/${id}`, { method: 'DELETE' });
+        const result = await res.json();
+
+        if (result.success) {
+            alert(`🔒 Đã chặn thành công phòng ban [${name}].`);
+            loadDanhSachPhongBanGrid();
+            loadMasterData(); // Đồng bộ lại dropdown phân quyền của nhân viên
+        } else {
+            // Trả về thông báo từ Backend nếu phòng ban vẫn đang có nhân sự thuộc quyền
+            alert(`Thao tác thất bại: ${result.message}`);
+        }
+    } catch (e) {
+        console.error(e);
+        alert("Lỗi kết nối đến máy chủ!");
+    }
+}
+
+// ==============================================================
+// === LOGIC XỬ LÝ QUẢN LÝ NHÂN SỰ VÀ PHÂN QUYỀN ===
+// ==============================================================
+
+// Tải Master Data cho danh mục phòng ban và vai trò từ máy chủ
 async function loadMasterData() {
     try {
         const res = await fetch('/api/quanlynhanvien/master-data');
@@ -99,7 +221,7 @@ async function loadMasterData() {
     } catch (e) { console.error(e); }
 }
 
-// Tải danh sách nhân sự
+// Tải danh sách nhân sự hành chính kèm bộ lọc tìm kiếm
 async function loadNhanVienData(searchQuery = "") {
     if (!els.tbodyNhanVien) return;
     els.tbodyNhanVien.innerHTML = '<tr><td colspan="4" class="p-12 text-center text-outline animate-pulse font-medium">Đang tải dữ liệu...</td></tr>';
@@ -136,7 +258,7 @@ async function loadNhanVienData(searchQuery = "") {
     } catch (e) { console.error(e); }
 }
 
-// Thao tác với Modal thêm nhân viên
+// Điều khiển Modal thêm tài khoản nhân viên mới
 function openAddUserModal() {
     document.getElementById('txtAddHoTen').value = '';
     document.getElementById('txtAddEmail').value = '';
@@ -148,6 +270,7 @@ function closeAddUserModal() {
     document.getElementById('modalAddUser').classList.add('hidden');
 }
 
+// Gửi yêu cầu API thêm mới tài khoản nhân viên
 async function submitAddUser() {
     const payload = {
         hoTen: document.getElementById('txtAddHoTen').value.trim(),
@@ -181,7 +304,7 @@ async function submitAddUser() {
     }
 }
 
-// Sửa quyền & Phòng ban nhân viên
+// Điều khiển Modal sửa đổi vai trò và phòng ban nhân sự
 function openEditModal(id, maPhongBan, currentRoles) {
     editingUserId = id;
     document.getElementById('selPhongBan').value = maPhongBan || "";
@@ -201,6 +324,7 @@ function closeModal() {
     editingUserId = null;
 }
 
+// Gửi yêu cầu API cập nhật vai trò hệ thống và phòng ban trực thuộc nhân viên
 async function submitUpdateRole() {
     if (!editingUserId) return;
 
@@ -224,16 +348,20 @@ async function submitUpdateRole() {
     } catch (e) { console.error(e); }
 }
 
-// Khóa/Mở khóa tài khoản
+// Gửi yêu cầu API thay đổi trạng thái khóa/mở khóa tài khoản nhân viên
 async function toggleLockStatus(id, name, actionName) {
-    if (!confirm(`XÁC NHẬN: Bạn muốn ${actionName} tài khoản của [${name}]?`)) return;
+    if (!confirm(`XÁC NHẬReject: Bạn muốn ${actionName} tài khoản của [${name}]?`)) return;
     try {
         const res = await fetch(`/api/quanlynhanvien/toggle-status/${id}`, { method: 'PUT' });
         if ((await res.json()).success) loadNhanVienData(els.txtSearch ? els.txtSearch.value.trim() : "");
     } catch (e) { console.error(e); }
 }
 
-// Phê duyệt đơn từ nghỉ phép
+// ==============================================================
+// === LOGIC XỬ LÝ PHÊ DUYỆT ĐƠN TỪ NGHỈ PHÉP ===
+// ==============================================================
+
+// Gửi yêu cầu API phê duyệt hoặc từ chối đơn xin nghỉ phép của nhân sự
 async function xuLyDonTu(id, trangThai) {
     if (!confirm(`XÁC NHẬN: Bạn muốn ${trangThai === "Đã duyệt" ? "PHÊ DUYỆT" : "TỪ CHỐI"} đơn này?`)) return;
     try {
@@ -244,7 +372,11 @@ async function xuLyDonTu(id, trangThai) {
     } catch (e) { alert("Lỗi kết nối."); }
 }
 
-// Tải danh sách lịch công tác
+// ==============================================================
+// === LOGIC XỬ LÝ LỊCH CÔNG TÁC (LOAD DANH SÁCH & XẾP LỊCH NEW) ===
+// ==============================================================
+
+// Tải toàn bộ kế hoạch lịch công tác của cơ quan từ máy chủ
 async function loadDanhSachCongTac() {
     const container = document.getElementById('listCongTacContainer');
     if (!container) return;
@@ -309,7 +441,7 @@ async function loadDanhSachCongTac() {
     }
 }
 
-// Modal xếp lịch công tác mới
+// Mở và kích hoạt tải danh sách cho Modal sắp xếp lịch công tác mới
 async function openAddCongTacModal() {
     document.getElementById('modalAddCongTac').classList.remove('hidden');
     const selNV = document.getElementById('selNhanVienCongTac');
@@ -335,6 +467,7 @@ function closeCongTacModal() {
     document.getElementById('fileCongTac').value = '';
 }
 
+// Gửi dữ liệu yêu cầu xếp lịch công tác mới (kèm file tài liệu đính kèm)
 async function submitAddCongTac() {
     const mucDichGopChung = document.getElementById('txtMucDichCT').value.trim();
     let diaDiem = "Chưa xác định";
@@ -371,6 +504,7 @@ async function submitAddCongTac() {
         const fileInput = document.getElementById('fileCongTac');
         if (fileInput && fileInput.files.length > 0) {
             btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang tải tài liệu lên...';
+            // Gọi upload file lưu vào Supabase Storage Bucket
             payload.fileDinhKemUrl = "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx";
         }
 
