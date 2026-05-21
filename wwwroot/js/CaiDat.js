@@ -62,9 +62,9 @@ function filterDonTu(status, btn) {
     document.getElementById('emptyFilterMsg').style.display = visibleCount === 0 ? 'flex' : 'none';
 }
 
-// Hàm chuyển đổi tab chức năng quản trị
+// Hàm chuyển đổi thứ tự các phân hệ Tab: Đơn từ -> Nhân sự -> Phòng ban -> Lịch công tác
 function switchTab(tab) {
-    if (!els.tabDonTu) return; // Đảm bảo DOM đã sẵn sàng
+    if (!els.tabDonTu) return;
 
     els.tabDonTu.classList.add('hidden');
     els.tabNhanSu.classList.add('hidden');
@@ -88,20 +88,106 @@ function switchTab(tab) {
         els.btnTabNhanSu.className = activeClass;
         loadNhanVienData(els.txtSearch ? els.txtSearch.value.trim() : "");
     }
-    else if (tab === 'congtac') {
-        els.tabCongTac.classList.remove('hidden');
-        els.btnTabCongTac.className = activeClass;
-        loadDanhSachCongTac();
-    }
     else if (tab === 'phongban') {
         if (els.tabPhongBan) els.tabPhongBan.classList.remove('hidden');
         if (els.btnTabPhongBan) els.btnTabPhongBan.className = activeClass;
         loadDanhSachPhongBanGrid();
     }
+    else if (tab === 'congtac') {
+        els.tabCongTac.classList.remove('hidden');
+        els.btnTabCongTac.className = activeClass;
+        loadDanhSachCongTac();
+    }
 }
 
 // ==============================================================
-// === LOGIC XỬ LÝ QUẢN LÝ PHÒNG BAN (ĐÃ CẬP NHẬT CHẶN PHÒNG BAN) ===
+// === LOGIC XỬ LÝ QUẢN LÝ NHÂN SỰ VÀ BẢO MẬT CLICK TRỰC TIẾP ===
+// ==============================================================
+
+// Tải Master Data phòng ban & vai trò
+async function loadMasterData() {
+    try {
+        const res = await fetch('/api/quanlynhanvien/master-data');
+        const data = await res.json();
+        if (data.success) {
+            masterData = data;
+            const selPb = document.getElementById('selPhongBan');
+            if (selPb) {
+                selPb.innerHTML = '<option value="">-- Chưa phân bổ --</option>' +
+                    data.phongBans.map(p => `<option value="${p.maPhongBan}">${p.tenPhongBan}</option>`).join('');
+            }
+        }
+    } catch (e) { console.error(e); }
+}
+
+async function loadNhanVienData(searchQuery = "") {
+    if (!els.tbodyNhanVien) return;
+    els.tbodyNhanVien.innerHTML = '<tr><td colspan="4" class="p-12 text-center text-outline animate-pulse font-medium">Đang tải dữ liệu...</td></tr>';
+    if (masterData.phongBans.length === 0) await loadMasterData();
+
+    try {
+        const res = await fetch(`/api/quanlynhanvien/danh-sach?q=${encodeURIComponent(searchQuery)}`);
+        const data = await res.json();
+
+        if (data.success) {
+            if (data.data.length === 0) {
+                els.tbodyNhanVien.innerHTML = `<tr><td colspan="4" class="p-16 text-center text-outline">Không tìm thấy nhân sự.</td></tr>`;
+                return;
+            }
+
+            const isAdmin = window.isAdminUser;
+
+            els.tbodyNhanVien.innerHTML = data.data.map(nv => {
+                const isLocked = nv.trangThai === 0;
+
+                // 1. Render Trạng thái
+                const statusHtml = !isLocked
+                    ? '<span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg text-[10px] font-bold">Hoạt động</span>'
+                    : '<span class="bg-red-50 text-error px-2.5 py-1 rounded-lg text-[10px] font-bold">Đã khóa</span>';
+
+                // 2. Render Vai trò
+                const rolesHtml = (nv.vaiTros && nv.vaiTros.length > 0)
+                    ? nv.vaiTros.map(v => `<span class="bg-blue-50 text-primary px-2 py-0.5 rounded-md text-[10px] font-bold">${v.tenVaiTro}</span>`).join(' ')
+                    : '<span class="text-xs text-outline italic">Chưa cấp quyền</span>';
+
+                const onClickAttr = isAdmin ? `onclick="window.location.href='/Home/ThongTinChiTiet?id=${nv.maNhanVien}'"` : '';
+                const cursorClass = isAdmin ? 'cursor-pointer hover:bg-primary/5' : 'cursor-default';
+
+                return `
+                <tr class="transition-colors duration-200 ${cursorClass} ${isLocked ? 'opacity-70' : ''}" ${onClickAttr}>
+                    <td class="px-6 py-4">
+                        <div class="flex items-center gap-4">
+                            <img src="${nv.anhDaiDien || '/images/avatar_default.jpg'}" class="w-10 h-10 rounded-full object-cover shadow-sm ${isLocked ? 'grayscale' : ''}"/>
+                            <div>
+                                <p class="text-sm font-bold text-gray-900">${nv.hoTen}</p>
+                                <p class="text-[11px] text-outline mt-0.5">${nv.email}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-6 py-4 text-sm font-medium text-gray-700">${nv.tenPhongBan || 'Chưa phân bổ'}</td>
+                    <td class="px-6 py-4">
+                        ${statusHtml}
+                        <div class="flex flex-wrap gap-1 mt-1">${rolesHtml}</div>
+                    </td>
+                    <td class="px-6 py-4 text-right" onclick="event.stopPropagation();">
+                        <button onclick="openEditModal(${nv.maNhanVien}, ${nv.maPhongBan || 'null'}, [${nv.vaiTros ? nv.vaiTros.map(v => v.maVaiTro).join(',') : ''}])" class="w-9 h-9 rounded-xl bg-white border border-gray-200 hover:border-primary hover:bg-primary hover:text-white transition-all shadow-sm">
+                            <span class="material-symbols-outlined text-[18px]">manage_accounts</span>
+                        </button>
+                        <button onclick="toggleLockStatus(${nv.maNhanVien}, '${nv.hoTen}', '${isLocked ? 'MỞ KHÓA' : 'KHÓA'}')" class="w-9 h-9 rounded-xl border ${isLocked ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-white border-gray-200 text-outline'} shadow-sm">
+                            <span class="material-symbols-outlined text-[18px]">${isLocked ? 'lock_open' : 'lock'}</span>
+                        </button>
+                    </td>
+                </tr>`;
+            }).join('');
+        }
+    } catch (e) {
+        console.error(e);
+        els.tbodyNhanVien.innerHTML = '<tr><td colspan="4" class="p-12 text-center text-error font-bold">Lỗi khi tải danh sách nhân viên!</td></tr>';
+    }
+}
+
+// ==============================================================
+// === QUẢN LÝ DANH MỤC PHÒNG BAN ===
 // ==============================================================
 
 // Tải dữ liệu danh mục phòng ban lên bảng quản trị
@@ -137,7 +223,6 @@ async function loadDanhSachPhongBanGrid() {
     }
 }
 
-// Điều khiển đóng mở modal thêm phòng ban
 function openAddPhongBanModal() {
     document.getElementById('txtAddTenPhongBan').value = '';
     document.getElementById('modalAddPhongBan').classList.remove('hidden');
@@ -147,7 +232,6 @@ function closeAddPhongBanModal() {
     document.getElementById('modalAddPhongBan').classList.add('hidden');
 }
 
-// Gửi yêu cầu API thiết lập thêm phòng ban hoạt động mới
 async function submitAddPhongBan() {
     const tenPhongBan = document.getElementById('txtAddTenPhongBan').value.trim();
     if (!tenPhongBan) return alert("⚠️ Vui lòng điền tên phòng ban mới!");
@@ -179,7 +263,6 @@ async function submitAddPhongBan() {
     }
 }
 
-// ĐÃ CẬP NHẬT: Gửi yêu cầu API CHẶN hoạt động phòng ban thay vì xóa thực tế khỏi database
 async function deletePhongBan(id, name) {
     if (!confirm(`⚠️ XÁC NHẬN CHẶN: Bạn có chắc chắn muốn khóa/chặn phòng ban [${name}]?\nSau khi chặn, nhân viên mới hoặc điều động phân quyền sẽ không thể thêm vào phòng ban này nữa.`)) return;
 
@@ -190,9 +273,8 @@ async function deletePhongBan(id, name) {
         if (result.success) {
             alert(`🔒 Đã chặn thành công phòng ban [${name}].`);
             loadDanhSachPhongBanGrid();
-            loadMasterData(); // Đồng bộ lại dropdown phân quyền của nhân viên
+            loadMasterData();
         } else {
-            // Trả về thông báo từ Backend nếu phòng ban vẫn đang có nhân sự thuộc quyền
             alert(`Thao tác thất bại: ${result.message}`);
         }
     } catch (e) {
@@ -202,63 +284,9 @@ async function deletePhongBan(id, name) {
 }
 
 // ==============================================================
-// === LOGIC XỬ LÝ QUẢN LÝ NHÂN SỰ VÀ PHÂN QUYỀN ===
+// === THAO TÁC MODALS VÀ CÁC LOGIC KHÁC (GIỮ NGUYÊN) ===
 // ==============================================================
 
-// Tải Master Data cho danh mục phòng ban và vai trò từ máy chủ
-async function loadMasterData() {
-    try {
-        const res = await fetch('/api/quanlynhanvien/master-data');
-        const data = await res.json();
-        if (data.success) {
-            masterData = data;
-            const selPb = document.getElementById('selPhongBan');
-            if (selPb) {
-                selPb.innerHTML = '<option value="">-- Chưa phân bổ --</option>' +
-                    data.phongBans.map(p => `<option value="${p.maPhongBan}">${p.tenPhongBan}</option>`).join('');
-            }
-        }
-    } catch (e) { console.error(e); }
-}
-
-// Tải danh sách nhân sự hành chính kèm bộ lọc tìm kiếm
-async function loadNhanVienData(searchQuery = "") {
-    if (!els.tbodyNhanVien) return;
-    els.tbodyNhanVien.innerHTML = '<tr><td colspan="4" class="p-12 text-center text-outline animate-pulse font-medium">Đang tải dữ liệu...</td></tr>';
-    if (masterData.phongBans.length === 0) await loadMasterData();
-    try {
-        const res = await fetch(`/api/quanlynhanvien/danh-sach?q=${encodeURIComponent(searchQuery)}`);
-        const data = await res.json();
-        if (data.success) {
-            if (data.data.length === 0) {
-                els.tbodyNhanVien.innerHTML = `<tr><td colspan="4" class="p-16 text-center text-outline">Không tìm thấy nhân sự.</td></tr>`;
-                return;
-            }
-            els.tbodyNhanVien.innerHTML = data.data.map(nv => {
-                const isLocked = nv.trangThai === 0;
-                const statusHtml = !isLocked ? '<span class="bg-emerald-50 text-emerald-700 px-2.5 py-1 rounded-lg text-[10px] font-bold">Hoạt động</span>' : '<span class="bg-red-50 text-error px-2.5 py-1 rounded-lg text-[10px] font-bold">Đã khóa</span>';
-                const rolesHtml = nv.vaiTros.length > 0 ? nv.vaiTros.map(v => `<span class="bg-blue-50 text-primary px-2 py-0.5 rounded-md text-[10px] font-bold">${v.tenVaiTro}</span>`).join(' ') : '<span class="text-xs text-outline italic">Chưa cấp quyền</span>';
-                return `
-                <tr class="hover:bg-primary/5 transition-colors ${isLocked ? 'opacity-70' : ''}">
-                    <td class="px-6 py-4">
-                        <div class="flex items-center gap-4">
-                            <img src="${nv.anhDaiDien || '/images/avatar_default.jpg'}" class="w-10 h-10 rounded-full object-cover shadow-sm ${isLocked ? 'grayscale' : ''}"/>
-                            <div><p class="text-sm font-bold text-gray-900">${nv.hoTen}</p><p class="text-[11px] text-outline mt-0.5">${nv.email}</p></div>
-                        </div>
-                    </td>
-                    <td class="px-6 py-4 text-sm font-medium text-gray-700">${nv.tenPhongBan || 'Chưa phân bổ'}</td>
-                    <td class="px-6 py-4">${statusHtml}<br/><div class="flex flex-wrap gap-1 mt-1">${rolesHtml}</div></td>
-                    <td class="px-6 py-4 text-right">
-                        <button onclick="openEditModal(${nv.maNhanVien}, ${nv.maPhongBan || 'null'}, [${nv.vaiTros.map(v => v.maVaiTro).join(',')}])" class="w-9 h-9 rounded-xl bg-white border border-gray-200 hover:border-primary hover:bg-primary hover:text-white transition-all shadow-sm"><span class="material-symbols-outlined text-[18px]">manage_accounts</span></button>
-                        <button onclick="toggleLockStatus(${nv.maNhanVien}, '${nv.hoTen}', '${isLocked ? 'MỞ KHÓA' : 'KHÓA'}')" class="w-9 h-9 rounded-xl border ${isLocked ? 'bg-emerald-50 border-emerald-200 text-emerald-600' : 'bg-white border-gray-200 text-outline'} shadow-sm"><span class="material-symbols-outlined text-[18px]">${isLocked ? 'lock_open' : 'lock'}</span></button>
-                    </td>
-                </tr>`;
-            }).join('');
-        }
-    } catch (e) { console.error(e); }
-}
-
-// Điều khiển Modal thêm tài khoản nhân viên mới
 function openAddUserModal() {
     document.getElementById('txtAddHoTen').value = '';
     document.getElementById('txtAddEmail').value = '';
@@ -270,7 +298,6 @@ function closeAddUserModal() {
     document.getElementById('modalAddUser').classList.add('hidden');
 }
 
-// Gửi yêu cầu API thêm mới tài khoản nhân viên
 async function submitAddUser() {
     const payload = {
         hoTen: document.getElementById('txtAddHoTen').value.trim(),
@@ -304,7 +331,6 @@ async function submitAddUser() {
     }
 }
 
-// Điều khiển Modal sửa đổi vai trò và phòng ban nhân sự
 function openEditModal(id, maPhongBan, currentRoles) {
     editingUserId = id;
     document.getElementById('selPhongBan').value = maPhongBan || "";
@@ -324,7 +350,6 @@ function closeModal() {
     editingUserId = null;
 }
 
-// Gửi yêu cầu API cập nhật vai trò hệ thống và phòng ban trực thuộc nhân viên
 async function submitUpdateRole() {
     if (!editingUserId) return;
 
@@ -348,20 +373,14 @@ async function submitUpdateRole() {
     } catch (e) { console.error(e); }
 }
 
-// Gửi yêu cầu API thay đổi trạng thái khóa/mở khóa tài khoản nhân viên
 async function toggleLockStatus(id, name, actionName) {
-    if (!confirm(`XÁC NHẬReject: Bạn muốn ${actionName} tài khoản của [${name}]?`)) return;
+    if (!confirm(`XÁC NHẬN: Bạn muốn ${actionName} tài khoản của [${name}]?`)) return;
     try {
         const res = await fetch(`/api/quanlynhanvien/toggle-status/${id}`, { method: 'PUT' });
         if ((await res.json()).success) loadNhanVienData(els.txtSearch ? els.txtSearch.value.trim() : "");
     } catch (e) { console.error(e); }
 }
 
-// ==============================================================
-// === LOGIC XỬ LÝ PHÊ DUYỆT ĐƠN TỪ NGHỈ PHÉP ===
-// ==============================================================
-
-// Gửi yêu cầu API phê duyệt hoặc từ chối đơn xin nghỉ phép của nhân sự
 async function xuLyDonTu(id, trangThai) {
     if (!confirm(`XÁC NHẬN: Bạn muốn ${trangThai === "Đã duyệt" ? "PHÊ DUYỆT" : "TỪ CHỐI"} đơn này?`)) return;
     try {
@@ -372,11 +391,6 @@ async function xuLyDonTu(id, trangThai) {
     } catch (e) { alert("Lỗi kết nối."); }
 }
 
-// ==============================================================
-// === LOGIC XỬ LÝ LỊCH CÔNG TÁC (LOAD DANH SÁCH & XẾP LỊCH NEW) ===
-// ==============================================================
-
-// Tải toàn bộ kế hoạch lịch công tác của cơ quan từ máy chủ
 async function loadDanhSachCongTac() {
     const container = document.getElementById('listCongTacContainer');
     if (!container) return;
@@ -441,7 +455,6 @@ async function loadDanhSachCongTac() {
     }
 }
 
-// Mở và kích hoạt tải danh sách cho Modal sắp xếp lịch công tác mới
 async function openAddCongTacModal() {
     document.getElementById('modalAddCongTac').classList.remove('hidden');
     const selNV = document.getElementById('selNhanVienCongTac');
@@ -467,7 +480,6 @@ function closeCongTacModal() {
     document.getElementById('fileCongTac').value = '';
 }
 
-// Gửi dữ liệu yêu cầu xếp lịch công tác mới (kèm file tài liệu đính kèm)
 async function submitAddCongTac() {
     const mucDichGopChung = document.getElementById('txtMucDichCT').value.trim();
     let diaDiem = "Chưa xác định";
@@ -504,7 +516,6 @@ async function submitAddCongTac() {
         const fileInput = document.getElementById('fileCongTac');
         if (fileInput && fileInput.files.length > 0) {
             btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang tải tài liệu lên...';
-            // Gọi upload file lưu vào Supabase Storage Bucket
             payload.fileDinhKemUrl = "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx";
         }
 
@@ -525,8 +536,7 @@ async function submitAddCongTac() {
     } catch (e) {
         console.error(e);
         alert("Lỗi kết nối máy chủ!");
-    }
-    finally {
+    } finally {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = '<span class="material-symbols-outlined text-[20px]">save</span> Lưu lịch công tác';
     }
