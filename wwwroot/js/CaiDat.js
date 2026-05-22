@@ -480,32 +480,45 @@ function closeCongTacModal() {
     document.getElementById('fileCongTac').value = '';
 }
 
+// 👉 HÀM ĐÃ ĐƯỢC CHUẨN HÓA TOÀN DIỆN: Gửi hỗn hợp Object JsonData và File qua FormData
 async function submitAddCongTac() {
     const mucDichGopChung = document.getElementById('txtMucDichCT').value.trim();
+    const fileInput = document.getElementById('fileCongTac');
+    const maNhanVien = document.getElementById('selNhanVienCongTac').value;
+    const dateStart = document.getElementById('dateStartCT').value;
+    const dateEnd = document.getElementById('dateEndCT').value;
+
+    if (!maNhanVien || !dateStart || !dateEnd || !mucDichGopChung) {
+        return alert("⚠️ Vui lòng nhập đầy đủ thông tin bắt buộc!");
+    }
+
+    if (new Date(dateStart) > new Date(dateEnd)) {
+        return alert("⚠️ Ngày kết thúc không thể diễn ra trước ngày bắt đầu!");
+    }
+
+    // Tiến hành phân mảnh chuỗi lấy Địa điểm và Nội dung
     let diaDiem = "Chưa xác định";
     let noiDung = mucDichGopChung;
-
     if (mucDichGopChung.includes('-')) {
         const parts = mucDichGopChung.split('-');
         diaDiem = parts[0].trim();
         noiDung = parts.slice(1).join('-').trim();
     }
 
+    // Đóng gói dữ liệu đối tượng đúng định dạng phân lớp DTO phía C#
     const payload = {
-        maNhanVien: parseInt(document.getElementById('selNhanVienCongTac').value),
-        ngayBatDau: document.getElementById('dateStartCT').value,
-        ngayKetThuc: document.getElementById('dateEndCT').value,
-        diaDiem: diaDiem,
-        noiDungCongViec: noiDung,
-        fileDinhKemUrl: ""
+        MaNhanVien: parseInt(maNhanVien),
+        NgayBatDau: dateStart,
+        NgayKetThuc: dateEnd,
+        DiaDiem: diaDiem,
+        NoiDungCongViec: noiDung
     };
 
-    if (!payload.maNhanVien || !payload.ngayBatDau || !payload.ngayKetThuc || !mucDichGopChung) {
-        return alert("⚠️ Vui lòng nhập đầy đủ thông tin bắt buộc!");
-    }
+    const formData = new FormData();
+    formData.append("jsonData", JSON.stringify(payload)); // Đóng gói dạng chuỗi cấu trúc JsonData an toàn
 
-    if (new Date(payload.ngayBatDau) > new Date(payload.ngayKetThuc)) {
-        return alert("⚠️ Ngày kết thúc không thể diễn ra trước ngày bắt đầu!");
+    if (fileInput && fileInput.files.length > 0) {
+        formData.append("file", fileInput.files[0]); // Nạp dữ liệu file gốc
     }
 
     const btnSubmit = document.getElementById('btnSubmitCongTac');
@@ -513,31 +526,32 @@ async function submitAddCongTac() {
     btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang xử lý...';
 
     try {
-        const fileInput = document.getElementById('fileCongTac');
-        if (fileInput && fileInput.files.length > 0) {
-            btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang tải tài liệu lên...';
-            payload.fileDinhKemUrl = "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx";
+        const res = await fetch('/api/congtac/them-co-file', {
+            method: 'POST',
+            body: formData // Tuyệt đối để trình duyệt tự động quản lý Multipart Boundary
+        });
+
+        if (!res.ok) {
+            throw new Error(`Hệ thống phản hồi mã lỗi: ${res.status}`);
         }
 
-        btnSubmit.innerHTML = '<span class="material-symbols-outlined animate-spin text-[20px]">sync</span> Đang lưu lịch...';
-        const res = await fetch('/api/congtac/them', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
         const data = await res.json();
-
         if (data.success) {
-            closeCongTacModal();
-            loadDanhSachCongTac();
+            alert("🎉 Đã xếp lịch công tác và gửi dữ liệu lên Supabase thành công!");
+            closeCongTacModal(); // Đóng giao diện Popup nhập liệu
+            loadDanhSachCongTac(); // Làm mới lưới biểu diễn lịch trình trên giao diện
         } else {
-            alert("Lỗi Database: " + data.message);
+            alert("⚠️ Thao tác thất bại từ Server: " + data.message);
         }
     } catch (e) {
         console.error(e);
-        alert("Lỗi kết nối máy chủ!");
+        alert("❌ Lỗi kết nối hệ thống! Hãy kiểm tra lại Console hoặc liên hệ quản trị viên.");
     } finally {
         btnSubmit.disabled = false;
         btnSubmit.innerHTML = '<span class="material-symbols-outlined text-[20px]">save</span> Lưu lịch công tác';
     }
 }
+
+// 👉 ĐỒNG THỜI: Tìm đến hàm loadNhanVienData trong CaiDat.js, sửa lại đường dẫn src của ảnh avatar mặc định
+// Thay thế đường dẫn '/images/avatar_default.jpg' cũ thành link CDN mạng ổn định này để triệt tiêu lỗi 404:
+// src="${nv.anhDaiDien || 'https://raw.githubusercontent.com/arcuri82/web_development_and_api_design/master/exercise-solutions/quiz-game/frontend/src/images/avatar_default.jpg'}"
