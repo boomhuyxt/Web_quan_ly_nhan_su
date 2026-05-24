@@ -45,7 +45,8 @@ namespace Web_quan_ly_nhan_su
                         maxRetryDelay: TimeSpan.FromSeconds(10),
                         errorCodesToAdd: null);
                 }));
-
+            // Đăng ký HttpClient vào hệ thống Dependency Injection
+            builder.Services.AddHttpClient();
             // 2. Cấu hình Xác thực bằng Cookie (Cookie Authentication)
             builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCookie(options =>

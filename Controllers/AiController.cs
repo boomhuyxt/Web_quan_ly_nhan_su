@@ -1,12 +1,15 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;   // ← Thêm dòng này
 using Pgvector;
 using Pgvector.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -17,79 +20,122 @@ namespace Web_quan_ly_nhan_su.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous] // Cho phép nạp dữ liệu từ Postman (Xóa đi nếu đã nạp xong)
+    [AllowAnonymous]
     public class AiController : ControllerBase
     {
         private readonly HttpClient _httpClient;
         private readonly AppDbContext _context;
-        private readonly string _geminiApiKey; // Đã bảo mật: Không gán cứng ở đây
+        private readonly string _geminiApiKey;
+
+        // Khóa bí mật dùng để mã hóa/giải mã (NÊN thay bằng key mạnh và giữ bí mật)
+        private const string SecretKey = "AtelierHR2026SecureKey!@#";
 
         public AiController(HttpClient httpClient, AppDbContext context, IConfiguration configuration)
         {
             _httpClient = httpClient;
             _context = context;
-            // Đọc Key từ file appsettings.json
-            _geminiApiKey = configuration["GeminiSettings:ApiKey"];
+
+            string encryptedKey = configuration["GeminiSettings:ApiKey"];
+            _geminiApiKey = DecryptString(encryptedKey);
+
+            Console.WriteLine($"[AI Controller] Key giải mã: {!string.IsNullOrEmpty(_geminiApiKey)} | Length: {_geminiApiKey?.Length ?? 0}");
         }
 
+        // ====================== GIẢI MÃ AES ======================
+        private string DecryptString(string cipherText)
+        {
+            if (string.IsNullOrEmpty(cipherText)) return string.Empty;
+
+            try
+            {
+                cipherText = cipherText.Trim().Replace(" ", "").Replace("_", "/");
+                if (cipherText.Length % 4 != 0)
+                    cipherText += new string('=', 4 - (cipherText.Length % 4));
+
+                byte[] cipherBytes = Convert.FromBase64String(cipherText);
+
+                using Aes aes = Aes.Create();
+                aes.Key = Encoding.UTF8.GetBytes(SecretKey.PadRight(32).Substring(0, 32));
+                aes.IV = aes.Key.Take(16).ToArray();
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+
+                using var ms = new MemoryStream();
+                using var cs = new CryptoStream(ms, aes.CreateDecryptor(), CryptoStreamMode.Write);
+                cs.Write(cipherBytes, 0, cipherBytes.Length);
+                cs.FlushFinalBlock();
+
+                return Encoding.UTF8.GetString(ms.ToArray());
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("❌ Lỗi giải mã AES: " + ex.Message);
+                return string.Empty;
+            }
+        }
+
+        // ====================== CHAT API ======================
         [HttpPost("Chat")]
         public async Task<IActionResult> Chat([FromBody] AiChatRequest request)
         {
-            var responseData = new AiChatResponse { Success = true };
-            if (string.IsNullOrEmpty(request.Message))
+            var responseData = new AiChatResponse
+            {
+                Success = true,
+                AttachedFiles = new List<FileMau>()
+            };
+
+            if (string.IsNullOrEmpty(_geminiApiKey))
+            {
+                responseData.Success = false;
+                responseData.Reply = "Lỗi cấu hình: API Key không hợp lệ.";
+                return StatusCode(500, responseData);
+            }
+
+            if (string.IsNullOrEmpty(request?.Message))
             {
                 responseData.Success = false;
                 responseData.Reply = "Vui lòng nhập câu hỏi.";
                 return BadRequest(responseData);
             }
 
-            string lowerMessage = request.Message.ToLower();
+            string lowerMessage = request.Message.ToLower().Trim();
 
-            // 1. LOGIC GỬI FILE MẪU TRỰC TIẾP
+            // 1. File mẫu
             var danhSachFileMau = new List<(string TuKhoa, string TenFile, string Url, string Icon)>
-{
-    // Cần đảm bảo link URL này là link tải file Thôi Việc thật trên Supabase của ông
-                ("nghỉ việc", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
-                ("thôi việc", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
-                ("nghỉ việt", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
-                ("don nghi", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
+            {
+                ("nghỉ việc", "Mẫu đơn xin nghỉ phép.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
+                ("thôi việc", "Mẫu đơn xin thôi việc.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Don_Xin_Thoi_Viec.docx", "description"),
+                ("nghỉ việt", "Mẫu đơn xin nghỉ phép.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
+                ("don nghi", "Mẫu đơn xin nghỉ phép.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_Don_Xin_Nghi_Phep.doc", "description"),
                 ("hợp đồng", "Mẫu hợp đồng lao động tiêu chuẩn.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx", "description"),
-                ("lao động", "Mẫu hợp đồng lao động tiêu chuẩn.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx" +
-                "", "description")
-};
-
-            // Dùng Trim() để loại bỏ khoảng trắng thừa
-            string cleanMessage = lowerMessage.Trim();
+                ("lao động", "Mẫu hợp đồng lao động tiêu chuẩn.docx", "https://dwdvizkleazjodyfbovl.supabase.co/storage/v1/object/public/FileMau/Mau_hop_dong_lao_dong_tieu_chuan.docx", "description")
+            };
 
             foreach (var bieuMau in danhSachFileMau)
             {
-                // Kiểm tra chứa từ khóa (Contains) 
-                if (cleanMessage.Contains(bieuMau.TuKhoa.ToLower()))
+                if (lowerMessage.Contains(bieuMau.TuKhoa) &&
+                    !responseData.AttachedFiles.Any(f => f.Url == bieuMau.Url))
                 {
-                    // Kiểm tra xem URL đã tồn tại trong list chưa để tránh lặp file
-                    if (!responseData.AttachedFiles.Any(f => f.Url == bieuMau.Url))
+                    responseData.AttachedFiles.Add(new FileMau
                     {
-                        responseData.AttachedFiles.Add(new FileMau
-                        {
-                            TenFile = bieuMau.TenFile,
-                            Url = bieuMau.Url,
-                            Icon = bieuMau.Icon
-                        });
-                    }
+                        TenFile = bieuMau.TenFile,
+                        Url = bieuMau.Url,
+                        Icon = bieuMau.Icon
+                    });
                 }
             }
 
-            // 2. RAG: TÌM KIẾM VECTOR
+            // 2. RAG Vector
             string thongTinHoTro = "Không tìm thấy tài liệu liên quan trong hệ thống.";
             try
             {
                 float[] vectorCauHoi = await GetGeminiEmbeddingAsync(request.Message);
-                if (vectorCauHoi != null && vectorCauHoi.Length > 0)
+                if (vectorCauHoi?.Length > 0)
                 {
                     var pgVector = new Vector(vectorCauHoi);
                     var kienThucLienQuan = await _context.DanhMucKienThuc
                         .OrderBy(x => x.VectoNoiDung.CosineDistance(pgVector))
-                        .Take(2)
+                        .Take(3)
                         .Select(x => $"Tài liệu '{x.TieuDe}':\n{x.NoiDung}")
                         .ToListAsync();
 
@@ -97,14 +143,18 @@ namespace Web_quan_ly_nhan_su.Controllers
                         thongTinHoTro = string.Join("\n\n---\n\n", kienThucLienQuan);
                 }
             }
-            catch (Exception ex) { Console.WriteLine("Lỗi Vector: " + ex.Message); }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Lỗi Vector: " + ex.Message);
+            }
 
-            // 3. GỌI GEMINI CHAT
+            // 3. Gọi Gemini
             string systemPrompt = $@"Bạn là trợ lý Nhân sự (HR) thân thiện của công ty Atelier.
-Dựa vào các thông tin quy định nội bộ công ty cung cấp dưới đây, hãy trả lời câu hỏi của nhân viên. 
+Dựa vào các thông tin quy định nội bộ công ty cung cấp dưới đây, hãy trả lời câu hỏi của nhân viên. 
 Tuyệt đối KHÔNG BỊA ĐẶT luật. Nếu tài liệu dưới đây không nhắc đến, hãy nói 'Tôi chưa tìm thấy thông tin này trong quy định hiện hành, vui lòng liên hệ phòng HR để được giải đáp'.
 
 THÔNG TIN QUY ĐỊNH:{thongTinHoTro}
+
 CÂU HỎI NHÂN VIÊN: {request.Message}";
 
             try
@@ -120,16 +170,17 @@ CÂU HỎI NHÂN VIÊN: {request.Message}";
             }
         }
 
+        // ====================== THÊM TÀI LIỆU ======================
         [HttpPost("ThemTaiLieu")]
         public async Task<IActionResult> ThemTaiLieu([FromBody] ThemKienThucRequest request)
         {
-            if (string.IsNullOrEmpty(request.NoiDung))
+            if (string.IsNullOrEmpty(request?.NoiDung))
                 return BadRequest(new { success = false, message = "Nội dung không được để trống." });
 
             try
             {
                 float[] vectorNoiDung = await GetGeminiEmbeddingAsync(request.NoiDung);
-                if (vectorNoiDung == null || vectorNoiDung.Length == 0)
+                if (vectorNoiDung?.Length == 0)
                     return StatusCode(500, new { success = false, message = "Lỗi tạo Vector." });
 
                 var kienThucMoi = new DanhMucKienThuc
@@ -142,18 +193,20 @@ CÂU HỎI NHÂN VIÊN: {request.Message}";
 
                 _context.DanhMucKienThuc.Add(kienThucMoi);
                 await _context.SaveChangesAsync();
+
                 return Ok(new { success = true, message = $"Đã nạp thành công: {request.TieuDe}" });
             }
             catch (Exception ex)
             {
-                var realError = ex.InnerException?.Message ?? ex.Message;
-                return StatusCode(500, new { success = false, message = "Lỗi Database: " + realError });
+                return StatusCode(500, new { success = false, message = "Lỗi: " + ex.Message });
             }
         }
 
+        // ====================== EMBEDDING ======================
         private async Task<float[]> GetGeminiEmbeddingAsync(string text)
         {
-            if (string.IsNullOrWhiteSpace(text)) return Array.Empty<float>();
+            if (string.IsNullOrEmpty(_geminiApiKey)) throw new Exception("API Key rỗng");
+
             string apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key={_geminiApiKey}";
 
             var payload = new
@@ -170,32 +223,63 @@ CÂU HỎI NHÂN VIÊN: {request.Message}";
             if (response.IsSuccessStatusCode)
             {
                 using JsonDocument doc = JsonDocument.Parse(responseString);
-                return doc.RootElement.GetProperty("embedding").GetProperty("values").EnumerateArray().Select(x => x.GetSingle()).ToArray();
+                return doc.RootElement.GetProperty("embedding").GetProperty("values")
+                          .EnumerateArray().Select(x => x.GetSingle()).ToArray();
             }
             throw new Exception($"Embedding Error: {responseString}");
         }
 
+        // ====================== GEMINI CHAT ======================
         private async Task<string> CallGeminiChatAsync(string prompt)
         {
-            string apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={_geminiApiKey}";
-            var payload = new { contents = new[] { new { parts = new[] { new { text = prompt } } } } };
-            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+            if (string.IsNullOrEmpty(_geminiApiKey)) throw new Exception("API Key rỗng");
 
+            string apiUrl = $"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={_geminiApiKey}";
+
+            var payload = new
+            {
+                contents = new[] { new { parts = new[] { new { text = prompt } } } },
+                generationConfig = new { temperature = 0.7, maxOutputTokens = 2048 }
+            };
+
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
             var response = await _httpClient.PostAsync(apiUrl, content);
             var responseString = await response.Content.ReadAsStringAsync();
 
             if (response.IsSuccessStatusCode)
             {
                 using JsonDocument doc = JsonDocument.Parse(responseString);
-                return doc.RootElement.GetProperty("candidates")[0].GetProperty("content").GetProperty("parts")[0].GetProperty("text").GetString();
+                if (doc.RootElement.TryGetProperty("candidates", out var candidates) && candidates.GetArrayLength() > 0)
+                {
+                    return candidates[0]
+                        .GetProperty("content")
+                        .GetProperty("parts")[0]
+                        .GetProperty("text")
+                        .GetString() ?? "";
+                }
             }
             throw new Exception($"Chat Error: {responseString}");
         }
     }
 
-    // Models 
+    // ====================== MODELS ======================
     public class AiChatRequest { public string Message { get; set; } }
-    public class AiChatResponse { public bool Success { get; set; } public string Reply { get; set; } public List<FileMau> AttachedFiles { get; set; } = new List<FileMau>(); }
-    public class FileMau { public string TenFile { get; set; } public string Url { get; set; } public string Icon { get; set; } }
-    public class ThemKienThucRequest { public string TieuDe { get; set; } public string NoiDung { get; set; } public string LoaiTaiLieu { get; set; } }
+    public class AiChatResponse
+    {
+        public bool Success { get; set; }
+        public string Reply { get; set; }
+        public List<FileMau> AttachedFiles { get; set; } = new List<FileMau>();
+    }
+    public class FileMau
+    {
+        public string TenFile { get; set; }
+        public string Url { get; set; }
+        public string Icon { get; set; }
+    }
+    public class ThemKienThucRequest
+    {
+        public string TieuDe { get; set; }
+        public string NoiDung { get; set; }
+        public string LoaiTaiLieu { get; set; }
+    }
 }
