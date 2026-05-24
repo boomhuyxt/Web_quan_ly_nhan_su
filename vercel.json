@@ -3,28 +3,13 @@
     "builds": [
         {
             "src": "Web_quan_ly_nhan_su.csproj",
-            "use": "@vercel/dotnet",
-            "config": {
-                "runtime": "dotnet",
-                "framework": "net10.0",
-                "publish": true
-            }
+            "use": "@vercel/dotnet"
         }
     ],
     "routes": [
         {
             "src": "/api/(.*)",
             "dest": "/api/$1"
-        },
-        {
-            "src": "/(.*)",
-            "dest": "/$1"
-        }
-    ],
-    "rewrites": [
-        {
-            "source": "/api/:path*",
-            "destination": "/api/:path*"
         }
     ]
 }
