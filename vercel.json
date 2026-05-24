@@ -1,15 +1,14 @@
-﻿{
-    "version": 2,
-    "builds": [
-        {
-            "src": "Web_quan_ly_nhan_su.csproj",
-            "use": "@vercel/dotnet"
-        }
-    ],
-    "routes": [
-        {
-            "src": "/api/(.*)",
-            "dest": "/api/$1"
-        }
-    ]
+{
+  "builds": [
+    {
+      "src": "Web_quan_ly_nhan_su.csproj",
+      "use": "@vercel/dotnet"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "/api/$1"
+    }
+  ]
 }
