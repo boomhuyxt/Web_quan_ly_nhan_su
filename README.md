@@ -243,9 +243,7 @@ Hệ thống được thiết kế với giao diện hiện đại sử dụng:
 
 # 👨‍💻 Tác Giả
 
-<p align="center">
-  [![Developer - Huy Gia](https://img.shields.io/badge/Developer-Huy_Gia-blue?style=for-the-badge&logo=github)](https://boomhuyxt.github.io/GiaHuy_Portfolio/)
-</p>
+[![Developer - Huy Gia](https://img.shields.io/badge/Developer-Huy_Gia-8A2BE2?style=for-the-badge&logo=github)](https://boomhuyxt.github.io/GiaHuy_Portfolio/)
 
 ## 📌 Thông Tin
 - 👤 Developer: **Huy Gia**
