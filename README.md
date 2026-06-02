@@ -153,7 +153,7 @@ Gemini AI Service
        ↓
 Supabase PostgreSQL + Vector Database
 ```
-
+<img width="1024" height="559" alt="2f00e1e9-a256-408e-ad4c-c354c40f4b5f" src="https://github.com/user-attachments/assets/97796d9f-fe3f-4546-b51d-34c1cde902b5" />
 ---
 
 # 🗃 Database
