@@ -244,7 +244,7 @@ Hệ thống được thiết kế với giao diện hiện đại sử dụng:
 # 👨‍💻 Tác Giả
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Developer-Huy_Gia-blue?style=for-the-badge&logo=github">
+  [![Developer - Huy Gia](https://img.shields.io/badge/Developer-Huy_Gia-blue?style=for-the-badge&logo=github)](https://boomhuyxt.github.io/GiaHuy_Portfolio/)
 </p>
 
 ## 📌 Thông Tin
