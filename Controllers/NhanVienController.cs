@@ -80,7 +80,6 @@ namespace Web_quan_ly_nhan_su.Controllers
                 currentNV.GioiTinh = nvUpdate.GioiTinh;
                 currentNV.DiaChi = nvUpdate.DiaChi;
 
-                // FIX LỖI POSTGRESQL: Ép kiểu Ngày sinh về UTC để tránh Crash Database
                 if (nvUpdate.NgaySinh.HasValue)
                 {
                     currentNV.NgaySinh = DateTime.SpecifyKind(nvUpdate.NgaySinh.Value, DateTimeKind.Utc);

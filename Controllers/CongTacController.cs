@@ -49,7 +49,6 @@ namespace Web_quan_ly_nhan_su.Controllers
                 if (string.IsNullOrEmpty(request.NgayBatDau) || string.IsNullOrEmpty(request.NgayKetThuc))
                     return BadRequest(new { success = false, message = "Vui lòng chọn đầy đủ ngày bắt đầu và kết thúc." });
 
-                // 👉 ĐÃ SỬA: Ép kiểu ngày tháng chủ động từ chuỗi string để loại bỏ hoàn toàn lỗi crash 500
                 DateTime tuNgay = DateTime.Parse(request.NgayBatDau);
                 DateTime denNgay = DateTime.Parse(request.NgayKetThuc);
 
@@ -70,7 +69,7 @@ namespace Web_quan_ly_nhan_su.Controllers
                     using (var memoryStream = new MemoryStream())
                     {
                         await file.CopyToAsync(memoryStream);
-                        byte[] fileBytes = memoryStream.ToArray(); // Giải quyết triệt để lỗi ép kiểu CS1503
+                        byte[] fileBytes = memoryStream.ToArray(); 
 
                         // Đẩy file (gửi file) trực tiếp lên Bucket "Lich_CT" trên Supabase
                         await supabase.Storage.From("Lich_CT").Upload(fileBytes, fileName);
@@ -84,11 +83,11 @@ namespace Web_quan_ly_nhan_su.Controllers
                 var lichMoi = new LichCongTac
                 {
                     MaNhanVien = request.MaNhanVien,
-                    NgayBatDau = tuNgay,   // Gán biến DateTime đã parse an toàn
-                    NgayKetThuc = denNgay, // Gán biến DateTime đã parse an toàn
+                    NgayBatDau = tuNgay,   
+                    NgayKetThuc = denNgay, 
                     DiaDiem = string.IsNullOrEmpty(request.DiaDiem) ? "Chưa xác định" : request.DiaDiem,
                     NoiDungCongViec = string.IsNullOrEmpty(request.NoiDungCongViec) ? "" : request.NoiDungCongViec,
-                    FileDinhKemUrl = fileUrl, // Đường link lưu file lấy từ server Supabase
+                    FileDinhKemUrl = fileUrl, 
                     TrangThai = "Sắp tới",
                     NgayTao = DateTime.Now
                 };
@@ -105,7 +104,7 @@ namespace Web_quan_ly_nhan_su.Controllers
                 {
                     errorMsg += " | Chi tiết lỗi nội bộ: " + ex.InnerException.Message;
                 }
-                // Trả về chi tiết lỗi thực tế giúp bạn debug trực tiếp trên màn hình F12
+               
                 return StatusCode(500, new { success = false, message = "Lỗi hệ thống xử lý nội bộ: " + errorMsg });
             }
         }

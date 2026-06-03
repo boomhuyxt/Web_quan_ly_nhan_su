@@ -7,8 +7,6 @@ using Web_quan_ly_nhan_su.Context;
 
 namespace Web_quan_ly_nhan_su.Controllers
 {
-    // Đặt Authorize ở cấp độ Class để đảm bảo TẤT CẢ các hàm trong file này 
-    // đều được bảo vệ, chỉ tài khoản ADMIN mới có quyền gọi tới.
     [Authorize(Roles = "ADMIN")]
     public class QuanTriNghiPhepController : Controller
     {

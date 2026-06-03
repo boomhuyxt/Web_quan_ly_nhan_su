@@ -24,8 +24,7 @@ namespace Web_quan_ly_nhan_su.Controllers
         [HttpGet]
         public async Task<IActionResult> DanhSachToanCongTy() // Đổi tên hàm cho đúng nghiệp vụ
         {
-            // 👉 Lấy TẤT CẢ dữ liệu có trong bảng Luong (Không có lệnh .Where để lọc)
-            // 👉 Dùng .Include() để Entity Framework tự động lấy thêm Tên và Ảnh của nhân viên
+
             var danhSachLuong = await _context.Luong
                 .Include(l => l.NhanVien)
                 .OrderByDescending(l => l.Nam)

@@ -28,7 +28,6 @@ namespace Web_quan_ly_nhan_su.Controllers
 
         // 1. HÀM NÀY HIỂN THỊ GIAO DIỆN VÀ DANH SÁCH ĐƠN
         [HttpGet]
-        [HttpGet]
         public IActionResult Index()
         {
             // Lấy MaNhanVien từ Identity Cookie
