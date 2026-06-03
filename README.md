@@ -24,7 +24,54 @@ Ngoài các chức năng quản lý truyền thống, hệ thống còn tích h�
 Dự án được xây dựng theo định hướng ứng dụng AI vào quản lý doanh nghiệp, giúp nâng cao trải nghiệm người dùng và tự động hóa quy trình nội bộ.
 
 ---
+## 🌐 Truy Cập Hệ Thống
 
+Hệ thống Quản lý Nhân sự Thông minh Atelier HRM đã được triển khai trực tuyến và có thể truy cập thông qua đường dẫn sau:
+
+**Website Demo:**
+https://webquanlynhansu-production.up.railway.app/
+
+
+### 🔑 Tài Khoản Kiểm Thử
+
+| Vai trò       | Tài khoản                                           | Mật khẩu |
+| ------------- | --------------------------------------------------- | -------- |
+| Quản trị viên | [hutech@gmail.com](mailto:admin@atelier.com)        | @123     |
+| Kế toán       | [ketoan@hutech.com](mailto:employee@atelier.com)    | @321     |
+| Nhân viên     | [nhanvien@hutech.com](mailto:employee@atelier.com)  | 123@     |
+
+### 🐳 Môi Trường Triển Khai
+
+Hệ thống được triển khai bằng công nghệ Docker và vận hành trên nền tảng Railway Cloud Platform.
+
+**Kiến trúc triển khai:**
+
+```text
+Người dùng
+      ↓
+Railway Cloud
+      ↓
+Docker Container
+      ↓
+ASP.NET Core Web API
+      ↓
+Supabase PostgreSQL Database
+      ↓
+Gemini AI Service
+```
+
+### Công nghệ triển khai
+
+* Docker Containerization
+* Railway Cloud Deployment
+* ASP.NET Core Web API
+* Supabase PostgreSQL
+* Gemini AI API
+* HTTPS Secure Connection
+
+Việc sử dụng Docker giúp chuẩn hóa môi trường vận hành, đảm bảo tính nhất quán giữa môi trường phát triển và môi trường triển khai thực tế. Railway hỗ trợ tự động build, triển khai và cập nhật phiên bản mới mỗi khi mã nguồn được cập nhật lên GitHub, giúp tối ưu quá trình vận hành và bảo trì hệ thống.
+
+---
 # 🛠 Công Nghệ Sử Dụng
 
 ## 🔹 Backend
