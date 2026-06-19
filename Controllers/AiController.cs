@@ -195,7 +195,7 @@ CÂU HỎI NHÂN VIÊN:
                         });
 
                 // Thực thi cuộc gọi thông qua chính sách Retry
-                // LƯU Ý: Hãy chắc chắn rằng bên trong hàm CallGeminiChatAsync của bạn đã truyền kèm cấu hình tool tìm kiếm
+         
                 responseData.Reply = await retryPolicy.ExecuteAsync(async () => await CallGeminiChatAsync(systemPrompt, enableSearch: true));
                 return Ok(responseData);
             }

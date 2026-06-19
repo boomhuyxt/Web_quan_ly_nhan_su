@@ -263,5 +263,114 @@ namespace Web_quan_ly_nhan_su.Controllers
                 return Json(new { success = false, message = ex.Message });
             }
         }
+
+        // =========================================================
+        // 4. TRANG QUẢN LÝ XEM & SỬA CHẤM CÔNG (DÀNH CHO ADMIN/HR)
+        // =========================================================
+        [HttpGet]
+        public async Task<IActionResult> QuanLyChamCong(int? maNhanVien, int? thang, int? nam)
+        {
+            // Mặc định lấy tháng năm hiện tại nếu lọc trống
+            int selectedThang = thang ?? DateTime.Now.Month;
+            int selectedNam = nam ?? DateTime.Now.Year;
+
+            // Gửi ngược lại sang View để giữ trạng thái trên bộ lọc select-option
+            ViewBag.SelectedNhanVien = maNhanVien;
+            ViewBag.Thang = selectedThang;
+            ViewBag.Nam = selectedNam;
+
+            // Lấy danh sách toàn bộ nhân viên để admin chọn lọc theo tên
+            var dsNhanVien = await _context.NhanVien.OrderBy(n => n.HoTen).ToListAsync();
+
+            // Query lọc bảng Chấm Công theo Tháng / Năm
+            var query = _context.ChamCong.Include(c => c.NhanVien)
+                .Where(c => c.NgayLamViec.Month == selectedThang && c.NgayLamViec.Year == selectedNam);
+
+            // Nếu admin chọn đích danh một nhân viên
+            if (maNhanVien.HasValue && maNhanVien > 0)
+            {
+                query = query.Where(c => c.MaNhanVien == maNhanVien.Value);
+            }
+
+            var dsChamCong = await query.OrderByDescending(c => c.NgayLamViec).ToListAsync();
+            ViewBag.DsChamCong = dsChamCong;
+
+            return View(dsNhanVien); // Trả Model là danh sách nhân viên về cho thanh Dropdown
+        }
+
+        // Model nhận dữ liệu sửa đổi từ AJAX
+        public class CapNhatChamCongRequest
+        {
+            public int MaChamCong { get; set; }
+            public int MaNhanVien { get; set; }
+            public string NgayLamViec { get; set; }
+            public string? GioVao { get; set; }
+            public string? GioRa { get; set; }
+            public bool IsChamCong { get; set; } // true: Đã đi làm, false: Xóa / Hủy chấm ngày đó
+        }
+
+        // =========================================================
+        // 5. API CẬP NHẬT TRẠNG THÁI / GIỜ CHẤM CÔNG TỪ ADMIN
+        // =========================================================
+        [HttpPost]
+        public async Task<IActionResult> CapNhatChamCongAdmin([FromBody] CapNhatChamCongRequest request)
+        {
+            try
+            {
+                if (request == null || request.MaNhanVien <= 0)
+                    return Json(new { success = false, message = "Dữ liệu không hợp lệ." });
+
+                DateTime ngayXuly = DateTime.Parse(request.NgayLamViec).Date;
+
+                // Tìm bản ghi chấm công đã tồn tại chưa
+                var chamCong = await _context.ChamCong
+                    .FirstOrDefaultAsync(c => (request.MaChamCong > 0 && c.MaChamCong == request.MaChamCong)
+                                           || (c.MaNhanVien == request.MaNhanVien && c.NgayLamViec == ngayXuly));
+
+                if (!request.IsChamCong)
+                {
+                    // Trình trạng: Admin sửa thành "Chưa chấm công" (Hủy/Xóa ngày chấm công này)
+                    if (chamCong != null)
+                    {
+                        _context.ChamCong.Remove(chamCong);
+                        await _context.SaveChangesAsync();
+                    }
+                    return Json(new { success = true, message = "Đã cập nhật trạng thái thành: Chưa chấm công" });
+                }
+                else
+                {
+                    // Tình trạng: Admin muốn ghi nhận "Đã chấm công" hoặc sửa giờ làm cụ thể
+                    TimeSpan? gioVaoParsed = !string.IsNullOrEmpty(request.GioVao) ? TimeSpan.Parse(request.GioVao) : new TimeSpan(8, 0, 0);
+                    TimeSpan? gioRaParsed = !string.IsNullOrEmpty(request.GioRa) ? TimeSpan.Parse(request.GioRa) : new TimeSpan(17, 0, 0);
+
+                    if (chamCong == null)
+                    {
+                        // Nếu ngày đó chưa có bản ghi (Chưa chấm công), tiến hành thêm mới trực tiếp
+                        var newCc = new ChamCong
+                        {
+                            MaNhanVien = request.MaNhanVien,
+                            NgayLamViec = ngayXuly,
+                            GioVao = gioVaoParsed,
+                            GioRa = gioRaParsed
+                        };
+                        _context.ChamCong.Add(newCc);
+                    }
+                    else
+                    {
+                        // Nếu đã có bản ghi trước đó, cập nhật lại khung giờ mới do Admin chỉ định
+                        chamCong.GioVao = gioVaoParsed;
+                        chamCong.GioRa = gioRaParsed;
+                        _context.ChamCong.Update(chamCong);
+                    }
+
+                    await _context.SaveChangesAsync();
+                    return Json(new { success = true, message = "Cập nhật dữ liệu giờ chấm công thành công!" });
+                }
+            }
+            catch (Exception ex)
+            {
+                return Json(new { success = false, message = "Lỗi hệ thống: " + ex.Message });
+            }
+        }
     }
 }

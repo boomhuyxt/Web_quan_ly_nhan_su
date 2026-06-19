@@ -1,17 +1,32 @@
 ﻿@model IEnumerable<Web_quan_ly_nhan_su.Models.NghiPhep>
+@using System.Security.Claims
+@using Microsoft.EntityFrameworkCore
+@inject Web_quan_ly_nhan_su.Context.AppDbContext _context
 @{
     ViewData["Title"] = "Chấm công FaceID";
     ViewData["PageHeader"] = "Chấm công FaceID";
 
-    // TỐI ƯU C#: Thêm viền mỏng (ring) để badge trạng thái trông sắc nét và cao cấp hơn
     string GetStatusStyle(string status)
     {
         return status switch
         {
             "Đã duyệt" => "bg-emerald-50 text-emerald-700 ring-1 ring-emerald-200/60",
             "Từ chối" => "bg-red-50 text-error ring-1 ring-red-200/60",
-            _ => "bg-amber-50 text-amber-700 ring-1 ring-amber-200/60" // Chờ duyệt
+            _ => "bg-amber-50 text-amber-700 ring-1 ring-amber-200/60"
         };
+    }
+
+    // Lấy trực tiếp quyền Admin từ Database giống như HomeController để chính xác 100%
+    bool chuoiAdmin = false;
+    var currentUserIdString = User.FindFirstValue(ClaimTypes.NameIdentifier);
+    if (!string.IsNullOrEmpty(currentUserIdString) && int.TryParse(currentUserIdString, out int currentUserId))
+    {
+        chuoiAdmin = _context.NhanVienVaiTro
+                             .Include(nvvt => nvvt.VaiTro)
+                             .Any(nvvt => nvvt.MaNhanVien == currentUserId &&
+                                          (nvvt.VaiTro.MaCode == "ADMIN" ||
+                                           nvvt.VaiTro.TenVaiTro == "Admin" ||
+                                           nvvt.VaiTro.TenVaiTro == "ADMIN"));
     }
 }
 
@@ -83,13 +98,11 @@
         "body": ["Inter"],
         "label": ["Inter"]
         },
-        borderRadius: {"DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px"},
-        },
+        borderRadius: { "DEFAULT": "0.25rem", "lg": "0.5rem", "xl": "0.75rem", "full": "9999px" },
         },
         },
         }
     </script>
-
     <link href="~/css/ChamCong.css" rel="stylesheet" />
 </head>
 <body class="bg-surface font-body text-on-surface selection:bg-primary/10">
@@ -127,6 +140,17 @@
                     </button>
                 </div>
 
+                @if (chuoiAdmin)
+                {
+                    <div class="w-full max-w-[336px] px-2 pt-2">
+                        <a href="@Url.Action("QuanLyChamCong", "Home")"
+                           class="w-full bg-amber-50 hover:bg-amber-100 text-amber-800 font-headline font-bold text-sm py-3 px-4 rounded-2xl border border-dashed border-amber-300 flex items-center justify-center gap-2 transition-all active:scale-98 shadow-sm">
+                            <span class="material-symbols-outlined text-[20px]">admin_panel_settings</span>
+                            Truy cập bảng Quản lý chấm công
+                        </a>
+                    </div>
+                }
+
                 <canvas id="captureCanvas" class="hidden"></canvas>
                 <p id="instructionText" class="text-on-surface-variant text-sm max-w-[280px]">Vui lòng chọn Đăng ký nếu là lần đầu, hoặc Chấm công để ghi nhận giờ làm</p>
                 <button id="btnCancelCamera" class="hidden mt-2 px-6 py-2 rounded-full bg-surface-container-high text-on-surface font-bold text-sm hover:bg-surface-dim transition-colors" onclick="location.reload()">Hủy thao tác</button>
@@ -158,28 +182,38 @@
         </section>
     </main>
 
-    <nav class="fixed bottom-0 w-full z-50 rounded-t-[32px] bg-white/80 backdrop-blur-2xl shadow-2xl no-border">
-        <div class="flex justify-around items-center px-4 py-3 pb-8 w-full">
-            <a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
-                <span class="material-symbols-outlined" data-icon="dashboard">dashboard</span>
-                <span class="font-['Inter'] text-[11px] font-medium tracking-wide">Tổng quan</span>
+    <nav class="fixed bottom-0 left-0 right-0 z-50 rounded-t-[32px] bg-white/95 backdrop-blur-2xl shadow-2xl border-t border-gray-100">
+        <div class="@(chuoiAdmin ? "grid grid-cols-5" : "grid grid-cols-4") items-center px-2 py-3 pb-8 max-w-2xl mx-auto w-full text-center gap-1">
+
+            <a class="flex flex-col items-center justify-center text-zinc-400 p-1 hover:text-blue-500 transition-transform active:scale-95" href="/Home/TongQuat">
+                <span class="material-symbols-outlined text-[22px]" data-icon="dashboard">dashboard</span>
+                <span class="font-['Inter'] text-[10px] font-medium tracking-tighter mt-0.5 block truncate w-full">Tổng quan</span>
             </a>
-            <a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
-                <span class="material-symbols-outlined" data-icon="group">group</span>
-                <span class="font-['Inter'] text-[11px] font-medium tracking-wide">Nhân viên</span>
+
+            <a class="flex flex-col items-center justify-center text-zinc-400 p-1 hover:text-blue-500 transition-transform active:scale-95" href="/Home/NhanVien">
+                <span class="material-symbols-outlined text-[22px]" data-icon="group">group</span>
+                <span class="font-['Inter'] text-[10px] font-medium tracking-tighter mt-0.5 block truncate w-full">Nhân viên</span>
             </a>
-            <a class="flex flex-col items-center justify-center text-blue-600 bg-blue-50/50 rounded-2xl p-2 transition-transform active:scale-90" href="#">
-                <span class="material-symbols-outlined" data-icon="fact_check" style="font-variation-settings: 'FILL' 1;">fact_check</span>
-                <span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chấm công</span>
+
+            <a class="flex flex-col items-center justify-center text-blue-600 bg-blue-50/80 rounded-xl p-1 transition-transform active:scale-95" href="#">
+                <span class="material-symbols-outlined text-[22px]" data-icon="fact_check" style="font-variation-settings: 'FILL' 1;">fact_check</span>
+                <span class="font-['Inter'] text-[10px] font-bold tracking-tighter mt-0.5 block truncate w-full">Chấm công</span>
             </a>
-            <a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="/Chat">
-                <span class="material-symbols-outlined" data-icon="forum">forum</span>
-                <span class="font-['Inter'] text-[11px] font-medium tracking-wide">Chat</span>
+
+            @if (chuoiAdmin)
+            {
+                <a class="flex flex-col items-center justify-center text-amber-600 bg-amber-50 rounded-xl p-1 transition-transform active:scale-95 border border-dashed border-amber-300 animate-pulse"
+                   href="@Url.Action("QuanLyChamCong", "Home")">
+                    <span class="material-symbols-outlined text-[22px] text-amber-600">admin_panel_settings</span>
+                    <span class="font-['Inter'] text-[10px] font-bold tracking-tighter mt-0.5 block truncate w-full">QL Công</span>
+                </a>
+            }
+
+            <a class="flex flex-col items-center justify-center text-zinc-400 p-1 hover:text-blue-500 transition-transform active:scale-95" href="/Home/Chat">
+                <span class="material-symbols-outlined text-[22px]" data-icon="forum">forum</span>
+                <span class="font-['Inter'] text-[10px] font-medium tracking-tighter mt-0.5 block truncate w-full">Chat</span>
             </a>
-            <a class="flex flex-col items-center justify-center text-zinc-400 p-2 hover:text-blue-500 transition-transform active:scale-90" href="#">
-                <span class="material-symbols-outlined" data-icon="settings">settings</span>
-                <span class="font-['Inter'] text-[11px] font-medium tracking-wide">Cài đặt</span>
-            </a>
+
         </div>
     </nav>
 

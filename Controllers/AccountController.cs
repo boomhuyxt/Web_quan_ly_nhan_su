@@ -43,7 +43,6 @@ namespace Web_quan_ly_nhan_su.Controllers
         {
             if (!string.IsNullOrEmpty(email) && !string.IsNullOrEmpty(password))
             {
-                // Tìm nhân viên theo Email và nạp kèm bảng VaiTro để lấy MaCode [cite: 10, 23]
                 var nhanVien = _context.NhanVien
                     .Include(nv => nv.NhanVienVaiTro)
                     .ThenInclude(nvvt => nvvt.VaiTro)
@@ -55,26 +54,40 @@ namespace Web_quan_ly_nhan_su.Controllers
 
                     if (nhanVien.MatKhauHash == hashedInputPassword)
                     {
-                        // 1. TẠO DANH SÁCH CLAIMS CƠ BẢN
                         var claims = new List<Claim>
-                        {
-                            new Claim(ClaimTypes.Name, nhanVien.HoTen),
-                            new Claim(ClaimTypes.Email, nhanVien.Email),
-                            new Claim(ClaimTypes.NameIdentifier, nhanVien.MaNhanVien.ToString())
-                        };
+                {
+                    new Claim(ClaimTypes.Name, nhanVien.HoTen),
+                    new Claim(ClaimTypes.Email, nhanVien.Email),
+                    new Claim(ClaimTypes.NameIdentifier, nhanVien.MaNhanVien.ToString())
+                };
 
-                        // 2. NẠP TẤT CẢ VAI TRÒ (ADMIN, KETOAN...) VÀO CLAIMS 
+                        // Biến tạm để lưu vai trò đầu tiên tìm thấy phục vụ Session công việc nhanh
+                        string primaryRole = "";
+
                         if (nhanVien.NhanVienVaiTro != null)
                         {
                             foreach (var nvvt in nhanVien.NhanVienVaiTro)
                             {
                                 if (nvvt.VaiTro != null && !string.IsNullOrEmpty(nvvt.VaiTro.MaCode))
                                 {
-                                    // Thêm Role vào Cookie để dùng User.IsInRole("...") sau này
                                     claims.Add(new Claim(ClaimTypes.Role, nvvt.VaiTro.MaCode));
+
+                                    if (string.IsNullOrEmpty(primaryRole))
+                                    {
+                                        primaryRole = nvvt.VaiTro.MaCode; // Lấy mã Code vai trò (ví dụ: ADMIN hoặc HR)
+                                    }
                                 }
                             }
                         }
+
+                        // --- BỔ SUNG LƯU SESSION ĐỒNG BỘ CHO HỆ THỐNG CHẤM CÔNG ---
+                        HttpContext.Session.SetInt32("MaNhanVien", nhanVien.MaNhanVien);
+                        if (!string.IsNullOrEmpty(primaryRole))
+                        {
+                            HttpContext.Session.SetString("Role", primaryRole);
+                            HttpContext.Session.SetString("VaiTro", primaryRole);
+                        }
+                        // ---------------------------------------------------------
 
                         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
                         var authProperties = new AuthenticationProperties
